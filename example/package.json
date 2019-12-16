@@ -1,0 +1,32 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "dependencies": {
+    "react-app-polyfill": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.15",
+    "@types/react-dom": "^16.8.4",
+    "parcel": "^1.12.3",
+    "typescript": "^3.4.5"
+  },
+  "peerDependencies": {
+    "@material-ui/core": ">= 4.0.0",
+    "@material-ui/styles": ">=4.0.0",
+    "commonmark": ">= 0.29.0",
+    "react": ">= 16.8.0",
+    "react-dom": ">= 16.8.0",
+    "react-redux": ">= 7.1.0",
+    "redux": ">= 4.0.4",
+    "redux-thunk": ">= 2.3.0",
+    "reduce-reducers": "^1.0.4",
+    "styled-components": ">= 4.0.0",
+    "typesafe-actions": ">= 4.4.2"
+  }
+}
