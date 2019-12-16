@@ -27,8 +27,11 @@
     "@types/styled-components": "^4.1.16",
     "axios": "^0.18.0",
     "commonmark": "^0.29.0",
+    "husky": "^3.1.0",
     "likert-react": "^0.0.0-beta6",
+    "lint-staged": "^9.5.0",
     "parcel": "^1.12.3",
+    "prettier": "^1.19.1",
     "react": "16.x",
     "react-content-loader": "^4.2.2",
     "react-dom": ">= 16.3.0",
@@ -62,5 +65,16 @@
     "redux-thunk": "^2.3.0",
     "styled-components": "^4.3.2",
     "typesafe-actions": "^4.4.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,css,json,md,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }
