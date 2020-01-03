@@ -1,5 +1,5 @@
 import * as React from "react"
-import Quiz from "../../src"
+import { Quiz } from "../../src"
 import {
   FormControlLabel,
   Checkbox,
@@ -11,7 +11,6 @@ import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
 import SimpleErrorBoundary from "./SimpleErrorBoundary"
 import { useInput, useLocalStorage } from "./customHooks"
-
 
 const App = () => {
   return <Quiz />

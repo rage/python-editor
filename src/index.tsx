@@ -1,3 +1,3 @@
-import Quiz from "./components"
+import { Quiz, PyEditor } from "./components"
 
-export default Quiz
+export { Quiz, PyEditor }
