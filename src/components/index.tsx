@@ -1,16 +1,24 @@
 import React, { useRef, useState } from "react"
 import Editor from "@monaco-editor/react"
 
-const Quiz: React.FunctionComponent = props => {
+type quizProps = {
+  editorInitialValue: string
+}
+
+type pyEditorProps = {
+  initialValue: string
+}
+
+const Quiz: React.FunctionComponent<quizProps> = ({ editorInitialValue }) => {
   return (
     <div>
       <p>This is a quiz.</p>
-      <PyEditor />
+      <PyEditor initialValue={editorInitialValue} />
     </div>
   )
 }
 
-const PyEditor: React.FunctionComponent = props => {
+const PyEditor: React.FunctionComponent<pyEditorProps> = ({ initialValue }) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
   const valueGetter = useRef(() => "")
 
@@ -30,6 +38,7 @@ const PyEditor: React.FunctionComponent = props => {
         Print editor content
       </button>
       <Editor
+        value={initialValue}
         height="90vh"
         language="python"
         editorDidMount={handleEditorDidMount}
