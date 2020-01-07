@@ -78,6 +78,7 @@
     ]
   },
   "dependencies": {
+    "@monaco-editor/react": "^3.0.1",
     "build": "^0.1.4"
   }
 }
