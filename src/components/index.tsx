@@ -2,16 +2,16 @@ import React, { useRef, useState } from "react"
 import Editor from "@monaco-editor/react"
 import useScript from "../hooks/useScript"
 
-type quizProps = {
+type QuizProps = {
   editorInitialValue: string
 }
 
-type pyEditorProps = {
+type PyEditorProps = {
   initialValue: string
   handleRun: (code: string) => void
 }
 
-const Quiz: React.FunctionComponent<quizProps> = ({ editorInitialValue }) => {
+const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   const [skulptLoaded, skulptError] = useScript(
     "http://localhost:1234/skulpt.min.js",
   )
@@ -59,7 +59,7 @@ const Quiz: React.FunctionComponent<quizProps> = ({ editorInitialValue }) => {
   )
 }
 
-const PyEditor: React.FunctionComponent<pyEditorProps> = ({
+const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   initialValue,
   handleRun,
 }) => {
