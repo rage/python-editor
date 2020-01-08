@@ -30,6 +30,7 @@
     "husky": "^3.1.0",
     "likert-react": "^0.0.0-beta6",
     "lint-staged": "^9.5.0",
+    "monaco-editor": "^0.19.2",
     "parcel": "^1.12.3",
     "prettier": "^1.19.1",
     "react": "16.x",
