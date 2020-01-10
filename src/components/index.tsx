@@ -2,7 +2,16 @@ import React, { useRef, useState } from "react"
 import Editor from "@monaco-editor/react"
 import useScript from "../hooks/useScript"
 
-const Quiz: React.FunctionComponent = props => {
+type QuizProps = {
+  editorInitialValue: string
+}
+
+type PyEditorProps = {
+  initialValue: string
+  handleRun: (code: string) => void
+}
+
+const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   const [skulptLoaded, skulptError] = useScript(
     "http://localhost:1234/skulpt.min.js",
   )
@@ -45,16 +54,15 @@ const Quiz: React.FunctionComponent = props => {
   return (
     <div>
       <p>This is a quiz.</p>
-      <PyEditor handleRun={handleRun} />
+      <PyEditor initialValue={editorInitialValue} handleRun={handleRun} />
     </div>
   )
 }
 
-type PyEditorProps = {
-  handleRun: (code: string) => void
-}
-
-const PyEditor: React.FunctionComponent<PyEditorProps> = props => {
+const PyEditor: React.FunctionComponent<PyEditorProps> = ({
+  initialValue,
+  handleRun,
+}) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
   const valueGetter = useRef(() => "")
 
@@ -74,12 +82,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = props => {
         Print editor content
       </button>
       <button
-        onClick={() => props.handleRun(valueGetter.current())}
+        onClick={() => handleRun(valueGetter.current())}
         disabled={!isEditorReady}
       >
         Run code
       </button>
       <Editor
+        value={initialValue}
         height="90vh"
         language="python"
         editorDidMount={handleEditorDidMount}
