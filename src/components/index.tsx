@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react"
 import Editor from "@monaco-editor/react"
 import useScript from "../hooks/useScript"
+import Output from "./Output"
 
 type QuizProps = {
   editorInitialValue: string
@@ -18,12 +19,13 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   const [stdlibLoaded, stdlibError] = useScript(
     "http://localhost:1234/skulpt-stdlib.js",
   )
+  const [progOutput, setProgOutput] = useState("")
 
   let Sk: any = {}
   if (skulptLoaded && !skulptError) Sk = (window as any).Sk
 
   function outf(text: string) {
-    console.log(text)
+    setProgOutput(prevState => prevState + text)
   }
 
   function builtinRead(x: any) {
@@ -37,6 +39,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
 
   function handleRun(code: string) {
     if (!code || code.length === 0) return
+    setProgOutput("")
 
     Sk.configure({
       output: outf,
@@ -47,14 +50,16 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
     try {
       Sk.importMainWithBody("<stdin>", false, code, true)
     } catch (e) {
-      alert(e)
+      console.log(e)
+      setProgOutput(e.toString())
     }
   }
 
   return (
-    <div>
+    <div style={{ position: "relative", width: "70vw" }}>
       <p>This is a quiz.</p>
       <PyEditor initialValue={editorInitialValue} handleRun={handleRun} />
+      <Output outputText={progOutput} clearOutput={() => setProgOutput("")} />
     </div>
   )
 }
