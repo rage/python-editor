@@ -1,5 +1,6 @@
-import * as React from "react"
+import React, { useState } from "react"
 import { Quiz } from "../../src"
+import { QuizLoader } from "../../src/components/QuizLoader"
 import {
   FormControlLabel,
   Checkbox,
@@ -15,7 +16,42 @@ import { useInput, useLocalStorage } from "./customHooks"
 const hello: string = '# A hello world program\nprint("Hello world")\n'
 
 const App = () => {
-  return <Quiz editorInitialValue={hello} />
+  const [url, setUrl] = useState<string | undefined>(undefined)
+  const [token, setToken] = useState<string | undefined>(undefined)
+  const [fetch, setFetch] = useState(false)
+  const handleFetch = () => {
+    event.preventDefault()
+    setFetch(true)
+  }
+  const loadQuiz = (url, token) => <QuizLoader url={url} token={token} />
+
+  return (
+    <>
+      <form onSubmit={handleFetch}>
+        <div>
+          url
+          <input
+            type="url"
+            value={url}
+            name="URL"
+            onChange={({ target }) => setUrl(target.value)}
+          />
+        </div>
+        <div>
+          token
+          <input
+            type="token"
+            value={token}
+            name="Token"
+            onChange={({ target }) => setToken(target.value)}
+          />
+        </div>
+        <button type="submit">fetch quiz</button>
+      </form>
+      {fetch && loadQuiz(url, token)}
+      {!fetch && <Quiz editorInitialValue={hello} />}
+    </>
+  )
 }
 
 export default App

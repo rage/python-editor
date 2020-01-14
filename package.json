@@ -80,6 +80,8 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^3.0.1",
-    "build": "^0.1.4"
+    "build": "^0.1.4",
+    "jszip": "^3.2.2",
+    "jszip-utils": "^0.1.0"
   }
 }
