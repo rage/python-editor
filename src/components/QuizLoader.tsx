@@ -28,6 +28,14 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       .then(res => {
         setText("Fetched " + res.data)
         console.log(res)
+        const zip = new JSZip()
+        return zip.loadAsync(res.data)
+      })
+      .then(zip => {
+        console.log(
+          "These should be the files contained in our zip: " +
+            JSON.stringify(zip.files),
+        )
       })
   }, [])
 
