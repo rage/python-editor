@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { Quiz } from "../../src"
 import { QuizLoader } from "../../src/components/QuizLoader"
 import {
+  Button,
   FormControlLabel,
   Checkbox,
   Paper,
@@ -11,35 +12,55 @@ import {
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
 import SimpleErrorBoundary from "./SimpleErrorBoundary"
-import { useInput, useLocalStorage } from "./customHooks"
+import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
 
 const hello: string = '# A hello world program\nprint("Hello world")\n'
+
+const StyledTextField = styled(props => (
+  <TextField variant="outlined" fullWidth {...props} />
+))`
+  margin: 1rem;
+`
+
+const StyledButton = styled(props => <Button variant="contained" {...props} />)`
+  margin: 1rem;
+`
 
 const App = () => {
   const url = useInput("url", "")
   const token = useInput("token", "")
-  const [fetch, setFetch] = useState(false)
-  const handleFetch = () => {
+  const [fetch, setFetch] = useLocalStorage("fetch", false)
+  const handleLoad = () => {
     event.preventDefault()
     setFetch(true)
   }
-  const loadQuiz = (url, token) => <QuizLoader url={url} token={token} />
+  const handleUnload = () => {
+    event.preventDefault()
+    setFetch(false)
+  }
+  const loadQuiz = (url, token) => {
+    console.log(`Got url=${url}, token=${token}`)
+    return <QuizLoader url={url} token={token} />
+  }
 
   return (
     <>
-      <form onSubmit={handleFetch}>
-        <div>
-          <TextField {...url} label="Quiz url" />
-        </div>
-        <div>
-          <TextField {...token} label="User token" />
-        </div>
-        <button type="submit">fetch quiz</button>
-      </form>
-      {fetch && loadQuiz(url, token)}
+      <div>
+        <StyledTextField {...url} label="Quiz url" />
+        <StyledTextField {...token} label="User token" />
+        <StyledButton onClick={handleLoad}>Load Quiz</StyledButton>
+        <StyledButton onClick={handleUnload}>Unload Quiz</StyledButton>
+      </div>
+      {fetch && loadQuiz(url.value, token.value)}
       {!fetch && <Quiz editorInitialValue={hello} />}
     </>
   )
 }
 
-export default App
+const StyledApp = () => (
+  <StylesProvider injectFirst>
+    <App />
+  </StylesProvider>
+)
+
+export default StyledApp

@@ -24,7 +24,7 @@
     "@types/react": "^16.8.20",
     "@types/react-dom": "^16.8.4",
     "@types/react-redux": "^7.1.0",
-    "@types/styled-components": "^4.1.16",
+    "@types/styled-components": "^4.4.2",
     "axios": "^0.18.0",
     "commonmark": "^0.29.0",
     "husky": "^3.1.0",
@@ -41,7 +41,7 @@
     "redux": "^4.0.1",
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
-    "styled-components": "^4.3.2",
+    "styled-components": "^4.4.1",
     "typesafe-actions": "^4.4.2",
     "typescript": "^3.5.2"
   },
@@ -80,6 +80,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^3.0.1",
+    "@types/jszip": "^3.1.7",
     "build": "^0.1.4",
     "jszip": "^3.2.2",
     "jszip-utils": "^0.1.0"
