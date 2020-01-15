@@ -16,8 +16,8 @@ import { useInput, useLocalStorage } from "./customHooks"
 const hello: string = '# A hello world program\nprint("Hello world")\n'
 
 const App = () => {
-  const [url, setUrl] = useState<string | undefined>(undefined)
-  const [token, setToken] = useState<string | undefined>(undefined)
+  const url = useInput("url", "")
+  const token = useInput("token", "")
   const [fetch, setFetch] = useState(false)
   const handleFetch = () => {
     event.preventDefault()
@@ -29,22 +29,10 @@ const App = () => {
     <>
       <form onSubmit={handleFetch}>
         <div>
-          url
-          <input
-            type="url"
-            value={url}
-            name="URL"
-            onChange={({ target }) => setUrl(target.value)}
-          />
+          <TextField {...url} label="Quiz url" />
         </div>
         <div>
-          token
-          <input
-            type="token"
-            value={token}
-            name="Token"
-            onChange={({ target }) => setToken(target.value)}
-          />
+          <TextField {...token} label="User token" />
         </div>
         <button type="submit">fetch quiz</button>
       </form>
