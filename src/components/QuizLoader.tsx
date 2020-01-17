@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react"
 import JSZip from "jszip"
-import JSZipUtils from "jszip-utils"
 import axios from "axios"
 import fs from "fs"
 import { Quiz } from "."
