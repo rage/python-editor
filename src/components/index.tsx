@@ -82,7 +82,6 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
 
   return (
     <>
-      <p>This is an editor.</p>
       <button onClick={handleShowValue} disabled={!isEditorReady}>
         Print editor content
       </button>
