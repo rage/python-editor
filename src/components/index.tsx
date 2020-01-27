@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react"
+import WebWorker from "react-webworker"
 import Editor from "@monaco-editor/react"
 import useScript from "../hooks/useScript"
 import Output from "./Output"
@@ -101,4 +102,4 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   )
 }
 
-export { Quiz, PyEditor }
+export { Quiz, PyEditor, QuizProps }

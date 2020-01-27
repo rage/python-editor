@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Quiz } from "../../src"
+import { Quiz, WorkerQuiz } from "../../src"
 import { QuizLoader } from "../../src/components/QuizLoader"
 import {
   Button,
@@ -15,6 +15,7 @@ import SimpleErrorBoundary from "./SimpleErrorBoundary"
 import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
 
 const hello: string = '# A hello world program\nprint("Hello world")\n'
+const infLoop: string = "# An infinite loop\nwhile True:\n pass"
 
 const StyledTextField = styled(props => (
   <TextField variant="outlined" fullWidth {...props} />
@@ -52,7 +53,7 @@ const App = () => {
         <StyledButton onClick={handleUnload}>Unload Quiz</StyledButton>
       </div>
       {fetch && loadQuiz(url.value, token.value)}
-      {!fetch && <Quiz editorInitialValue={hello} />}
+      {!fetch && <WorkerQuiz editorInitialValue={infLoop} />}
     </>
   )
 }

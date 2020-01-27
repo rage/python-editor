@@ -1,3 +1,3 @@
 import { Quiz, PyEditor } from "./components"
-
-export { Quiz, PyEditor }
+import WorkerQuiz from "./components/WorkerQuiz"
+export { Quiz, WorkerQuiz, PyEditor }
