@@ -17,9 +17,14 @@ const WorkerQuiz: React.FunctionComponent<QuizProps> = ({
             if (!code || code.length === 0) return
             postMessage(code)
           }
-          if (error)
-            console.log(`The Web worker gave an error: ${error.message}`)
-          if (data) setProgOutput(data)
+          if (data && data.error) {
+            console.log(`The Web worker gave an error: ${data.error}`)
+            setProgOutput(data.error)
+          }
+          if (data && data.result) {
+            setProgOutput(data.result)
+            console.log(JSON.stringify(data))
+          }
           return (
             <div>
               <PyEditor

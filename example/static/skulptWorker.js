@@ -4,7 +4,7 @@ onmessage = e => {
   let out = ""
   const code = e.data
   const Sk = self.Sk
-  Sk.execLimit = 5000
+  Sk.execLimit = 3000
   const outf = output => {
     console.log(`Skulpt says ${output}`)
     out += output
@@ -30,9 +30,9 @@ onmessage = e => {
   try {
     Sk.importMainWithBody("<stdin>", false, code, true)
     console.log("Posting message back to main script")
-    postMessage(out)
+    postMessage({ result: out, error: null })
   } catch (e) {
     console.log(`Worker caught an error: ${e}`)
-    postMessage(`An error occurred: ${e}`)
+    postMessage({ error: e.toString(), result: null })
   }
 }
