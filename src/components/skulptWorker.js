@@ -30,4 +30,6 @@ onmessage = e => {
     console.log(`Worker caught an error: ${e}`)
     postMessage({ error: e.toString(), result: null })
   }
+
+  postMessage({ done: true })
 }

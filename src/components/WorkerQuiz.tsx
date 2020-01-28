@@ -6,6 +6,7 @@ const WorkerQuiz: React.FunctionComponent<QuizProps> = ({
   editorInitialValue,
 }) => {
   const [progOutput, setProgOutput] = useState("")
+  const [workerAvailable, setworkerAvailable] = useState(true)
   const worker = new Worker("skulptWorker.js")
 
   worker.onmessage = (msg: any) => {
@@ -14,6 +15,10 @@ const WorkerQuiz: React.FunctionComponent<QuizProps> = ({
     }
     if (msg.data.result) {
       handleResult(msg.data.result)
+    }
+    if (msg.data.done) {
+      console.log(`Received done signal`)
+      setworkerAvailable(true)
     }
   }
 
@@ -29,6 +34,7 @@ const WorkerQuiz: React.FunctionComponent<QuizProps> = ({
 
   const runInWorker = (code: string) => {
     setProgOutput("")
+    setworkerAvailable(false)
     if (!code || code.length === 0) return
     worker.postMessage(code)
   }
@@ -36,7 +42,11 @@ const WorkerQuiz: React.FunctionComponent<QuizProps> = ({
   return (
     <div style={{ position: "relative", width: "70vw" }}>
       <p>This is a worker quiz.</p>
-      <PyEditor initialValue={editorInitialValue} handleRun={runInWorker} />
+      <PyEditor
+        initialValue={editorInitialValue}
+        handleRun={runInWorker}
+        allowRun={workerAvailable}
+      />
       <Output outputText={progOutput} clearOutput={() => setProgOutput("")} />
     </div>
   )

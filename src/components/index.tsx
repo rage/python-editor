@@ -11,6 +11,7 @@ type QuizProps = {
 type PyEditorProps = {
   initialValue: string
   handleRun: (code: string) => void
+  allowRun?: boolean
 }
 
 const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
@@ -68,6 +69,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   initialValue,
   handleRun,
+  allowRun = true,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
   const valueGetter = useRef(() => "")
@@ -88,7 +90,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
       </button>
       <button
         onClick={() => handleRun(valueGetter.current())}
-        disabled={!isEditorReady}
+        disabled={!(isEditorReady && allowRun)}
       >
         Run code
       </button>
