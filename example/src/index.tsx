@@ -1,6 +1,6 @@
 import React, { useState } from "react"
-import { Quiz, WorkerQuiz } from "../../src"
-import { QuizLoader } from "../../src/components/QuizLoader"
+import { Quiz, WorkerQuiz, QuizLoader } from "../../src/index"
+import {} from "../../src/components/QuizLoader"
 import {
   Button,
   FormControlLabel,

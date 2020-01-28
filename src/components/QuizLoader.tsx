@@ -44,4 +44,4 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   )
 }
 
-export { QuizLoader }
+export default QuizLoader
