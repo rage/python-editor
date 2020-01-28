@@ -16,6 +16,7 @@ import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
 
 const hello: string = '# A hello world program\nprint("Hello world")\n'
 const infLoop: string = "# An infinite loop\nwhile True:\n pass"
+const printis: string = "for i in range(3):\n print(i)"
 
 const StyledTextField = styled(props => (
   <TextField variant="outlined" fullWidth {...props} />
@@ -53,7 +54,7 @@ const App = () => {
         <StyledButton onClick={handleUnload}>Unload Quiz</StyledButton>
       </div>
       {fetch && loadQuiz(url.value, token.value)}
-      {!fetch && <WorkerQuiz editorInitialValue={infLoop} />}
+      {!fetch && <WorkerQuiz editorInitialValue={printis} />}
     </>
   )
 }

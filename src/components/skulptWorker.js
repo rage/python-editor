@@ -1,16 +1,13 @@
 onmessage = e => {
   self.importScripts("skulpt.min.js")
   self.importScripts("skulpt-stdlib.js")
-  let out = ""
   const code = e.data
   const Sk = self.Sk
   Sk.execLimit = 3000
-  const outf = output => {
-    console.log(`Skulpt says ${output}`)
-    out += output
-  }
 
-  console.log("Message received from main script: " + e.data)
+  const outf = output => {
+    postMessage({ result: output, error: null })
+  }
 
   function builtinRead(x) {
     if (
@@ -29,8 +26,6 @@ onmessage = e => {
 
   try {
     Sk.importMainWithBody("<stdin>", false, code, true)
-    console.log("Posting message back to main script")
-    postMessage({ result: out, error: null })
   } catch (e) {
     console.log(`Worker caught an error: ${e}`)
     postMessage({ error: e.toString(), result: null })
