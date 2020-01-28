@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react"
 import JSZip from "jszip"
 import axios from "axios"
-import fs from "fs"
-import { Quiz } from "."
 import WorkerQuiz from "./WorkerQuiz"
 
 type QuizLoaderProps = {
