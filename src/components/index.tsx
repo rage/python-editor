@@ -94,7 +94,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
       </button>
       <Editor
         value={initialValue}
-        height="90vh"
+        height="60vh"
         language="python"
         editorDidMount={handleEditorDidMount}
       />
