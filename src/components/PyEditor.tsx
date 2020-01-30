@@ -1,11 +1,17 @@
 import React, { useRef, useState } from "react"
 import Editor from "@monaco-editor/react"
+import styled from "styled-components"
+import { Button } from "@material-ui/core"
 
 type PyEditorProps = {
   initialValue: string
   handleRun: (code: string) => void
   allowRun?: boolean
 }
+
+const StyledButton = styled(props => <Button variant="contained" {...props} />)`
+  margin: 1rem;
+`
 
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   initialValue,
@@ -26,15 +32,15 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
 
   return (
     <>
-      <button onClick={handleShowValue} disabled={!isEditorReady}>
+      <StyledButton onClick={handleShowValue} disabled={!isEditorReady}>
         Print editor content
-      </button>
-      <button
+      </StyledButton>
+      <StyledButton
         onClick={() => handleRun(valueGetter.current())}
         disabled={!(isEditorReady && allowRun)}
       >
         Run code
-      </button>
+      </StyledButton>
       <Editor
         value={initialValue}
         height="60vh"
