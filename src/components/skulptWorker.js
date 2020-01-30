@@ -1,12 +1,24 @@
 onmessage = e => {
   self.importScripts("skulpt.min.js")
   self.importScripts("skulpt-stdlib.js")
+  const execLimit = 3000
+  const messageLimit = 200
   const code = e.data
   const Sk = self.Sk
-  Sk.execLimit = 3000
+  Sk.execLimit = execLimit
+  var messagesSent = 0
 
   const outf = output => {
+    if (messagesSent >= messageLimit) {
+      if (messagesSent == messageLimit) {
+        messagesSent += 1
+        Sk.execLimit = 0
+        throw `Exceeded maximum number (${messageLimit}) of outputs.`
+      }
+      return
+    }
     postMessage({ result: output, error: null })
+    messagesSent += 1
   }
 
   function builtinRead(x) {
