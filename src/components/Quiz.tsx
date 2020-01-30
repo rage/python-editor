@@ -1,52 +1,48 @@
 import React, { useState } from "react"
 import useScript from "../hooks/useScript"
 import PyEditor from "./PyEditor"
+import Editor from "@monaco-editor/react"
 import Output from "./Output"
 
 type QuizProps = {
   editorInitialValue: string
 }
 
+type PyEditorProps = {
+  initialValue: string
+  handleRun: (code: string) => void
+}
+
+const worker = new Worker("./worker.js")
+
 const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
-  const [skulptLoaded, skulptError] = useScript(
-    "http://localhost:1234/skulpt.min.js",
-  )
-  const [stdlibLoaded, stdlibError] = useScript(
-    "http://localhost:1234/skulpt-stdlib.js",
-  )
   const [progOutput, setProgOutput] = useState("")
-
-  let Sk: any = {}
-  if (skulptLoaded && !skulptError) Sk = (window as any).Sk
-
-  function outf(text: string) {
-    setProgOutput(prevState => prevState + text)
-  }
-
-  function builtinRead(x: any) {
-    if (
-      Sk.builtinFiles === undefined ||
-      Sk.builtinFiles["files"][x] === undefined
-    )
-      throw "File not found: '" + x + "'"
-    return Sk.builtinFiles["files"][x]
-  }
+  const [workerAvailable, setWorkerAvailable] = useState(true)
 
   function handleRun(code: string) {
-    if (!code || code.length === 0) return
-    setProgOutput("")
+    if (workerAvailable) {
+      setProgOutput("")
+      setWorkerAvailable(false)
+      worker.postMessage({ type: "run", msg: code })
+    } else {
+      console.log("Worker is busy")
+    }
+  }
 
-    Sk.configure({
-      output: outf,
-      read: builtinRead,
-      __future__: Sk.python3,
-    })
-
-    try {
-      Sk.importMainWithBody("<stdin>", false, code, true)
-    } catch (e) {
-      console.log(e)
-      setProgOutput(e.toString())
+  worker.onmessage = function(e) {
+    const { type, msg } = e.data
+    if (type === "print") {
+      setProgOutput(prevOutput => prevOutput + msg)
+    } else if (type === "input_required") {
+      // Delay to simulate user input delay
+      setTimeout(() => {
+        worker.postMessage({ type: "input", msg: "this is the input msg" })
+      }, 3000)
+    } else if (type === "error") {
+      console.log(msg)
+      setProgOutput(prevOutput => prevOutput + msg)
+    } else if (type === "done") {
+      setWorkerAvailable(true)
     }
   }
 
