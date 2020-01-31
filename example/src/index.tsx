@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Quiz, WorkerQuiz, QuizLoader } from "../../src/index"
+import { Quiz, QuizLoader } from "../../src/index"
 import {} from "../../src/components/QuizLoader"
 import {
   Button,
