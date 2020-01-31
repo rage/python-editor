@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import JSZip from "jszip"
 import axios from "axios"
-import WorkerQuiz from "./WorkerQuiz"
+import { Quiz } from "./Quiz"
 
 type QuizLoaderProps = {
   url: string
@@ -39,7 +39,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
 
   return (
     <>
-      <WorkerQuiz editorInitialValue={text} />
+      <Quiz editorInitialValue={text} />
     </>
   )
 }

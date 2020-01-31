@@ -54,7 +54,7 @@ const App = () => {
         <StyledButton onClick={handleUnload}>Unload Quiz</StyledButton>
       </div>
       {fetch && loadQuiz(url.value, token.value)}
-      {!fetch && <WorkerQuiz editorInitialValue={printis} />}
+      {!fetch && <Quiz editorInitialValue={printis} />}
     </>
   )
 }

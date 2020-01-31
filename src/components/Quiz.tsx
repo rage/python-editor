@@ -1,7 +1,5 @@
 import React, { useState } from "react"
-import useScript from "../hooks/useScript"
 import PyEditor from "./PyEditor"
-import Editor from "@monaco-editor/react"
 import Output from "./Output"
 
 type QuizProps = {
@@ -49,7 +47,11 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   return (
     <div style={{ position: "relative", width: "70vw" }}>
       <p>This is a quiz.</p>
-      <PyEditor initialValue={editorInitialValue} handleRun={handleRun} />
+      <PyEditor
+        initialValue={editorInitialValue}
+        handleRun={handleRun}
+        allowRun={workerAvailable}
+      />
       <Output outputText={progOutput} clearOutput={() => setProgOutput("")} />
     </div>
   )
