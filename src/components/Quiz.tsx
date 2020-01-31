@@ -1,15 +1,10 @@
-import React, { useRef, useState } from "react"
-import Editor from "@monaco-editor/react"
+import React, { useState } from "react"
 import useScript from "../hooks/useScript"
+import PyEditor from "./PyEditor"
 import Output from "./Output"
 
 type QuizProps = {
   editorInitialValue: string
-}
-
-type PyEditorProps = {
-  initialValue: string
-  handleRun: (code: string) => void
 }
 
 const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
@@ -64,41 +59,4 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   )
 }
 
-const PyEditor: React.FunctionComponent<PyEditorProps> = ({
-  initialValue,
-  handleRun,
-}) => {
-  const [isEditorReady, setIsEditorReady] = useState(false)
-  const valueGetter = useRef(() => "")
-
-  function handleEditorDidMount(_valueGetter: any) {
-    setIsEditorReady(true)
-    valueGetter.current = _valueGetter
-  }
-
-  function handleShowValue() {
-    alert(valueGetter.current())
-  }
-
-  return (
-    <>
-      <button onClick={handleShowValue} disabled={!isEditorReady}>
-        Print editor content
-      </button>
-      <button
-        onClick={() => handleRun(valueGetter.current())}
-        disabled={!isEditorReady}
-      >
-        Run code
-      </button>
-      <Editor
-        value={initialValue}
-        height="90vh"
-        language="python"
-        editorDidMount={handleEditorDidMount}
-      />
-    </>
-  )
-}
-
-export { Quiz, PyEditor }
+export { Quiz, QuizProps }

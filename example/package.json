@@ -8,7 +8,8 @@
     "build": "parcel build index.html"
   },
   "dependencies": {
-    "react-app-polyfill": "^1.0.1"
+    "react-app-polyfill": "^1.0.1",
+    "react-webworker": "^2.1.0"
   },
   "devDependencies": {
     "@types/react": "^16.8.15",
