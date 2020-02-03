@@ -48,8 +48,8 @@ const App = () => {
   return (
     <>
       <div>
-        <StyledTextField {...url} label="Quiz url" />
-        <StyledTextField {...token} label="User token" />
+        <StyledTextField {...url} label="Quiz url" data-cy="url-input" />
+        <StyledTextField {...token} label="User token" data-cy="token-input" />
         <StyledButton onClick={handleLoad}>Load Quiz</StyledButton>
         <StyledButton onClick={handleUnload}>Unload Quiz</StyledButton>
       </div>
