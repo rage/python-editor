@@ -6,16 +6,12 @@ type QuizProps = {
   editorInitialValue: string
 }
 
-type PyEditorProps = {
-  initialValue: string
-  handleRun: (code: string) => void
-}
-
 const worker = new Worker("./worker.js")
 
 const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   const [progOutput, setProgOutput] = useState("")
   const [workerAvailable, setWorkerAvailable] = useState(true)
+  const [inputRequested, setInputRequested] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -32,15 +28,22 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
     if (type === "print") {
       setProgOutput(prevOutput => prevOutput + msg)
     } else if (type === "input_required") {
-      // Delay to simulate user input delay
-      setTimeout(() => {
-        worker.postMessage({ type: "input", msg: "this is the input msg" })
-      }, 3000)
+      setInputRequested(true)
     } else if (type === "error") {
       console.log(msg)
       setProgOutput(prevOutput => prevOutput + msg)
+      setWorkerAvailable(true)
     } else if (type === "done") {
       setWorkerAvailable(true)
+    }
+  }
+
+  const sendInput = (input: string) => {
+    if (inputRequested) {
+      console.log("sending input to web worker....")
+      setInputRequested(false)
+      setProgOutput(prevOutput => prevOutput + "\n" + input + "\n")
+      worker.postMessage({ type: "input", msg: input })
     }
   }
 
@@ -52,7 +55,12 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
         handleRun={handleRun}
         allowRun={workerAvailable}
       />
-      <Output outputText={progOutput} clearOutput={() => setProgOutput("")} />
+      <Output
+        outputText={progOutput}
+        clearOutput={() => setProgOutput("")}
+        inputRequested={inputRequested}
+        sendInput={sendInput}
+      />
     </div>
   )
 }

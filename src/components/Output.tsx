@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react"
 import styled, { keyframes } from "styled-components"
-import { Button, Paper, Grid, Typography } from "@material-ui/core"
+import { Button, Paper, Grid, Typography, TextField } from "@material-ui/core"
 
 type OutputProps = {
   outputText: string
   clearOutput: () => void
+  inputRequested: any
+  sendInput: (input: string) => void
 }
 
 const ContainerBox = styled.div`
@@ -43,8 +45,11 @@ const AnimatedOutputBox = styled(Paper)<{ open: boolean }>`
   width: 100%;
 `
 
-const OutputTitleBox = styled(Grid)`
-  background-color: #2196f3;
+const OutputTitleBox = styled(({ inputRequested, ...props }) => (
+  <Grid {...props} />
+))`
+  background-color: ${({ inputRequested }) =>
+    inputRequested ? "#FF9800" : "#2196f3"};
   color: white;
   padding: 10px;
   border-radius: 3px 3px 0 0;
@@ -72,7 +77,7 @@ const StyledOutput = styled(Grid)`
 const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(!!props.outputText)
   const [open, setOpen] = useState(true)
-  const { outputText, clearOutput } = props
+  const { outputText, clearOutput, inputRequested, sendInput } = props
 
   useEffect(() => {
     if (outputText && !render) {
@@ -92,15 +97,23 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     }
   }
 
+  const keyPressOnInput = (e: any) => {
+    if (e.key === "Enter" && inputRequested) {
+      sendInput(e.target.value)
+    }
+  }
+
   if (!render) return null
 
   return (
     <ContainerBox>
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
         <Grid container direction="column">
-          <OutputTitleBox item>
-            <OutputTitle>Output</OutputTitle>
-            <FloatedButton
+          <OutputTitleBox inputRequested={inputRequested} item>
+            <OutputTitle>
+              Output {inputRequested && "(Waiting for input)"}
+            </OutputTitle>
+            <FloatedButton 
               onClick={closeOutput}
               variant="contained"
               data-cy="close-btn"
@@ -108,7 +121,20 @@ const Output: React.FunctionComponent<OutputProps> = props => {
               Close
             </FloatedButton>
           </OutputTitleBox>
-          <StyledOutput item>{outputText}</StyledOutput>
+          <StyledOutput item>
+            {outputText}
+            <div>
+              {inputRequested && (
+                <TextField
+                  label="Enter input and press 'Enter'"
+                  margin="dense"
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                  onKeyPress={keyPressOnInput}
+                />
+              )}
+            </div>
+          </StyledOutput>
         </Grid>
       </AnimatedOutputBox>
     </ContainerBox>
