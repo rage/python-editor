@@ -50,8 +50,12 @@ const App = () => {
       <div>
         <StyledTextField {...url} label="Quiz url" data-cy="url-input" />
         <StyledTextField {...token} label="User token" data-cy="token-input" />
-        <StyledButton onClick={handleLoad}>Load Quiz</StyledButton>
-        <StyledButton onClick={handleUnload}>Unload Quiz</StyledButton>
+        <StyledButton onClick={handleLoad} data-cy="load-btn">
+          Load Quiz
+        </StyledButton>
+        <StyledButton onClick={handleUnload} data-cy="unload-btn">
+          Unload Quiz
+        </StyledButton>
       </div>
       {fetch && loadQuiz(url.value, token.value)}
       {!fetch && <Quiz editorInitialValue={printis} />}
