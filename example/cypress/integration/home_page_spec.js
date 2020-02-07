@@ -18,4 +18,40 @@ describe("The Main Page", () => {
       .type(inputToken)
       .should("have.value", inputToken)
   })
+
+  it("has a load quiz button", () => {
+    cy.get("[data-cy=load-btn]").click()
+  })
+
+  it("has an unload quiz button", () => {
+    cy.get("[data-cy=unload-btn]").click()
+  })
+
+  it("has a print editor content button", () => {
+    cy.get("[data-cy=print-btn]").click()
+  })
+
+  it("has a run code button", () => {
+    cy.get("[data-cy=run-btn]").click()
+  })
+
+  it("has an editor input field", () => {
+    cy.visit("/")
+    cy.get(".monaco-editor")
+      .click()
+      .focused()
+      .type("{ctrl}{end}")
+      .type("{shift}{ctrl}{home}{backspace}")
+      .type('# A simple program\nprint("hello from", "python")\n')
+  })
+
+  it("running python code produces output", () => {
+    cy.get("[data-cy=run-btn]").click()
+    cy.contains("hello from python")
+  })
+
+  it("close button hides output", () => {
+    cy.get("[data-cy=close-btn").click()
+    cy.contains("hello from python").should("not.exist")
+  })
 })
