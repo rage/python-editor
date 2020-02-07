@@ -100,7 +100,11 @@ const Output: React.FunctionComponent<OutputProps> = props => {
         <Grid container direction="column">
           <OutputTitleBox item>
             <OutputTitle>Output</OutputTitle>
-            <FloatedButton onClick={closeOutput} variant="contained">
+            <FloatedButton
+              onClick={closeOutput}
+              variant="contained"
+              data-cy="close-btn"
+            >
               Close
             </FloatedButton>
           </OutputTitleBox>
