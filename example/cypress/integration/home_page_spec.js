@@ -1,21 +1,39 @@
+const program = '# A simple program\nprint("hello from", "python")\n'
+const inputUrl = "http://www.foo.bar"
+const inputToken = "123abc000"
+
 describe("The Main Page", () => {
   it("successfully loads", () => {
     cy.visit("/")
   })
 
   it("has a url input field", () => {
-    const inputUrl = "http://www.foo.bar"
     cy.get("[data-cy=url-input]")
       .find("input")
       .type(inputUrl)
       .should("have.value", inputUrl)
   })
 
+  it("can get url from local storage", () => {
+    cy.visit("/")
+    window.localStorage.setItem("url", inputUrl)
+    cy.get("[data-cy=url-input]")
+      .find("input")
+      .should("have.value", inputUrl)
+  })
+
   it("has a user token input field", () => {
-    const inputToken = "123abc000"
     cy.get("[data-cy=token-input]")
       .find("input")
       .type(inputToken)
+      .should("have.value", inputToken)
+  })
+
+  it("can get token from local storage", () => {
+    cy.visit("/")
+    window.localStorage.setItem("token", inputToken)
+    cy.get("[data-cy=token-input]")
+      .find("input")
       .should("have.value", inputToken)
   })
 
@@ -42,7 +60,17 @@ describe("The Main Page", () => {
       .focused()
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
-      .type('# A simple program\nprint("hello from", "python")\n')
+      .type(program)
+  })
+
+  it("editor contents can be displayed as an alert", () => {
+    const stub = cy.stub()
+    cy.on("window:alert", stub)
+    cy.get("[data-cy=print-btn]")
+      .click()
+      .then(() => {
+        expect(stub.getCall(0)).to.be.calledWith(program)
+      })
   })
 
   it("running python code produces output", () => {
