@@ -32,12 +32,17 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
 
   return (
     <>
-      <StyledButton onClick={handleShowValue} disabled={!isEditorReady}>
+      <StyledButton
+        onClick={handleShowValue}
+        disabled={!isEditorReady}
+        data-cy="print-btn"
+      >
         Print editor content
       </StyledButton>
       <StyledButton
         onClick={() => handleRun(valueGetter.current())}
         disabled={!(isEditorReady && allowRun)}
+        data-cy="run-btn"
       >
         Run code
       </StyledButton>
