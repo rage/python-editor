@@ -2,7 +2,7 @@
   "name": "moocfi-editor",
   "version": "0.5.0",
   "description": "",
-  "main": "dist/index.html",
+  "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "now-build": "parcel build example/index.html --out-dir public",
