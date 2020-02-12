@@ -1,3 +1,5 @@
 themeprovider-example
 dist
 node_modules
+public
+**/cypress/videos
