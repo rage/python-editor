@@ -1,7 +1,4 @@
-importScripts(
-  "http://localhost:1234/skulpt.min.js",
-  "http://localhost:1234/skulpt-stdlib.js",
-)
+importScripts("skulpt.min.js", "skulpt-stdlib.js")
 let Sk = self.Sk
 
 function outf(text) {

@@ -5,7 +5,7 @@
   "main": "dist/index.html",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "now-build": "rm -rf ./dist && parcel build example/index.html --out-dir public",
+    "now-build": "parcel build example/index.html --out-dir public",
     "prepare": "npm install build",
     "watch": "tsc --watch"
   },
