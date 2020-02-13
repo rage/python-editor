@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
+import { v4 as uuid } from "uuid"
 
 type QuizProps = {
   editorInitialValue: string
@@ -9,13 +10,13 @@ type QuizProps = {
 const worker = new Worker("./worker.js")
 
 const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
-  const [progOutput, setProgOutput] = useState("")
+  const [output, setOutput] = useState<any>([])
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [inputRequested, setInputRequested] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
-      setProgOutput("")
+      setOutput([])
       setWorkerAvailable(false)
       worker.postMessage({ type: "run", msg: code })
     } else {
@@ -26,12 +27,12 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   worker.onmessage = function(e) {
     const { type, msg } = e.data
     if (type === "print") {
-      setProgOutput(prevOutput => prevOutput + msg)
+      setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
     } else if (type === "input_required") {
       setInputRequested(true)
     } else if (type === "error") {
       console.log(msg)
-      setProgOutput(prevOutput => prevOutput + msg)
+      setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
       setWorkerAvailable(true)
     } else if (type === "done") {
       setWorkerAvailable(true)
@@ -40,9 +41,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
 
   const sendInput = (input: string) => {
     if (inputRequested) {
-      console.log("sending input to web worker....")
       setInputRequested(false)
-      setProgOutput(prevOutput => prevOutput + "\n" + input + "\n")
+      setOutput(
+        output.concat({ id: uuid(), type: "input", text: `${input}\n` }),
+      )
       worker.postMessage({ type: "input", msg: input })
     }
   }
@@ -56,8 +58,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
         allowRun={workerAvailable}
       />
       <Output
-        outputText={progOutput}
-        clearOutput={() => setProgOutput("")}
+        outputText={output}
+        clearOutput={() => setOutput([])}
         inputRequested={inputRequested}
         sendInput={sendInput}
       />

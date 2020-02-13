@@ -3,9 +3,9 @@ import styled, { keyframes } from "styled-components"
 import { Button, Paper, Grid, Typography, TextField } from "@material-ui/core"
 
 type OutputProps = {
-  outputText: string
+  outputText: { id: string; type: string; text: string }[]
   clearOutput: () => void
-  inputRequested: any
+  inputRequested: boolean
   sendInput: (input: string) => void
 }
 
@@ -74,13 +74,21 @@ const StyledOutput = styled(Grid)`
   white-space: pre-wrap;
 `
 
+const StyledUserInput = styled.span`
+  background-color: #efefef;
+  border-radius: 3px 3px 3px 3px;
+  color: #292929;
+  margin: 3px;
+  padding: 3px;
+`
+
 const Output: React.FunctionComponent<OutputProps> = props => {
-  const [render, setRender] = useState(!!props.outputText)
+  const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const { outputText, clearOutput, inputRequested, sendInput } = props
 
   useEffect(() => {
-    if (outputText && !render) {
+    if (outputText.length > 0 && !render) {
       setRender(true)
       if (!open) setOpen(true)
     }
@@ -105,6 +113,14 @@ const Output: React.FunctionComponent<OutputProps> = props => {
 
   if (!render) return null
 
+  const outputElems = outputText.map(output =>
+    output.type !== "input" ? (
+      <React.Fragment key={output.id}>{output.text}</React.Fragment>
+    ) : (
+      <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
+    ),
+  )
+
   return (
     <ContainerBox>
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
@@ -122,18 +138,18 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             </FloatedButton>
           </OutputTitleBox>
           <StyledOutput item>
-            {outputText}
-            <div>
-              {inputRequested && (
-                <TextField
-                  label="Enter input and press 'Enter'"
-                  margin="dense"
-                  variant="outlined"
-                  InputLabelProps={{ shrink: true }}
-                  onKeyPress={keyPressOnInput}
-                />
-              )}
-            </div>
+            {outputElems}
+            {inputRequested && (
+              <TextField
+                label="Enter input and press 'Enter'"
+                margin="dense"
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                onKeyPress={keyPressOnInput}
+                autoFocus={true}
+                style={{ display: "block" }}
+              />
+            )}
           </StyledOutput>
         </Grid>
       </AnimatedOutputBox>
