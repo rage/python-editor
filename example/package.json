@@ -9,6 +9,7 @@
     "cypress:open": "cypress open"
   },
   "dependencies": {
+    "parcel": "^1.12.4",
     "react-app-polyfill": "^1.0.6",
     "react-webworker": "^2.1.0"
   },
@@ -16,7 +17,6 @@
     "@types/react": "^16.9.19",
     "@types/react-dom": "^16.9.5",
     "cypress": "^4.0.1",
-    "parcel": "^1.12.3",
     "parcel-plugin-static-files-copy": "^2.3.1",
     "typescript": "^3.7.5"
   },
