@@ -87,6 +87,26 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   const [open, setOpen] = useState(true)
   const { outputText, clearOutput, inputRequested, sendInput } = props
 
+  const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
+  const userInputFieldRef: React.RefObject<HTMLInputElement> = React.createRef()
+
+  const scrollToBottom = () => {
+    if (outputRef && outputRef.current) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight
+    }
+  }
+
+  const focusOnInputField = () => {
+    if (userInputFieldRef && userInputFieldRef.current) {
+      userInputFieldRef.current.focus({ preventScroll: true })
+    }
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+    if (inputRequested) focusOnInputField()
+  }, [inputRequested, outputText])
+
   useEffect(() => {
     if (outputText.length > 0 && !render) {
       setRender(true)
@@ -137,16 +157,16 @@ const Output: React.FunctionComponent<OutputProps> = props => {
               Close
             </FloatedButton>
           </OutputTitleBox>
-          <StyledOutput item>
+          <StyledOutput item ref={outputRef}>
             {outputElems}
             {inputRequested && (
               <TextField
+                inputRef={userInputFieldRef}
                 label="Enter input and press 'Enter'"
                 margin="dense"
                 variant="outlined"
                 InputLabelProps={{ shrink: true }}
                 onKeyPress={keyPressOnInput}
-                autoFocus={true}
                 style={{ display: "block" }}
               />
             )}
