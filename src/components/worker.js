@@ -23,6 +23,7 @@ function run(code) {
       self.addEventListener("message", function(e) {
         if (e.data.type === "input") {
           resolve(e.data.msg)
+          Sk.execStart = new Date()
         }
       })
     })
