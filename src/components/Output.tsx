@@ -142,14 +142,14 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   )
 
   return (
-    <ContainerBox>
+    <ContainerBox data-cy="output-container">
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
         <Grid container direction="column">
           <OutputTitleBox inputRequested={inputRequested} item>
             <OutputTitle>
               Output {inputRequested && "(Waiting for input)"}
             </OutputTitle>
-            <FloatedButton 
+            <FloatedButton
               onClick={closeOutput}
               variant="contained"
               data-cy="close-btn"
@@ -168,6 +168,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                 InputLabelProps={{ shrink: true }}
                 onKeyPress={keyPressOnInput}
                 style={{ display: "block" }}
+                data-cy="user-input-field"
               />
             )}
           </StyledOutput>

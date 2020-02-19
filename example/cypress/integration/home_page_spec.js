@@ -82,4 +82,43 @@ describe("The Main Page", () => {
     cy.get("[data-cy=close-btn").click()
     cy.contains("hello from python").should("not.exist")
   })
+
+  describe("running python code that includes input command", () => {
+    const inputProgram = 'input("Enter a word:")'
+
+    it("displays input prompt", () => {
+      cy.visit("/")
+      cy.get(".monaco-editor")
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(inputProgram)
+      cy.get("[data-cy=run-btn]").click()
+      cy.get("[data-cy=output-container]").contains("Enter a word:")
+    })
+
+    it("displays waiting indication in title", () => {
+      cy.contains("(Waiting for input)")
+    })
+
+    it("displays input field with label", () => {
+      cy.get("[data-cy=user-input-field]").contains(
+        "Enter input and press 'Enter'",
+      )
+    })
+
+    it("can enter input value and add it to output", () => {
+      cy.get("[data-cy=user-input-field]")
+        .find("input")
+        .type("cat")
+        .type("{enter}")
+      cy.contains("cat")
+    })
+
+    it("hides input field and changes title after entering input", () => {
+      cy.get("[data-cy=user-input-field]").should("not.exist")
+      cy.contains("(Waiting for input)").should("not.exist")
+    })
+  })
 })
