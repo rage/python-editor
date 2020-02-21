@@ -5,12 +5,5 @@
       "NODE_ENV": "development"
     }
   },
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@now/static-build",
-      "config": { "distDir": "public" }
-    }
-  ],
   "alias": "python-editor.now.sh"
 }
