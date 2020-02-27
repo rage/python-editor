@@ -1,8 +1,41 @@
 importScripts("skulpt.min.js", "skulpt-stdlib.js")
 let Sk = self.Sk
 
+postMessage({ type: "ready" })
+
+let printBuffer = []
+let intervalId = null
+const batchSize = 200
+let running = false
+
+const intervalManager = runInterval => {
+  if (intervalId) {
+    clearInterval(intervalId)
+  }
+  if (runInterval) {
+    intervalId = setInterval(() => {
+      console.log("interval")
+      if (printBuffer.length > 0) {
+        const batch = printBuffer.splice(0, batchSize)
+        postMessage({ type: "print_batch", msg: batch })
+      }
+      if (!running && printBuffer.length === 0) {
+        clearInterval(intervalId)
+        postMessage({ type: "print_done" })
+      }
+    }, 100)
+  }
+}
+
+let prevDate = null
+
 function outf(text) {
-  postMessage({ type: "print", msg: text })
+  printBuffer.push(text)
+  const newDate = Date.now()
+  if (newDate - prevDate > 50) {
+    postMessage({ type: "print_batch", msg: printBuffer.splice(0, batchSize) })
+    prevDate = newDate
+  }
 }
 
 function builtinRead(x) {
@@ -40,10 +73,12 @@ function run(code) {
     })
     .then(e => {
       console.log("running skulpt completed")
-      postMessage({ type: "done" })
+      running = false
+      postMessage({ type: "ready" })
     })
     .catch(e => {
       console.log(e)
+      running = false
       postMessage({ type: "error", msg: e.toString() })
     })
 }
@@ -51,6 +86,11 @@ function run(code) {
 self.onmessage = function(e) {
   const { type, msg } = e.data
   if (type === "run") {
+    intervalManager(true)
+    running = true
+    printBuffer = []
     run(msg)
+  } else if (type === "stop") {
+    intervalManager(false)
   }
 }
