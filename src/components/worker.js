@@ -8,16 +8,29 @@ let intervalId = null
 const batchSize = 200
 let running = false
 
+// used to check if a control message "input_required" has been appended to buffer
+const checkForMsg = () => {
+  let msgObject = null
+  if (typeof printBuffer[printBuffer.length - 1] === "object") {
+    msgObject = printBuffer.pop()
+  }
+  return msgObject
+}
+
 const intervalManager = runInterval => {
   if (intervalId) {
     clearInterval(intervalId)
   }
   if (runInterval) {
     intervalId = setInterval(() => {
-      console.log("interval")
       if (printBuffer.length > 0) {
+        let msgObject = null
+        if (printBuffer.length <= batchSize) {
+          msgObject = checkForMsg()
+        }
         const batch = printBuffer.splice(0, batchSize)
         postMessage({ type: "print_batch", msg: batch })
+        if (msgObject) postMessage(msgObject)
       }
       if (!running && printBuffer.length === 0) {
         clearInterval(intervalId)
@@ -51,7 +64,7 @@ function run(code) {
   if (!code || code.length === 0) return
   Sk.execLimit = 10000
   Sk.inputfun = function() {
-    postMessage({ type: "input_required" })
+    printBuffer.push({ type: "input_required" })
     return new Promise((resolve, reject) => {
       self.addEventListener("message", function(e) {
         if (e.data.type === "input") {

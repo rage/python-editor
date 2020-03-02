@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
-import { Button } from "@material-ui/core"
 
 type QuizProps = {
   editorInitialValue: string
@@ -41,8 +40,12 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
       setWorkerAvailable(true)
     } else if (type === "print_batch") {
       if (running) {
-        const mapped = msg.map(t => ({ id: uuid(), type: "output", text: t }))
-        setOutput(prev => prev.concat(mapped))
+        const prints = msg.map((text: string) => ({
+          id: uuid(),
+          type: "output",
+          text,
+        }))
+        setOutput((prev: []) => prev.concat(prints))
       }
     } else if (type === "print_done") {
       setRunning(false)
@@ -66,6 +69,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
     }
     worker.postMessage({ type: "stop" })
     setRunning(false)
+    setInputRequested(false)
   }
 
   const clearOutput = () => {
@@ -76,18 +80,12 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
   return (
     <div style={{ position: "relative", width: "70vw" }}>
       <p>This is a quiz.</p>
-      <Button
-        variant="contained"
-        disabled={!running}
-        style={{ float: "right" }}
-        onClick={() => stopWorker()}
-      >
-        Terminate
-      </Button>
       <PyEditor
         initialValue={editorInitialValue}
         handleRun={handleRun}
         allowRun={workerAvailable}
+        handleStop={stopWorker}
+        isRunning={running}
       />
       <Output
         outputText={output}
