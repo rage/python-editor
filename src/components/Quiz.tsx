@@ -5,21 +5,25 @@ import { v4 as uuid } from "uuid"
 
 type QuizProps = {
   editorInitialValue: string
+  // editorValueGetter: any
+  setContentBuffer: any
 }
 
-let worker = new Worker("./worker.js")
+const worker = new Worker("./worker.js")
 
-const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
+const Quiz: React.FunctionComponent<QuizProps> = ({
+  editorInitialValue,
+  // editorValueGetter,
+  setContentBuffer,
+}) => {
   const [output, setOutput] = useState<any>([])
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [inputRequested, setInputRequested] = useState(false)
-  const [running, setRunning] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
       setOutput([])
       setWorkerAvailable(false)
-      setRunning(true)
       worker.postMessage({ type: "run", msg: code })
     } else {
       console.log("Worker is busy")
@@ -36,19 +40,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
       console.log(msg)
       setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
       setWorkerAvailable(true)
-    } else if (type === "ready") {
+    } else if (type === "done") {
       setWorkerAvailable(true)
-    } else if (type === "print_batch") {
-      if (running) {
-        const prints = msg.map((text: string) => ({
-          id: uuid(),
-          type: "output",
-          text,
-        }))
-        setOutput((prev: []) => prev.concat(prints))
-      }
-    } else if (type === "print_done") {
-      setRunning(false)
     }
   }
 
@@ -62,21 +55,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
     }
   }
 
-  const stopWorker = () => {
-    if (!workerAvailable) {
-      worker.terminate()
-      worker = new Worker("./worker.js")
-    }
-    worker.postMessage({ type: "stop" })
-    setRunning(false)
-    setInputRequested(false)
-  }
-
-  const clearOutput = () => {
-    stopWorker()
-    setOutput([])
-  }
-
   return (
     <div style={{ position: "relative", width: "70vw" }}>
       <p>This is a quiz.</p>
@@ -84,12 +62,12 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
         initialValue={editorInitialValue}
         handleRun={handleRun}
         allowRun={workerAvailable}
-        handleStop={stopWorker}
-        isRunning={running}
+        // editorValueGetter={editorValueGetter}
+        setContentBuffer={setContentBuffer}
       />
       <Output
         outputText={output}
-        clearOutput={clearOutput}
+        clearOutput={() => setOutput([])}
         inputRequested={inputRequested}
         sendInput={sendInput}
       />

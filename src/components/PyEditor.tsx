@@ -5,10 +5,10 @@ import { Button } from "@material-ui/core"
 
 type PyEditorProps = {
   initialValue: string
+  // editorValueGetter: any
+  setContentBuffer: any
   handleRun: (code: string) => void
   allowRun?: boolean
-  handleStop: () => void
-  isRunning: boolean
 }
 
 const StyledButton = styled(props => <Button variant="contained" {...props} />)`
@@ -17,21 +17,25 @@ const StyledButton = styled(props => <Button variant="contained" {...props} />)`
 
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   initialValue,
+  // editorValueGetter,
+  setContentBuffer,
   handleRun,
   allowRun = true,
-  handleStop,
-  isRunning,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
-  const valueGetter = useRef(() => "")
+  const editorRef = useRef()
 
-  function handleEditorDidMount(_valueGetter: any) {
+  function handleEditorDidMount(_: any, editor: any) {
+    console.log("This is handleEditorDidMount")
     setIsEditorReady(true)
-    valueGetter.current = _valueGetter
+    editorRef.current = editor
+    editor.onDidChangeModelContent(() => {
+      setContentBuffer(editorRef.current.getValue())
+    })
   }
 
   function handleShowValue() {
-    alert(valueGetter.current())
+    alert(editorRef.current.getValue())
   }
 
   return (
@@ -44,18 +48,11 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         Print editor content
       </StyledButton>
       <StyledButton
-        onClick={() => handleRun(valueGetter.current())}
+        onClick={() => handleRun(editorRef.current.getValue())}
         disabled={!(isEditorReady && allowRun)}
         data-cy="run-btn"
       >
         Run code
-      </StyledButton>
-      <StyledButton
-        onClick={() => handleStop()}
-        disabled={!isRunning}
-        data-cy="stop-btn"
-      >
-        Stop
       </StyledButton>
       <Editor
         value={initialValue}
