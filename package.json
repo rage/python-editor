@@ -5,9 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
-    "serve": "rm -rf ./public && parcel index.html --out-dir public",
+    "cypress:open": "cypress open",
     "now-build": "parcel build index.html --out-dir public",
     "prepare": "npm install build",
+    "serve": "rm -rf ./public && parcel index.html --out-dir public",
     "watch": "tsc --watch"
   },
   "keywords": [],
@@ -29,6 +30,7 @@
     "@types/styled-components": "^4.4.2",
     "axios": "^0.18.0",
     "commonmark": "^0.29.0",
+    "cypress": "^4.1.0",
     "husky": "^3.1.0",
     "likert-react": "^0.0.0-beta6",
     "lint-staged": "^9.5.0",
