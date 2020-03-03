@@ -121,4 +121,19 @@ describe("The Main Page", () => {
       cy.contains("(Waiting for input)").should("not.exist")
     })
   })
+
+  it("stops program if stop button is clicked", () => {
+    const inputProgram = 'input("Enter a word:")'
+    cy.visit("/")
+    cy.get(".monaco-editor")
+      .click()
+      .focused()
+      .type("{ctrl}{end}")
+      .type("{shift}{ctrl}{home}{backspace}")
+      .type(inputProgram)
+    cy.get("[data-cy=run-btn]").click()
+    cy.get("[data-cy=stop-btn]").click()
+    cy.get("[data-cy=stop-btn]").should("be.disabled")
+    cy.get("[data-cy=user-input-field]").should("not.exist")
+  })
 })

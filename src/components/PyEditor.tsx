@@ -7,6 +7,8 @@ type PyEditorProps = {
   initialValue: string
   handleRun: (code: string) => void
   allowRun?: boolean
+  handleStop: () => void
+  isRunning: boolean
 }
 
 const StyledButton = styled(props => <Button variant="contained" {...props} />)`
@@ -17,6 +19,8 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   initialValue,
   handleRun,
   allowRun = true,
+  handleStop,
+  isRunning,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
   const valueGetter = useRef(() => "")
@@ -45,6 +49,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         data-cy="run-btn"
       >
         Run code
+      </StyledButton>
+      <StyledButton
+        onClick={() => handleStop()}
+        disabled={!isRunning}
+        data-cy="stop-btn"
+      >
+        Stop
       </StyledButton>
       <Editor
         value={initialValue}
