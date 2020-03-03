@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "serve": "rm -rf ./public && parcel index.html --out-dir public",
-    "now-build": "parcel build index.html --out-dir public && cp example/static/skulpt* public",
+    "now-build": "parcel build index.html --out-dir public",
     "prepare": "npm install build",
     "watch": "tsc --watch"
   },
