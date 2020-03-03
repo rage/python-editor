@@ -16,7 +16,7 @@ import { useInput, useLocalStorage } from "./hooks/customHooks"
 
 const hello: string = '# A hello world program\nprint("Hello world")\n'
 const infLoop: string = "# An infinite loop\nwhile True:\n pass"
-const printis: string = "for i in range(3):\t print(i)"
+const printis: string = "for i in range(5):\n\tprint(i)"
 
 const StyledTextField = styled(props => (
   <TextField variant="outlined" fullWidth {...props} />

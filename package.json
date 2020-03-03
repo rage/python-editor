@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
+    "serve": "rm -rf ./public && parcel index.html --out-dir public",
     "now-build": "parcel build index.html --out-dir public && cp example/static/skulpt* public",
     "prepare": "npm install build",
     "watch": "tsc --watch"
@@ -86,6 +87,7 @@
     "build": "^0.1.4",
     "jszip": "^3.2.2",
     "jszip-utils": "^0.1.0",
+    "parcel-plugin-static-files-copy": "^2.3.1",
     "react-app-polyfill": "^1.0.6",
     "react-webworker": "^2.1.0",
     "uuid": "^3.4.0",
