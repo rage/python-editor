@@ -5,7 +5,6 @@ import { Button } from "@material-ui/core"
 
 type PyEditorProps = {
   initialValue: string
-  // editorValueGetter: any
   setContentBuffer: any
   handleRun: (code: string) => void
   allowRun?: boolean
@@ -17,7 +16,6 @@ const StyledButton = styled(props => <Button variant="contained" {...props} />)`
 
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   initialValue,
-  // editorValueGetter,
   setContentBuffer,
   handleRun,
   allowRun = true,

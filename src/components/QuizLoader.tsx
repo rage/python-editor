@@ -27,7 +27,6 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   const [srcFiles, setSrcFiles] = useState([] as Array<FileEntry>)
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
   const [selectedFile, setSelectedFile] = useState("")
-  // const editorValueGetter = useRef()
   const [contentBuffer, setContentBuffer] = useState("")
   const mainSourceFile = "__main__.py"
 
@@ -45,8 +44,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     setSrcFiles((prev: any) =>
       prev.map((file: any) =>
         file.shortName === selectedFile
-          ? // ? { ...file, content: editorValueGetter.current() }
-            { ...file, content: contentBuffer }
+          ? { ...file, content: contentBuffer }
           : file,
       ),
     )

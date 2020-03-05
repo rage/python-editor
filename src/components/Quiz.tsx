@@ -5,7 +5,6 @@ import { v4 as uuid } from "uuid"
 
 type QuizProps = {
   editorInitialValue: string
-  // editorValueGetter: any
   setContentBuffer: any
 }
 
@@ -13,7 +12,6 @@ const worker = new Worker("./worker.js")
 
 const Quiz: React.FunctionComponent<QuizProps> = ({
   editorInitialValue,
-  // editorValueGetter,
   setContentBuffer,
 }) => {
   const [output, setOutput] = useState<any>([])
@@ -62,7 +60,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         initialValue={editorInitialValue}
         handleRun={handleRun}
         allowRun={workerAvailable}
-        // editorValueGetter={editorValueGetter}
         setContentBuffer={setContentBuffer}
       />
       <Output
