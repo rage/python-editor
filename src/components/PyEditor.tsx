@@ -5,7 +5,7 @@ import { Button } from "@material-ui/core"
 
 type PyEditorProps = {
   initialValue: string
-  setContentBuffer: any
+  setContentBuffer: React.Dispatch<React.SetStateAction<string>>
   handleRun: (code: string) => void
   allowRun?: boolean
 }
@@ -27,7 +27,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
     setIsEditorReady(true)
     editorRef.current = editor
     editor.onDidChangeModelContent(() => {
-      setContentBuffer(editorRef.current.getValue())
+      setContentBuffer(() => editorRef.current.getValue())
     })
   }
 

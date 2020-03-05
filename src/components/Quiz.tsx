@@ -5,7 +5,7 @@ import { v4 as uuid } from "uuid"
 
 type QuizProps = {
   editorInitialValue: string
-  setContentBuffer: any
+  setContentBuffer: React.Dispatch<React.SetStateAction<string>>
 }
 
 const worker = new Worker("./worker.js")
