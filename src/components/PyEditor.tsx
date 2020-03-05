@@ -24,7 +24,6 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   const editorRef = useRef()
 
   function handleEditorDidMount(_: any, editor: any) {
-    console.log("This is handleEditorDidMount")
     setIsEditorReady(true)
     editorRef.current = editor
     editor.onDidChangeModelContent(() => {
