@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Quiz } from "./components/Quiz"
-import QuizLoader from "./components/QuizLoader"
+import { QuizLoader } from "./components/QuizLoader"
 import {
   Button,
   FormControlLabel,
@@ -58,7 +58,8 @@ const App = () => {
         </StyledButton>
       </div>
       {fetch && loadQuiz(url.value, token.value)}
-      {!fetch && <Quiz editorInitialValue={printis} />}
+      {/* {!fetch && <Quiz editorInitialValue={printis} />} */}
+      {!fetch && <Quiz />}
     </>
   )
 }

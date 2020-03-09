@@ -1,13 +1,14 @@
-import React, { useRef, useState } from "react"
-import Editor from "@monaco-editor/react"
+import React, { useRef, useState, useEffect } from "react"
+// import Editor from "@monaco-editor/react"
+import { ControlledEditor } from "@monaco-editor/react"
 import styled from "styled-components"
 import { Button } from "@material-ui/core"
 
 type PyEditorProps = {
-  initialValue: string
-  setContentBuffer: React.Dispatch<React.SetStateAction<string>>
   handleRun: (code: string) => void
   allowRun?: boolean
+  editorValue
+  setEditorValue: React.Dispatch<React.SetStateAction<string>>
 }
 
 const StyledButton = styled(props => <Button variant="contained" {...props} />)`
@@ -15,24 +16,24 @@ const StyledButton = styled(props => <Button variant="contained" {...props} />)`
 `
 
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
-  initialValue,
-  setContentBuffer,
   handleRun,
   allowRun = true,
+  editorValue,
+  setEditorValue,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
-  const editorRef = useRef()
 
   function handleEditorDidMount(_: any, editor: any) {
     setIsEditorReady(true)
-    editorRef.current = editor
-    editor.onDidChangeModelContent(() => {
-      setContentBuffer(() => editorRef.current.getValue())
-    })
+  }
+
+  const handleChange = (ev, value) => {
+    setEditorValue(value)
+    return value
   }
 
   function handleShowValue() {
-    alert(editorRef.current.getValue())
+    alert(editorValue)
   }
 
   return (
@@ -45,17 +46,18 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         Print editor content
       </StyledButton>
       <StyledButton
-        onClick={() => handleRun(editorRef.current.getValue())}
+        onClick={() => handleRun(editorValue)}
         disabled={!(isEditorReady && allowRun)}
         data-cy="run-btn"
       >
         Run code
       </StyledButton>
-      <Editor
-        value={initialValue}
+      <ControlledEditor
+        value={editorValue}
         height="60vh"
         language="python"
         editorDidMount={handleEditorDidMount}
+        onChange={handleChange}
       />
     </>
   )

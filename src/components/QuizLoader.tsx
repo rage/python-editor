@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Quiz } from "./Quiz"
 import { getZippedQuiz } from "../services/quiz"
-import { InputLabel, Select } from "@material-ui/core"
+// import { InputLabel, Select } from "@material-ui/core"
 
 type QuizLoaderProps = {
   url: string
@@ -15,6 +15,13 @@ type FileEntry = {
   content: string
 }
 
+const defaultFile: FileEntry = {
+  fullName: "",
+  shortName: "",
+  originalContent: "",
+  content: "",
+}
+
 /*  Loads the quiz from the server. Then returns a Quiz component
     with the initial editor text set to the contents of the first
     file whose path contains "/src/__main__.py".
@@ -24,39 +31,11 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   token,
 }) => {
   const [text, setText] = useState("Initial text")
-  const [srcFiles, setSrcFiles] = useState([] as Array<FileEntry>)
+  const [srcFiles, setSrcFiles] = useState([defaultFile] as Array<FileEntry>)
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
-  const [selectedFile, setSelectedFile] = useState("")
-  const [contentBuffer, setContentBuffer] = useState("")
   const mainSourceFile = "__main__.py"
 
-  const getContentByShortName = (name: string, fileSet: Array<any>) => {
-    return getFileByShortName(name, fileSet).content
-  }
-
-  const getFileByShortName = (name: string, fileSet: Array<any>) => {
-    let firstMatch = fileSet.filter(({ shortName }) => shortName === name)[0]
-    return firstMatch
-  }
-
-  const handleChange = (e: any) => {
-    console.log("setting selected file to " + e.target.value)
-    setSrcFiles((prev: any) =>
-      prev.map((file: any) =>
-        file.shortName === selectedFile
-          ? { ...file, content: contentBuffer }
-          : file,
-      ),
-    )
-    changeFile(e.target.value, srcFiles)
-  }
-
-  const changeFile = (shortName: string, fileList: Array<object>) => {
-    setSelectedFile(shortName)
-    setText(getContentByShortName(shortName, fileList))
-  }
-
-  const getFiles = (
+  const getFileEntries = (
     zip: any,
     directory: string,
     stateObject: object,
@@ -94,37 +73,19 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
 
   useEffect(() => {
     getZippedQuiz(url, token)
-      .then(zip => getFiles(zip, "src", srcFiles, setSrcFiles, mainSourceFile))
-      .then(files => {
-        setSrcFiles(files)
-        if (files.length > 0) {
-          changeFile(files[0].shortName, files)
-        }
+      .then(zip =>
+        getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile),
+      )
+      .then(fileEntries => {
+        setSrcFiles(() => fileEntries)
       })
   }, [])
 
   return (
     <>
-      <InputLabel id="label">Select File</InputLabel>
-      <Select
-        labelId="label"
-        native
-        value={selectedFile}
-        onChange={handleChange}
-      >
-        {srcFiles.length > 0 && (
-          <>
-            {srcFiles.map(({ shortName }) => (
-              <option key={shortName} value={shortName}>
-                {shortName}
-              </option>
-            ))}
-          </>
-        )}
-      </Select>
-      <Quiz editorInitialValue={text} setContentBuffer={setContentBuffer} />
+      <Quiz initialFiles={srcFiles} />
     </>
   )
 }
 
-export default QuizLoader
+export { QuizLoader, FileEntry }
