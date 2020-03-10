@@ -99,7 +99,7 @@ describe("The Main Page", () => {
     })
 
     it("displays waiting indication in title", () => {
-      cy.contains("(Waiting for input)")
+      cy.contains("Waiting for input")
     })
 
     it("displays input field with label", () => {
@@ -118,7 +118,7 @@ describe("The Main Page", () => {
 
     it("hides input field and changes title after entering input", () => {
       cy.get("[data-cy=user-input-field]").should("not.exist")
-      cy.contains("(Waiting for input)").should("not.exist")
+      cy.contains("Waiting for input").should("not.exist")
     })
   })
 
@@ -134,6 +134,35 @@ describe("The Main Page", () => {
     cy.get("[data-cy=run-btn]").click()
     cy.get("[data-cy=stop-btn]").click()
     cy.get("[data-cy=stop-btn]").should("be.disabled")
+    cy.get("[data-cy=user-input-field]").should("not.exist")
+  })
+
+  it("displays running status when program is running", () => {
+    const infiniteProgram = "while True:\n  x = 0"
+    cy.visit("/")
+    cy.get(".monaco-editor")
+      .click()
+      .focused()
+      .type("{ctrl}{end}")
+      .type("{shift}{ctrl}{home}{backspace}")
+      .type(infiniteProgram)
+    cy.get("[data-cy=run-btn]").click()
+    cy.contains("Running")
+    cy.get("[data-cy=ouput-title-stop-btn]").should("not.be.disabled")
+  })
+
+  it("clicking stop button in output title stops program", () => {
+    const inputProgram = 'input("Enter a word:")'
+    cy.visit("/")
+    cy.get(".monaco-editor")
+      .click()
+      .focused()
+      .type("{ctrl}{end}")
+      .type("{shift}{ctrl}{home}{backspace}")
+      .type(inputProgram)
+    cy.get("[data-cy=run-btn]").click()
+    cy.get("[data-cy=output-title-stop-btn").click()
+    cy.get("[data-cy=output-title-stop-btn]").should("be.disabled")
     cy.get("[data-cy=user-input-field]").should("not.exist")
   })
 })

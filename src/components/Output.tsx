@@ -63,7 +63,6 @@ const OutputTitleBox = styled(({ inputRequested, ...props }) => (
     inputRequested ? "#FF9800" : "#2196f3"};
   color: white;
   border-radius: 3px 3px 0 0;
-  height: 60px;
   padding: 5px;
 `
 
@@ -188,7 +187,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             direction="row"
           >
             <OutputTitle>Output</OutputTitle>
-            <Grid container item xs={4} alignItems="center" justify="flex-end">
+            <Grid container item xs={8} alignItems="center" justify="flex-end">
               {statusIcon}
               <StatusText>{statusText}</StatusText>
               <MarginedButton
@@ -196,6 +195,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                 variant="contained"
                 color="secondary"
                 disabled={!isRunning}
+                data-cy="output-title-stop-btn"
               >
                 Stop
               </MarginedButton>
