@@ -58,7 +58,6 @@ const App = () => {
         </StyledButton>
       </div>
       {fetch && loadQuiz(url.value, token.value)}
-      {/* {!fetch && <Quiz editorInitialValue={printis} />} */}
       {!fetch && <Quiz />}
     </>
   )

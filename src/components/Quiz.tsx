@@ -9,7 +9,7 @@ type QuizProps = {
   initialFiles: Array<FileEntry>
 }
 
-const worker = new Worker("./worker.js")
+let worker = new Worker("./worker.js")
 
 const defaultFile: FileEntry = {
   fullName: "",
@@ -25,11 +25,13 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   const [files, setFiles] = useState([defaultFile])
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
+  const [running, setRunning] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
       setOutput([])
       setWorkerAvailable(false)
+      setRunning(true)
       worker.postMessage({ type: "run", msg: code })
     } else {
       console.log("Worker is busy")
@@ -46,8 +48,19 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       console.log(msg)
       setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
       setWorkerAvailable(true)
-    } else if (type === "done") {
+    } else if (type === "ready") {
       setWorkerAvailable(true)
+    } else if (type === "print_batch") {
+      if (running) {
+        const prints = msg.map((text: string) => ({
+          id: uuid(),
+          type: "output",
+          text,
+        }))
+        setOutput((prev: []) => prev.concat(prints))
+      }
+    } else if (type === "print_done") {
+      setRunning(false)
     }
   }
 
@@ -92,6 +105,21 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     changeFile(initialFiles[0].shortName, initialFiles)
   }, [initialFiles])
 
+  const stopWorker = () => {
+    if (!workerAvailable) {
+      worker.terminate()
+      worker = new Worker("./worker.js")
+    }
+    worker.postMessage({ type: "stop" })
+    setRunning(false)
+    setInputRequested(false)
+  }
+
+  const clearOutput = () => {
+    stopWorker()
+    setOutput([])
+  }
+
   return (
     <div style={{ position: "relative", width: "70vw" }}>
       <p>This is a quiz.</p>
@@ -115,12 +143,14 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       <PyEditor
         handleRun={handleRun}
         allowRun={workerAvailable}
+        handleStop={stopWorker}
+        isRunning={running}
         editorValue={editorValue}
         setEditorValue={setEditorValue}
       />
       <Output
         outputText={output}
-        clearOutput={() => setOutput([])}
+        clearOutput={clearOutput}
         inputRequested={inputRequested}
         sendInput={sendInput}
       />

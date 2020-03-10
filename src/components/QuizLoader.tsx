@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import { Quiz } from "./Quiz"
 import { getZippedQuiz } from "../services/quiz"
 // import { InputLabel, Select } from "@material-ui/core"

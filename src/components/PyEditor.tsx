@@ -7,6 +7,8 @@ import { Button } from "@material-ui/core"
 type PyEditorProps = {
   handleRun: (code: string) => void
   allowRun?: boolean
+  handleStop: () => void
+  isRunning: boolean
   editorValue
   setEditorValue: React.Dispatch<React.SetStateAction<string>>
 }
@@ -18,6 +20,8 @@ const StyledButton = styled(props => <Button variant="contained" {...props} />)`
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   handleRun,
   allowRun = true,
+  handleStop,
+  isRunning,
   editorValue,
   setEditorValue,
 }) => {
@@ -51,6 +55,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         data-cy="run-btn"
       >
         Run code
+      </StyledButton>
+      <StyledButton
+        onClick={() => handleStop()}
+        disabled={!isRunning}
+        data-cy="stop-btn"
+      >
+        Stop
       </StyledButton>
       <ControlledEditor
         value={editorValue}
