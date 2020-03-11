@@ -158,14 +158,17 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   )
 }
 
+const defaultContent = `# No file has been loaded.
+\nfor i in range(3):\n\tprint("hello word")`
+
 Quiz.defaultProps = {
   editorInitialValue: "",
   initialFiles: [
     {
       fullName: "default",
       shortName: "default",
-      originalContent: "# No file has been loaded.",
-      content: "# No file has been loaded.",
+      originalContent: defaultContent,
+      content: defaultContent,
     },
   ],
 }
