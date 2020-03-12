@@ -1,19 +1,23 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": false,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "./dist",
     "target": "es5",
-    "module": "commonjs",
-    "jsx": "react",
+    "lib": ["dom", "esnext"],
+    "module": "esnext",
     "moduleResolution": "node",
-    "noImplicitAny": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strict": true,
     "removeComments": true,
-    "strictNullChecks": false,
-    "preserveConstEnums": true,
+    "declaration": false,
     "sourceMap": true,
-    "lib": ["es2015", "es2016", "dom"],
-    "baseUrl": ".",
+    "jsx": "react",
+    "typeRoots": ["index.d.ts", "node_modules/@types"],
     "types": ["node"]
-  }
+  },
+  "include": ["./src/**/*.tsx", "./src/**/*.ts", "src/utils/string_tools.ts"],
+  "exclude": ["node_modules"]
 }
