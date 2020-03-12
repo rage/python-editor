@@ -2,7 +2,7 @@
   "version": 2,
   "build": {
     "env": {
-      "NODE_ENV": "development"
+      "NODE_ENV": "production"
     }
   },
   "alias": "python-3-editor.now.sh"
