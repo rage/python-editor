@@ -2,5 +2,8 @@ themeprovider-example
 dist
 node_modules
 public
+DevProfile
+.vscode
 **/cypress/videos
+**/cypress/screenshots
 .cache

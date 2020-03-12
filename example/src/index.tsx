@@ -1,6 +1,6 @@
 import React, { useState } from "react"
-import { Quiz, QuizLoader } from "../../src/index"
-import {} from "../../src/components/QuizLoader"
+import { Quiz } from "../../src/components/Quiz"
+import { QuizLoader } from "../../src/components/QuizLoader"
 import {
   Button,
   FormControlLabel,
@@ -11,12 +11,7 @@ import {
 } from "@material-ui/core"
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
-import SimpleErrorBoundary from "./SimpleErrorBoundary"
 import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
-
-const hello: string = '# A hello world program\nprint("Hello world")\n'
-const infLoop: string = "# An infinite loop\nwhile True:\n pass"
-const printis: string = "for i in range(3):\n print(i)"
 
 const StyledTextField = styled(props => (
   <TextField variant="outlined" fullWidth {...props} />
@@ -58,7 +53,7 @@ const App = () => {
         </StyledButton>
       </div>
       {fetch && loadQuiz(url.value, token.value)}
-      {!fetch && <Quiz editorInitialValue={printis} />}
+      {!fetch && <Quiz />}
     </>
   )
 }

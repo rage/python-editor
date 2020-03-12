@@ -15,17 +15,9 @@
     "declaration": false,
     "sourceMap": true,
     "jsx": "react",
-    "typeRoots": [
-      "index.d.ts",
-      "node_modules/@types"
-    ],
+    "typeRoots": ["index.d.ts", "node_modules/@types"],
     "types": ["node"]
   },
-  "include": [
-    "./src/**/*.tsx",
-    "./src/**/*.ts", "src/utils/string_tools.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["./src/**/*.tsx", "./src/**/*.ts", "src/utils/string_tools.ts"],
+  "exclude": ["node_modules"]
 }
