@@ -153,6 +153,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         clearOutput={clearOutput}
         inputRequested={inputRequested}
         sendInput={sendInput}
+        isRunning={running}
+        handleStop={stopWorker}
       />
     </div>
   )

@@ -15,11 +15,6 @@
   "author": "",
   "license": "Apache-2.0 OR MIT",
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.9.0",
-    "@fortawesome/fontawesome-svg-core": "^1.2.0-7",
-    "@fortawesome/free-regular-svg-icons": "^5.9.0",
-    "@fortawesome/free-solid-svg-icons": "^5.9.0",
-    "@fortawesome/react-fontawesome": "^0.1.4",
     "@types/commonmark": "^0.27.4",
     "@types/node": "^12.0.12",
     "@types/react": "^16.8.20",
@@ -73,6 +68,11 @@
     ]
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.12.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.27",
+    "@fortawesome/free-regular-svg-icons": "^5.12.1",
+    "@fortawesome/free-solid-svg-icons": "^5.12.1",
+    "@fortawesome/react-fontawesome": "^0.1.9",
     "@material-ui/core": "^4.9.5",
     "@material-ui/styles": "^4.9.0",
     "@monaco-editor/react": "^3.0.1",

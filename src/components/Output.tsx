@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from "react"
 import styled, { keyframes } from "styled-components"
-import { Button, Paper, Grid, Typography, TextField } from "@material-ui/core"
+import {
+  Button,
+  Paper,
+  Grid,
+  Typography,
+  TextField,
+  CircularProgress,
+} from "@material-ui/core"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 
 type OutputProps = {
   outputText: { id: string; type: string; text: string }[]
   clearOutput: () => void
   inputRequested: boolean
   sendInput: (input: string) => void
+  isRunning: boolean
+  handleStop: () => void
 }
 
 const ContainerBox = styled.div`
@@ -51,20 +62,20 @@ const OutputTitleBox = styled(({ inputRequested, ...props }) => (
   background-color: ${({ inputRequested }) =>
     inputRequested ? "#FF9800" : "#2196f3"};
   color: white;
-  padding: 10px;
   border-radius: 3px 3px 0 0;
+  padding: 5px;
 `
 
 const OutputTitle = styled(Typography)`
   && {
     font-size: 1.62rem;
     display: inline-block;
+    padding: 5px;
   }
 `
 
-const FloatedButton = styled(Button)`
-  float: right;
-  display: inline-block;
+const MarginedButton = styled(Button)`
+  margin: 5px;
 `
 
 const StyledOutput = styled(Grid)`
@@ -82,10 +93,21 @@ const StyledUserInput = styled.span`
   padding: 3px;
 `
 
+const StatusText = styled(Typography)`
+  margin: 10px;
+`
+
 const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
-  const { outputText, clearOutput, inputRequested, sendInput } = props
+  const {
+    outputText,
+    clearOutput,
+    inputRequested,
+    sendInput,
+    isRunning,
+    handleStop,
+  } = props
 
   const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
   const userInputFieldRef: React.RefObject<HTMLInputElement> = React.createRef()
@@ -108,11 +130,11 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   }, [inputRequested, outputText])
 
   useEffect(() => {
-    if (outputText.length > 0 && !render) {
+    if (isRunning && !render) {
       setRender(true)
       if (!open) setOpen(true)
     }
-  }, [outputText])
+  }, [isRunning])
 
   const closeOutput = () => {
     setOpen(false)
@@ -141,21 +163,50 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     ),
   )
 
+  const statusText = !isRunning
+    ? null
+    : inputRequested
+    ? "Waiting for input"
+    : "Running"
+
+  const statusIcon = !isRunning ? null : inputRequested ? (
+    <FontAwesomeIcon icon={faExclamation} />
+  ) : (
+    <CircularProgress size={25} color="inherit" disableShrink />
+  )
+
   return (
     <ContainerBox data-cy="output-container">
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
         <Grid container direction="column">
-          <OutputTitleBox inputRequested={inputRequested} item>
-            <OutputTitle>
-              Output {inputRequested && "(Waiting for input)"}
-            </OutputTitle>
-            <FloatedButton
-              onClick={closeOutput}
-              variant="contained"
-              data-cy="close-btn"
-            >
-              Close
-            </FloatedButton>
+          <OutputTitleBox
+            inputRequested={inputRequested}
+            container
+            item
+            justify="space-between"
+            direction="row"
+          >
+            <OutputTitle>Output</OutputTitle>
+            <Grid container item xs={8} alignItems="center" justify="flex-end">
+              {statusIcon}
+              <StatusText>{statusText}</StatusText>
+              <MarginedButton
+                onClick={handleStop}
+                variant="contained"
+                color="secondary"
+                disabled={!isRunning}
+                data-cy="output-title-stop-btn"
+              >
+                Stop
+              </MarginedButton>
+              <MarginedButton
+                onClick={closeOutput}
+                variant="contained"
+                data-cy="close-btn"
+              >
+                Close
+              </MarginedButton>
+            </Grid>
           </OutputTitleBox>
           <StyledOutput item ref={outputRef}>
             {outputElems}
