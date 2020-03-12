@@ -92,6 +92,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ editorInitialValue }) => {
         clearOutput={clearOutput}
         inputRequested={inputRequested}
         sendInput={sendInput}
+        isRunning={running}
+        handleStop={stopWorker}
       />
     </div>
   )
