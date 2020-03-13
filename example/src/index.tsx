@@ -1,17 +1,10 @@
-import React, { useState } from "react"
-import { Quiz } from "../../src/components/Quiz"
-import { QuizLoader } from "../../src/components/QuizLoader"
-import {
-  Button,
-  FormControlLabel,
-  Checkbox,
-  Paper,
-  TextField,
-  Typography,
-} from "@material-ui/core"
+import React from "react"
+import { Quiz } from "../../"
+import { QuizLoader } from "../../"
+import { Button, TextField } from "@material-ui/core"
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
-import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
+import { useInput, useLocalStorage } from "../../"
 
 const StyledTextField = styled(props => (
   <TextField variant="outlined" fullWidth {...props} />
