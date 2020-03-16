@@ -21,13 +21,5 @@
     "parcel-plugin-static-files-copy": "^2.3.1",
     "typescript": "^3.7.5"
   },
-  "peerDependencies": {
-    "@material-ui/core": ">= 4.0.0",
-    "@material-ui/styles": ">=4.0.0",
-    "commonmark": ">= 0.29.0",
-    "react": ">= 16.8.0",
-    "react-dom": ">= 16.8.0",
-    "styled-components": ">= 4.0.0",
-    "typesafe-actions": ">= 4.4.2"
-  }
+  "peerDependencies": {}
 }
