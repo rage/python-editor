@@ -1,6 +1,5 @@
 import React from "react"
-import { Quiz } from "../../"
-import { QuizLoader } from "../../"
+import { Quiz, QuizLoader } from "../../"
 import { Button, TextField } from "@material-ui/core"
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
