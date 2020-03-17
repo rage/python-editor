@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "cypress:open": "cypress open",
-    "now-build": "parcel build example/index.html --out-dir public && cp static/* public/",
+    "now-build": "cd example && parcel build index.html --out-dir ../public && cp ../static/* ../public/",
     "prepare": "npm install build",
     "serve": "rm -rf ./public && parcel index.html --out-dir public",
     "watch": "tsc --watch"
