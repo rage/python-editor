@@ -159,17 +159,39 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   )
 }
 
-const defaultContent = `# No file has been loaded.
-\nfor i in range(3):\n\tprint("hello word")`
+const defaultSrcContent = `# No quiz has been loaded.
+
+def greeting(recipient):
+  return "Hello " + recipient + "!"
+  
+for i in range(3):
+  print(greeting("world"))
+`
+
+const defaultTestContent = `# No quiz has been loaded.
+
+import unittest
+
+class TestFunctions(unittest.TestCase):
+  def test_arithmetic(self):
+    self.assertEqual(42, 40+2)
+
+unittest.main()
+`
 
 Quiz.defaultProps = {
-  editorInitialValue: "",
   initialFiles: [
     {
-      fullName: "default",
-      shortName: "default",
-      originalContent: defaultContent,
-      content: defaultContent,
+      fullName: "main.py",
+      shortName: "main.py",
+      originalContent: defaultSrcContent,
+      content: defaultSrcContent,
+    },
+    {
+      fullName: "test.py",
+      shortName: "test.py",
+      originalContent: defaultTestContent,
+      content: defaultTestContent,
     },
   ],
 }
