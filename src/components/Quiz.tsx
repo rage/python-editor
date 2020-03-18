@@ -4,6 +4,7 @@ import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
 import { FileEntry } from "./QuizLoader"
+import { PythonImport, parseImport } from "../services/import_parsing"
 
 type QuizProps = {
   initialFiles: Array<FileEntry>
@@ -36,6 +37,37 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     } else {
       console.log("Worker is busy")
     }
+  }
+
+  const wrap = (source: string) => {
+    const importPattern = /^from \.\w+ import/
+    const sourceLines = source.split("\n")
+    const lines = sourceLines.map((line, num) => {
+      return line.match(importPattern)
+        ? replaceImport(parseImport(line), num)
+        : line
+    })
+    return lines.join("\n")
+  }
+
+  const handleRunWrapped = (code: string) => {
+    const wrapped = wrap(code)
+    console.log(wrapped)
+    return handleRun(wrapped)
+  }
+
+  const replaceImport = (im: PythonImport, lineNumber: number): string => {
+    const sourceShortName = im.pkg.slice(1) + ".py"
+    console.log("sourceShortName is " + sourceShortName)
+    const source = getContentByShortName(sourceShortName, files)
+    const sourceLines = source.split("\n").map((line: string) => "\t" + line)
+    const names = im.names.join(", ")
+    const functionName = `__wrap${lineNumber}`
+    const head = `def ${functionName}():\n`
+    const body = sourceLines.join("\n") + "\n"
+    const ret = `\treturn ${names}\n`
+    const tail = `${names} = ${functionName}()`
+    return head + body + ret + tail
   }
 
   worker.onmessage = function(e) {
@@ -141,6 +173,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       </Select>
       <PyEditor
         handleRun={handleRun}
+        handleRunWrapped={handleRunWrapped}
         allowRun={workerAvailable}
         handleStop={stopWorker}
         isRunning={running}
@@ -164,19 +197,25 @@ const defaultSrcContent = `# No quiz has been loaded.
 def greeting(recipient):
   return "Hello " + recipient + "!"
   
-for i in range(3):
-  print(greeting("world"))
+#for i in range(3):
+#  print(greeting("world"))
 `
 
+// const defaultTestContent = `# No quiz has been loaded.
+
+// import unittest
+
+// class TestFunctions(unittest.TestCase):
+//   def test_arithmetic(self):
+//     self.assertEqual(42, 40+2)
+
+// unittest.main()
+// `
 const defaultTestContent = `# No quiz has been loaded.
 
-import unittest
+from .main import greeting
 
-class TestFunctions(unittest.TestCase):
-  def test_arithmetic(self):
-    self.assertEqual(42, 40+2)
-
-unittest.main()
+greeting("world")
 `
 
 Quiz.defaultProps = {
