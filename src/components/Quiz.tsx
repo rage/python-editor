@@ -215,7 +215,7 @@ const defaultTestContent = `# No quiz has been loaded.
 
 from .main import greeting
 
-greeting("world")
+print(greeting("world"))
 `
 
 Quiz.defaultProps = {
