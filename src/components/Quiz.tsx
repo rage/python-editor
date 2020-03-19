@@ -39,28 +39,41 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     }
   }
 
-  const wrap = (source: string) => {
+  const wrap = (source: string, presentlyImported: Array<string>) => {
     const importPattern = /^from \.\w+ import/
     const sourceLines = source.split("\n")
     const lines = sourceLines.map((line, num) => {
       return line.match(importPattern)
-        ? replaceImport(parseImport(line), num)
+        ? replaceImport(parseImport(line), num, presentlyImported)
         : line
     })
     return lines.join("\n")
   }
 
   const handleRunWrapped = (code: string) => {
-    const wrapped = wrap(code)
-    console.log(wrapped)
-    return handleRun(wrapped)
+    try {
+      const wrapped = wrap(code, [selectedFile.shortName])
+      return handleRun(wrapped)
+    } catch (error) {
+      return handleRun(`print("${error}")`)
+    }
   }
 
-  const replaceImport = (im: PythonImport, lineNumber: number): string => {
+  const replaceImport = (
+    im: PythonImport,
+    lineNumber: number,
+    presentlyImported: Array<string>,
+  ): string => {
     const sourceShortName = im.pkg.slice(1) + ".py"
-    console.log("sourceShortName is " + sourceShortName)
+    if (presentlyImported.includes(sourceShortName)) {
+      const errMsg =
+        sourceShortName +
+        " has already been imported. Mutually recursive imports are not allowed."
+      throw errMsg
+    }
     const source = getContentByShortName(sourceShortName, files)
-    const sourceLines = source.split("\n").map((line: string) => "\t" + line)
+    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
+    const sourceLines = wrapped.split("\n").map((line: string) => "\t" + line)
     const names = im.names.join(", ")
     const functionName = `__wrap${lineNumber}`
     const head = `def ${functionName}():\n`
@@ -194,11 +207,14 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
 
 const defaultSrcContent = `# No quiz has been loaded.
 
-def greeting(recipient):
-  return "Hello " + recipient + "!"
+from .utils import greeting
+
+def greetWorld():
+  print(greeting("world"))
+
+def foo():
+  print("foo!")
   
-#for i in range(3):
-#  print(greeting("world"))
 `
 
 // const defaultTestContent = `# No quiz has been loaded.
@@ -213,9 +229,19 @@ def greeting(recipient):
 // `
 const defaultTestContent = `# No quiz has been loaded.
 
-from .main import greeting
+from .main import greetWorld
 
-print(greeting("world"))
+greetWorld()
+`
+
+const defaultUtilsContent = `# No quiz has been loaded.
+
+# Mutually recursive imports are disallowed.
+# Try uncommenting the line below!
+#from .main import foo
+
+def greeting(recipient):
+  return "Hello " + recipient + "!"
 `
 
 Quiz.defaultProps = {
@@ -225,6 +251,12 @@ Quiz.defaultProps = {
       shortName: "main.py",
       originalContent: defaultSrcContent,
       content: defaultSrcContent,
+    },
+    {
+      fullName: "utils.py",
+      shortName: "utils.py",
+      originalContent: defaultUtilsContent,
+      content: defaultUtilsContent,
     },
     {
       fullName: "test.py",
