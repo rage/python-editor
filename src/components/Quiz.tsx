@@ -207,10 +207,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
 
 const defaultSrcContent = `# No quiz has been loaded.
 
-from .utils import greeting
+from .utils import greeting, getLocality
 
 def greetWorld():
-  print(greeting("world"))
+  print(greeting(getLocality()))
 
 def foo():
   print("foo!")
@@ -242,6 +242,9 @@ const defaultUtilsContent = `# No quiz has been loaded.
 
 def greeting(recipient):
   return "Hello " + recipient + "!"
+
+def getLocality():
+  return "world"
 `
 
 Quiz.defaultProps = {
