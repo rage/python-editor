@@ -1,20 +1,38 @@
-type PythonImport = {
+type PythonImportAll = {
+  pkg: string
+}
+
+type PythonImportSome = {
   pkg: string
   names: Array<string>
 }
 
-const parseImport = (line: string): PythonImport => {
+/* Parse a Python import statement of the type
+"import .foo" */
+const parseImportAll = (line: string): PythonImportAll => {
   let pkg: string
-  let names: Array<string>
-  const simpleImportMatches = line.match(
-    /^from (\.\w+) import (\w+|(\w+, ?)\w+)$/,
-  )
-  if (simpleImportMatches) {
-    pkg = simpleImportMatches[1]
-    names = simpleImportMatches[2].split(",").map(s => s.trim())
-    return { pkg, names }
+  const importMatches = line.match(/^import (\.\w+)[ \t]*$/)
+  if (importMatches) {
+    pkg = importMatches[1]
+    return { pkg }
   }
-  return { pkg: "", names: [] }
+  throw "Malformed import statement"
 }
 
-export { PythonImport, parseImport }
+/* Parse a Python import statement of the type
+"import .foo" */
+const parseImportSome = (line: string): PythonImportSome => {
+  let pkg: string
+  let names: Array<string>
+  const importMatches = line.match(
+    /^from (\.\w+) import (\w+|(\w+, ?)\w+)[ \t]*$/,
+  )
+  if (importMatches) {
+    pkg = importMatches[1]
+    names = importMatches[2].split(",").map(s => s.trim())
+    return { pkg, names }
+  }
+  throw "Malformed import statement"
+}
+
+export { PythonImportAll, PythonImportSome, parseImportAll, parseImportSome }

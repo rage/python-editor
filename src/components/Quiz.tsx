@@ -4,7 +4,12 @@ import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
 import { FileEntry } from "./QuizLoader"
-import { PythonImport, parseImport } from "../services/import_parsing"
+import {
+  PythonImportAll,
+  PythonImportSome,
+  parseImportAll,
+  parseImportSome,
+} from "../services/import_parsing"
 
 type QuizProps = {
   initialFiles: Array<FileEntry>
@@ -39,17 +44,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     }
   }
 
-  const wrap = (source: string, presentlyImported: Array<string>) => {
-    const importPattern = /^from \.\w+ import/
-    const sourceLines = source.split("\n")
-    const lines = sourceLines.map((line, num) => {
-      return line.match(importPattern)
-        ? replaceImport(parseImport(line), num, presentlyImported)
-        : line
-    })
-    return lines.join("\n")
-  }
-
   const handleRunWrapped = (code: string) => {
     try {
       const wrapped = wrap(code, [selectedFile.shortName])
@@ -59,8 +53,40 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     }
   }
 
-  const replaceImport = (
-    im: PythonImport,
+  const wrap = (source: string, presentlyImported: Array<string>) => {
+    const importAllPattern = /^import/
+    const importSomePattern = /^from \.\w+ import/
+    const sourceLines = source.split("\n")
+    const lines = sourceLines.map((line, num) => {
+      if (line.match(importAllPattern)) {
+        return replaceImportAll(parseImportAll(line), num, presentlyImported)
+      }
+      return line.match(importSomePattern)
+        ? replaceImportSome(parseImportSome(line), num, presentlyImported)
+        : line
+    })
+    return lines.join("\n")
+  }
+
+  const replaceImportAll = (
+    im: PythonImportAll,
+    lineNumber: number,
+    presentlyImported: Array<string>,
+  ): string => {
+    const sourceShortName = im.pkg.slice(1) + ".py"
+    if (presentlyImported.includes(sourceShortName)) {
+      const errMsg =
+        sourceShortName +
+        " has already been imported. Mutually recursive imports are not allowed."
+      throw errMsg
+    }
+    const source = getContentByShortName(sourceShortName, files)
+    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
+    return `\n${wrapped}\n`
+  }
+
+  const replaceImportSome = (
+    im: PythonImportSome,
     lineNumber: number,
     presentlyImported: Array<string>,
   ): string => {
