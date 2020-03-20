@@ -75,7 +75,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   }
 
   const handleChange = (e: any) => {
-    console.log("setting selected file to " + e.target.value)
     setFiles((prev: any) =>
       prev.map((file: any) =>
         file.shortName === selectedFile.shortName

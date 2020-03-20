@@ -1,5 +1,6 @@
 import { Quiz } from "./components/Quiz"
-import QuizLoader from "./components/QuizLoader"
+import { QuizLoader } from "./components/QuizLoader"
 import PyEditor from "./components/PyEditor"
 import Output from "./components/Output"
-export { Output, PyEditor, Quiz, QuizLoader }
+import { useInput, useLocalStorage } from "./hooks/customHooks"
+export { Output, PyEditor, Quiz, QuizLoader, useInput, useLocalStorage }
