@@ -30,7 +30,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   token,
 }) => {
   const [text, setText] = useState("Initial text")
-  const [srcFiles, setSrcFiles] = useState([defaultFile] as Array<FileEntry>)
+  const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
   const mainSourceFile = "__main__.py"
 
@@ -40,15 +40,15 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     stateObject: object,
     setter: (newState: any, callback?: any) => void,
     main: string | null,
-  ) => {
+  ): Promise<Array<FileEntry>> => {
     const fileSelector: RegExp = RegExp(`${directory}/\\w*\\.py$`)
     const files = orderFiles(zip.file(fileSelector), main)
-    return Promise.all(files.map(f => createEntry(zip, f)))
+    return Promise.all(files.map((f: any) => createEntry(zip, f)))
   }
 
-  const orderFiles = (files, main: string | null) => {
+  const orderFiles = (files: any, main: string | null) => {
     if (main) {
-      const mainIndex = files.findIndex(file => file.name.includes(main))
+      const mainIndex = files.findIndex((file: any) => file.name.includes(main))
       if (mainIndex > -1) {
         const mainEntry = files.splice(mainIndex, 1)[0]
         files.unshift(mainEntry)
@@ -58,7 +58,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     return files
   }
 
-  const createEntry = async (zip, f) => {
+  const createEntry = async (zip: any, f: any): Promise<FileEntry> => {
     const file = zip.file(f.name)
     const content = await f.async("string")
     const fullName: string = f.name
@@ -66,8 +66,9 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     let shortName: string | null = null
     if (matches) {
       shortName = matches[0]
+      return { fullName, shortName, originalContent: content, content }
     }
-    return { fullName, shortName, originalContent: content, content }
+    return { fullName: "", shortName: "", originalContent: "", content: "" }
   }
 
   useEffect(() => {
