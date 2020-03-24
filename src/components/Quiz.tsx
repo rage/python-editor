@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { InputLabel, Select } from "@material-ui/core"
+import { InputLabel, Select, Button } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -61,6 +61,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       }
     } else if (type === "print_done") {
       setRunning(false)
+    } else if (type === "testResults") {
+      console.log("[TEST RESULTS]", msg)
     }
   }
 
@@ -119,6 +121,11 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     setOutput([])
   }
 
+  const runTest = () => {
+    console.log("Running tests")
+    worker.postMessage({ type: "runTests" })
+  }
+
   return (
     <div style={{ position: "relative", width: "70vw" }}>
       <p>This is a quiz.</p>
@@ -139,6 +146,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
           </>
         )}
       </Select>
+      <Button variant="contained" onClick={runTest}>
+        Run test
+      </Button>
       <PyEditor
         handleRun={handleRun}
         allowRun={workerAvailable}

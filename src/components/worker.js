@@ -7,6 +7,7 @@ let printBuffer = []
 let intervalId = null
 const batchSize = 200
 let running = false
+let testing = false
 
 // used to check if a control message "input_required" has been appended to buffer
 const checkForMsg = () => {
@@ -40,14 +41,39 @@ const intervalManager = runInterval => {
   }
 }
 
+let testResults = []
+// Running tests requires verbosity > 1 from unittest
+// Make sure to run with command unittest.main(2) or equal
+const handleTestOutput = text => {
+  console.log(text)
+  if (text.startsWith("Running")) {
+    const testName = text.split(" ")[2]
+    testResults.push({ testName, passed: true })
+  } else if (
+    text.startsWith("Fail:") ||
+    text.startsWith("Test threw exception")
+  ) {
+    const lastResult = testResults.pop()
+    const updatedResult = { ...lastResult, passed: false, feedback: text }
+    testResults.push(updatedResult)
+  }
+}
+
 let prevDate = null
 
 function outf(text) {
-  printBuffer.push(text)
-  const newDate = Date.now()
-  if (newDate - prevDate > 50) {
-    postMessage({ type: "print_batch", msg: printBuffer.splice(0, batchSize) })
-    prevDate = newDate
+  if (testing) {
+    handleTestOutput(text)
+  } else {
+    printBuffer.push(text)
+    const newDate = Date.now()
+    if (newDate - prevDate > 50) {
+      postMessage({
+        type: "print_batch",
+        msg: printBuffer.splice(0, batchSize),
+      })
+      prevDate = newDate
+    }
   }
 }
 
@@ -86,15 +112,42 @@ function run(code) {
     })
     .then(e => {
       console.log("running skulpt completed")
+      if (testing) {
+        testing = false
+        postMessage({ type: "testResults", msg: testResults })
+        testResults = []
+      }
       running = false
       postMessage({ type: "ready" })
     })
     .catch(e => {
       console.log(e)
       running = false
+      testing = false
       postMessage({ type: "error", msg: e.toString() })
     })
 }
+
+const defaultTest = `
+import unittest
+
+class TestStringMethods(unittest.TestCase):
+
+    def test_upper(self):
+        self.assertEqual('foo'.upper(), 'FOO')
+
+    def test_isupper(self):
+        self.assertTrue('FOO'.isupper())
+        self.assertFalse('Foo'.isupper())
+    
+    def test_failing(self):
+        self.assertEqual('foobar', 'foo')
+
+if __name__ == '__main__':
+    # Running tests requires verbosity > 1 at the moment 
+    # Make sure to run with command unittest.main(2) or equal
+    unittest.main(2)
+`
 
 self.onmessage = function(e) {
   const { type, msg } = e.data
@@ -105,5 +158,12 @@ self.onmessage = function(e) {
     run(msg)
   } else if (type === "stop") {
     intervalManager(false)
+  } else if (type === "runTests") {
+    testing = true
+    if (!msg) {
+      run(defaultTest)
+    } else {
+      run(msg)
+    }
   }
 }
