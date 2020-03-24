@@ -199,6 +199,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         native
         value={selectedFile.shortName}
         onChange={handleChange}
+        data-cy="select-file"
       >
         {files.length > 0 && (
           <>
@@ -232,6 +233,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
 }
 
 const defaultSrcContent = `# No quiz has been loaded.
+# This is the default file main.py
 
 from .utils import greeting, getLocality
 
@@ -254,6 +256,7 @@ def foo():
 // unittest.main()
 // `
 const defaultTestContent = `# No quiz has been loaded.
+# This is the default file test.py
 
 from .main import greetWorld
 
@@ -261,6 +264,7 @@ greetWorld()
 `
 
 const defaultUtilsContent = `# No quiz has been loaded.
+# This is the default file utils.py
 
 # Mutually recursive imports are disallowed.
 # Try uncommenting the line below!
