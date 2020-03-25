@@ -54,7 +54,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   }
 
   const wrap = (source: string, presentlyImported: Array<string>) => {
-    const importAllPattern = /^import/
+    const importAllPattern = /^import \./
     const importSomePattern = /^from \.\w+ import/
     const sourceLines = source.split("\n")
     const lines = sourceLines.map((line, num) => {
