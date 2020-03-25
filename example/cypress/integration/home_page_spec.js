@@ -172,7 +172,7 @@ describe("The Playground", () => {
     })
   })
 
-  describe.only("Using default files", () => {
+  describe("Using default files", () => {
     it("Unloading quiz brings up default main.py file", () => {
       cy.visit("/")
       cy.get("[data-cy=unload-btn]").click()
