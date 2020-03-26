@@ -156,10 +156,14 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   if (!render) return null
 
   const outputElems = outputText.map(output =>
-    output.type !== "input" ? (
-      <React.Fragment key={output.id}>{output.text}</React.Fragment>
-    ) : (
+    output.type === "input" ? (
       <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
+    ) : output.type === "testResult" ? (
+      <div key={output.id}>
+        {output.text} {output.feedback}
+      </div>
+    ) : (
+      <React.Fragment key={output.id}>{output.text}</React.Fragment>
     ),
   )
 

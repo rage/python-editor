@@ -63,6 +63,18 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       setRunning(false)
     } else if (type === "testResults") {
       console.log("[TEST RESULTS]", msg)
+      const results = msg.map((result: any) => {
+        const text = result.passed
+          ? `PASSED: ${result.testName}`
+          : `FAILED: ${result.testName}`
+        return {
+          id: uuid(),
+          type: "testResult",
+          text,
+          feedback: result.feedback || null,
+        }
+      })
+      setOutput((prev: []) => prev.concat(results))
     }
   }
 
