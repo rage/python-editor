@@ -65,14 +65,23 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       console.log("[TEST RESULTS]", msg)
       const results = msg.map((result: any) => {
         const text = result.passed
-          ? `PASSED: ${result.testName}`
-          : `FAILED: ${result.testName}`
+          ? `Passed: ${result.testName}`
+          : `Failed: ${result.testName}`
         return {
           id: uuid(),
           type: "testResult",
           text,
           feedback: result.feedback || null,
         }
+      })
+
+      const passedTests = msg.reduce((passed: number, result: any) => {
+        return passed + (result.passed ? 1 : 0)
+      }, 0)
+      results.push({
+        id: uuid(),
+        type: "testResult",
+        text: `Test results: ${passedTests}/${msg.length} tests passed!`,
       })
       setOutput((prev: []) => prev.concat(results))
     }
