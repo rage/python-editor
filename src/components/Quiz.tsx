@@ -4,6 +4,12 @@ import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
 import { FileEntry } from "./QuizLoader"
+import {
+  PythonImportAll,
+  PythonImportSome,
+  parseImportAll,
+  parseImportSome,
+} from "../services/import_parsing"
 
 type QuizProps = {
   initialFiles: Array<FileEntry>
@@ -36,6 +42,71 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     } else {
       console.log("Worker is busy")
     }
+  }
+
+  const handleRunWrapped = (code: string) => {
+    try {
+      const wrapped = wrap(code, [selectedFile.shortName])
+      return handleRun(wrapped)
+    } catch (error) {
+      return handleRun(`print("${error}")`)
+    }
+  }
+
+  const wrap = (source: string, presentlyImported: Array<string>) => {
+    const importAllPattern = /^import \./
+    const importSomePattern = /^from \.\w+ import/
+    const sourceLines = source.split("\n")
+    const lines = sourceLines.map((line, num) => {
+      if (line.match(importAllPattern)) {
+        return replaceImportAll(parseImportAll(line), num, presentlyImported)
+      }
+      return line.match(importSomePattern)
+        ? replaceImportSome(parseImportSome(line), num, presentlyImported)
+        : line
+    })
+    return lines.join("\n")
+  }
+
+  const replaceImportAll = (
+    im: PythonImportAll,
+    lineNumber: number,
+    presentlyImported: Array<string>,
+  ): string => {
+    const sourceShortName = im.pkg.slice(1) + ".py"
+    if (presentlyImported.includes(sourceShortName)) {
+      const errMsg =
+        sourceShortName +
+        " has already been imported. Mutually recursive imports are not allowed."
+      throw errMsg
+    }
+    const source = getContentByShortName(sourceShortName, files)
+    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
+    return `\n${wrapped}\n`
+  }
+
+  const replaceImportSome = (
+    im: PythonImportSome,
+    lineNumber: number,
+    presentlyImported: Array<string>,
+  ): string => {
+    const sourceShortName = im.pkg.slice(1) + ".py"
+    if (presentlyImported.includes(sourceShortName)) {
+      const errMsg =
+        sourceShortName +
+        " has already been imported. Mutually recursive imports are not allowed."
+      throw errMsg
+    }
+    const source = getContentByShortName(sourceShortName, files)
+    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
+    const sourceLines = wrapped.split("\n").map((line: string) => "\t" + line)
+    const names = im.names.join(", ")
+    const functionName = `__wrap${lineNumber}`
+    const head = `def ${functionName}():\n`
+    const body = sourceLines.join("\n") + "\n"
+    const ret = `\treturn ${names}\n`
+    const tail = `${names} = ${functionName}()`
+    return head + body + ret + tail
   }
 
   worker.onmessage = function(e) {
@@ -156,6 +227,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         native
         value={selectedFile.shortName}
         onChange={handleChange}
+        data-cy="select-file"
       >
         {files.length > 0 && (
           <>
@@ -172,6 +244,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       </Button>
       <PyEditor
         handleRun={handleRun}
+        handleRunWrapped={handleRunWrapped}
         allowRun={workerAvailable}
         handleStop={stopWorker}
         isRunning={running}
@@ -190,17 +263,70 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   )
 }
 
-const defaultContent = `# No file has been loaded.
-\nfor i in range(3):\n\tprint("hello word")`
+const defaultSrcContent = `# No quiz has been loaded.
+# This is the default file main.py
+
+from .utils import greeting, getLocality
+
+def greetWorld():
+  print(greeting(getLocality()))
+
+def foo():
+  print("foo!")
+  
+`
+
+// const defaultTestContent = `# No quiz has been loaded.
+
+// import unittest
+
+// class TestFunctions(unittest.TestCase):
+//   def test_arithmetic(self):
+//     self.assertEqual(42, 40+2)
+
+// unittest.main()
+// `
+const defaultTestContent = `# No quiz has been loaded.
+# This is the default file test.py
+
+from .main import greetWorld
+
+greetWorld()
+`
+
+const defaultUtilsContent = `# No quiz has been loaded.
+# This is the default file utils.py
+
+# Mutually recursive imports are disallowed.
+# Try uncommenting the line below!
+#from .main import foo
+
+def greeting(recipient):
+  return "Hello " + recipient + "!"
+
+def getLocality():
+  return "world"
+`
 
 Quiz.defaultProps = {
-  editorInitialValue: "",
   initialFiles: [
     {
-      fullName: "default",
-      shortName: "default",
-      originalContent: defaultContent,
-      content: defaultContent,
+      fullName: "main.py",
+      shortName: "main.py",
+      originalContent: defaultSrcContent,
+      content: defaultSrcContent,
+    },
+    {
+      fullName: "utils.py",
+      shortName: "utils.py",
+      originalContent: defaultUtilsContent,
+      content: defaultUtilsContent,
+    },
+    {
+      fullName: "test.py",
+      shortName: "test.py",
+      originalContent: defaultTestContent,
+      content: defaultTestContent,
     },
   ],
 }

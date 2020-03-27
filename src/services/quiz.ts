@@ -1,7 +1,7 @@
 import axios from "axios"
 import JSZip from "jszip"
 
-const getZippedQuiz = (url: string, token: string): Promise<any> => {
+const getZippedQuiz = (url: string, token: string): Promise<JSZip> => {
   return axios
     .request({
       responseType: "arraybuffer",

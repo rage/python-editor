@@ -6,10 +6,11 @@ import { Button } from "@material-ui/core"
 
 type PyEditorProps = {
   handleRun: (code: string) => void
+  handleRunWrapped: (code: string) => void
   allowRun?: boolean
   handleStop: () => void
   isRunning: boolean
-  editorValue
+  editorValue: string
   setEditorValue: React.Dispatch<React.SetStateAction<string>>
 }
 
@@ -19,6 +20,7 @@ const StyledButton = styled(props => <Button variant="contained" {...props} />)`
 
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   handleRun,
+  handleRunWrapped,
   allowRun = true,
   handleStop,
   isRunning,
@@ -31,7 +33,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
     setIsEditorReady(true)
   }
 
-  const handleChange = (ev, value) => {
+  const handleChange = (ev: any, value: any) => {
     setEditorValue(value)
     return value
   }
@@ -55,6 +57,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         data-cy="run-btn"
       >
         Run code
+      </StyledButton>
+      <StyledButton
+        onClick={() => handleRunWrapped(editorValue)}
+        disabled={!(isEditorReady && allowRun)}
+        data-cy="run-wrapped-btn"
+      >
+        Run with wrapped imports
       </StyledButton>
       <StyledButton
         onClick={() => handleStop()}
