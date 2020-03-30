@@ -32,9 +32,12 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
     setIsEditorReady(true)
   }
 
-  const handleChange = (ev: any, value: any) => {
-    setEditorValue(value)
-    return value
+  const handleChange = (ev: any, value: string | undefined): string => {
+    if (value) {
+      setEditorValue(value)
+      return value
+    }
+    return ""
   }
 
   function handleShowValue() {
