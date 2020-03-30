@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react"
+import React, { useState } from "react"
 import { ControlledEditor } from "@monaco-editor/react"
 import styled from "styled-components"
 import { Button } from "@material-ui/core"
