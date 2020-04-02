@@ -160,7 +160,8 @@ const Output: React.FunctionComponent<OutputProps> = props => {
       <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
     ) : output.type === "testResult" ? (
       <div key={output.id}>
-        {output.text} {output.feedback}
+        {output.text} {output.feedback}{" "}
+        {output.points ? `[point: ${output.points}]` : null}
       </div>
     ) : (
       <React.Fragment key={output.id}>{output.text}</React.Fragment>

@@ -143,6 +143,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
           type: "testResult",
           text,
           feedback: result.feedback || null,
+          points: result.points,
         }
       })
 

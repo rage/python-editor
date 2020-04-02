@@ -1,6 +1,5 @@
 importScripts("skulpt.min.js", "skulpt-stdlib.js")
 let Sk = self.Sk
-
 postMessage({ type: "ready" })
 
 let printBuffer = []
@@ -50,7 +49,8 @@ const handleTestOutput = text => {
   if (text.startsWith("Running")) {
     const testName = text.split(" ")[2]
     const matchingPoint = testPoints.find(
-      t => t.name === testName.split(".")[1],
+      t =>
+        t.name === testName.split(".")[0] || t.name === testName.split(".")[1],
     )
     testResults.push({
       testName,
@@ -149,8 +149,11 @@ def hello():
     print('Hello world!')
 
 def points(*args):
+    def jsonify_arr(arr):
+        return str(arr).replace("'", '"')
+
     def wrapper(fn):
-        print('Points: {"name": "{}", "points":"{}"}'.format(fn.__name__, args[0]))
+        print('Points: {"name": "{}", "points": {}}'.format(fn.__name__, jsonify_arr(list(args))))
         return fn
     return wrapper
 
@@ -180,6 +183,14 @@ class TestOtherThings(unittest.TestCase):
 
         self.assertEqual(output, 'Hello world!')
 
+@points('3.1', '3.2')
+class TestClassPoints(unittest.TestCase):
+    
+    def test_true(self):
+        self.assertEqual('foo', 'foo')
+
+    def test_trueagain(self):
+        self.assertEqual('foo', 'foo')
     
 if __name__ == '__main__':
     # Running tests requires verbosity > 1 at the moment 
