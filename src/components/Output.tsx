@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
+import TestResults from "./TestResults"
 
 type OutputProps = {
   outputText: { id: string; type: string; text: string }[]
@@ -155,18 +156,20 @@ const Output: React.FunctionComponent<OutputProps> = props => {
 
   if (!render) return null
 
-  const outputElems = outputText.map(output =>
-    output.type === "input" ? (
-      <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
-    ) : output.type === "testResult" ? (
-      <div key={output.id}>
-        {output.text} {output.feedback}{" "}
-        {output.points ? `[point: ${output.points}]` : null}
-      </div>
-    ) : (
-      <React.Fragment key={output.id}>{output.text}</React.Fragment>
-    ),
-  )
+  const outputElems = () => {
+    if (!outputText || outputText.length === 0) return null
+    if (outputText[0].type === "testResults") {
+      return <TestResults results={outputText[0].text} />
+    } else {
+      return outputText.map(output =>
+        output.type === "input" ? (
+          <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
+        ) : (
+          <React.Fragment key={output.id}>{output.text}</React.Fragment>
+        ),
+      )
+    }
+  }
 
   const statusText = !isRunning
     ? null
@@ -214,7 +217,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             </Grid>
           </OutputTitleBox>
           <StyledOutput item ref={outputRef}>
-            {outputElems}
+            {outputElems()}
             {inputRequested && (
               <TextField
                 inputRef={userInputFieldRef}
