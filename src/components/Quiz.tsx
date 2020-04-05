@@ -294,4 +294,4 @@ Quiz.defaultProps = {
   ],
 }
 
-export { Quiz, QuizProps }
+export { Quiz, QuizProps, defaultFile }

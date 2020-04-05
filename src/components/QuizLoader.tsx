@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Quiz } from "./Quiz"
+import { Quiz, defaultFile } from "./Quiz"
 import { getZippedQuiz } from "../services/quiz"
 
 type QuizLoaderProps = {
@@ -12,13 +12,6 @@ type FileEntry = {
   shortName: string
   originalContent: string
   content: string
-}
-
-const defaultFile: FileEntry = {
-  fullName: "",
-  shortName: "",
-  originalContent: "",
-  content: "",
 }
 
 /*  Loads the quiz from the server. Then returns a Quiz component
