@@ -20,7 +20,7 @@ const parseImportAll = (line: string): PythonImportAll => {
 }
 
 /* Parse a Python import statement of the type
-"import .foo" */
+"from .foo import myClass, myFunction" */
 const parseImportSome = (line: string): PythonImportSome => {
   let pkg: string
   let names: Array<string>

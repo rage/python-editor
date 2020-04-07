@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect } from "react"
-// import Editor from "@monaco-editor/react"
+import React, { useState } from "react"
 import { ControlledEditor } from "@monaco-editor/react"
 import styled from "styled-components"
 import { Button } from "@material-ui/core"
@@ -33,9 +32,12 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
     setIsEditorReady(true)
   }
 
-  const handleChange = (ev: any, value: any) => {
-    setEditorValue(value)
-    return value
+  const handleChange = (ev: any, value: string | undefined): string => {
+    if (value) {
+      setEditorValue(value)
+      return value
+    }
+    return ""
   }
 
   function handleShowValue() {

@@ -53,6 +53,11 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     }
   }
 
+  /* Replace import statements of the form "import .mymodule" and
+  "from .mymodule import myClass, myFunction" with the contents of
+  mymodule.py, appropriately wrapped. Cyclical imports (module foo
+  imports from module bar, bar imports from foo) are detected and
+  result in an exception. */
   const wrap = (source: string, presentlyImported: Array<string>) => {
     const importAllPattern = /^import \./
     const importSomePattern = /^from \.\w+ import/
@@ -242,19 +247,8 @@ def greetWorld():
 
 def foo():
   print("foo!")
-  
 `
 
-// const defaultTestContent = `# No quiz has been loaded.
-
-// import unittest
-
-// class TestFunctions(unittest.TestCase):
-//   def test_arithmetic(self):
-//     self.assertEqual(42, 40+2)
-
-// unittest.main()
-// `
 const defaultTestContent = `# No quiz has been loaded.
 # This is the default file test.py
 
@@ -300,4 +294,4 @@ Quiz.defaultProps = {
   ],
 }
 
-export { Quiz, QuizProps }
+export { Quiz, QuizProps, defaultFile }
