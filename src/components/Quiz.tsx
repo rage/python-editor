@@ -134,7 +134,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       setRunning(false)
     } else if (type === "testResults") {
       console.log("[TEST RESULTS]", msg)
-
+      setRunning(false)
       const results = msg.map((result: any) => ({
         id: uuid(),
         testName: result.testName,
@@ -203,6 +203,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
 
   const runTest = () => {
     console.log("Running tests")
+    setRunning(true)
     worker.postMessage({ type: "runTests" })
   }
 

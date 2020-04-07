@@ -1,6 +1,12 @@
-import React from "react"
+import React, { useState } from "react"
 import styled from "styled-components"
-import { Paper, Typography } from "@material-ui/core"
+import {
+  Paper,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+} from "@material-ui/core"
+import TestProgressBar from "./TestProgressBar"
 
 type TestResultsProps = {
   results: {
@@ -49,22 +55,53 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
 const TestResults: React.FunctionComponent<TestResultsProps> = ({
   results,
 }) => {
-  const passedTests = results.reduce((passed: number, result: any) => {
+  const [showAll, setShowAll] = useState(false)
+  const passedTestsSum = results.reduce((passed: number, result: any) => {
     return passed + (result.passed ? 1 : 0)
   }, 0)
-  const resultSummary = `Test results: ${passedTests}/${results.length} tests passed!`
-  const mappedResults = results.map(r => (
-    <TestResult
-      key={r.id}
-      testName={r.testName}
-      passed={r.passed}
-      feedback={r.feedback}
-    />
-  ))
+  const passedTestsPercentage = Math.round(
+    (passedTestsSum / results.length) * 100,
+  )
+
+  const showResults = () => {
+    if (!showAll) {
+      const failedTest = results.find(result => result.passed === false)
+      return failedTest ? (
+        <TestResult
+          key={failedTest.id}
+          testName={failedTest.testName}
+          passed={failedTest.passed}
+          feedback={failedTest.feedback}
+        />
+      ) : null
+    }
+
+    return results.map(r => (
+      <TestResult
+        key={r.id}
+        testName={r.testName}
+        passed={r.passed}
+        feedback={r.feedback}
+      />
+    ))
+  }
+
   return (
     <div>
-      {resultSummary}
-      {mappedResults}
+      <Typography style={{ fontSize: "20" }}>Test Results</Typography>
+      <FormControlLabel
+        style={{ float: "right" }}
+        label="Show all"
+        control={
+          <Checkbox
+            checked={showAll}
+            onChange={() => setShowAll(!showAll)}
+            color="primary"
+          />
+        }
+      />
+      <TestProgressBar percentage={passedTestsPercentage} />
+      {showResults()}
     </div>
   )
 }
