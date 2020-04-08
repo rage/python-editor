@@ -34,6 +34,8 @@ const ProgressBarText = styled(Typography)`
 const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
   percentage,
 }) => {
+  if (!percentage) return null
+
   return (
     <div>
       <Typography style={{ float: "left" }}>Tests passed: </Typography>

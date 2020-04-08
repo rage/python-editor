@@ -10,6 +10,7 @@ import {
   parseImportAll,
   parseImportSome,
 } from "../services/import_parsing"
+import { OutputObject, TestResultObject } from "../types"
 
 type QuizProps = {
   initialFiles: Array<FileEntry>
@@ -25,7 +26,8 @@ const defaultFile: FileEntry = {
 }
 
 const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
-  const [output, setOutput] = useState<any>([])
+  const [output, setOutput] = useState<OutputObject[]>([])
+  const [testResults, setTestResults] = useState<TestResultObject[]>([])
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [inputRequested, setInputRequested] = useState(false)
   const [files, setFiles] = useState([defaultFile])
@@ -36,6 +38,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   function handleRun(code: string) {
     if (workerAvailable) {
       setOutput([])
+      setTestResults([])
       setWorkerAvailable(false)
       setRunning(true)
       worker.postMessage({ type: "run", msg: code })
@@ -128,7 +131,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
           type: "output",
           text,
         }))
-        setOutput((prev: []) => prev.concat(prints))
+        setOutput(prevState => prevState.concat(prints))
       }
     } else if (type === "print_done") {
       setRunning(false)
@@ -142,7 +145,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         feedback: result.feedback || null,
         points: result.points,
       }))
-      setOutput([{ type: "testResults", text: results }])
+      setTestResults(results)
     }
   }
 
@@ -201,8 +204,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     setOutput([])
   }
 
-  const runTest = () => {
+  const runTests = () => {
     console.log("Running tests")
+    setOutput([])
     setRunning(true)
     worker.postMessage({ type: "runTests" })
   }
@@ -228,7 +232,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
           </>
         )}
       </Select>
-      <Button variant="contained" onClick={runTest}>
+      <Button variant="contained" onClick={runTests}>
         Run test
       </Button>
       <PyEditor
@@ -241,7 +245,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         setEditorValue={setEditorValue}
       />
       <Output
-        outputText={output}
+        outputContent={output}
+        testResults={testResults}
         clearOutput={clearOutput}
         inputRequested={inputRequested}
         sendInput={sendInput}

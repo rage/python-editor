@@ -86,6 +86,8 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
     ))
   }
 
+  if (!results || results.length === 0) return null
+
   return (
     <div>
       <Typography style={{ fontSize: "20" }}>Test Results</Typography>

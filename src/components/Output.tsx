@@ -11,9 +11,11 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 import TestResults from "./TestResults"
+import { OutputObject, TestResultObject } from "../types"
 
 type OutputProps = {
-  outputText: { id: string; type: string; text: string }[]
+  outputContent: OutputObject[]
+  testResults: TestResultObject[]
   clearOutput: () => void
   inputRequested: boolean
   sendInput: (input: string) => void
@@ -102,7 +104,8 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const {
-    outputText,
+    outputContent,
+    testResults,
     clearOutput,
     inputRequested,
     sendInput,
@@ -128,7 +131,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   useEffect(() => {
     scrollToBottom()
     if (inputRequested) focusOnInputField()
-  }, [inputRequested, outputText])
+  }, [inputRequested, outputContent])
 
   useEffect(() => {
     if (isRunning && !render) {
@@ -156,19 +159,20 @@ const Output: React.FunctionComponent<OutputProps> = props => {
 
   if (!render) return null
 
-  const outputElems = () => {
-    if (!outputText || outputText.length === 0) return null
-    if (outputText[0].type === "testResults") {
-      return <TestResults results={outputText[0].text} />
-    } else {
-      return outputText.map(output =>
+  const showOutput = () => {
+    if (outputContent && outputContent.length > 0) {
+      return outputContent.map(output =>
         output.type === "input" ? (
           <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
         ) : (
           <React.Fragment key={output.id}>{output.text}</React.Fragment>
         ),
       )
+    } else if (testResults) {
+      return <TestResults results={testResults} />
     }
+
+    return null
   }
 
   const statusText = !isRunning
@@ -217,7 +221,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             </Grid>
           </OutputTitleBox>
           <StyledOutput item ref={outputRef}>
-            {outputElems()}
+            {showOutput()}
             {inputRequested && (
               <TextField
                 inputRef={userInputFieldRef}
