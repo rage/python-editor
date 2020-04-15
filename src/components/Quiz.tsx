@@ -34,6 +34,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
   const [running, setRunning] = useState(false)
+  const [testing, setTesting] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -41,6 +42,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       setTestResults([])
       setWorkerAvailable(false)
       setRunning(true)
+      setTesting(false)
       worker.postMessage({ type: "run", msg: code })
     } else {
       console.log("Worker is busy")
@@ -208,6 +210,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     console.log("Running tests")
     setOutput([])
     setRunning(true)
+    setTesting(true)
     worker.postMessage({ type: "runTests" })
   }
 
@@ -252,6 +255,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         sendInput={sendInput}
         isRunning={running}
         handleStop={stopWorker}
+        testing={testing}
       />
     </div>
   )

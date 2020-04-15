@@ -8,7 +8,7 @@ type TestProgressBarProps = {
 
 const ProgressBarBackground = styled.div`
   background-color: #b6bce2;
-  width: 400px;
+  width: 100%;
   height: 25px;
   overflow: hidden;
   text-align: center;
@@ -38,7 +38,9 @@ const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
 
   return (
     <div>
-      <Typography style={{ float: "left" }}>Tests passed: </Typography>
+      <Typography style={{ textAlign: "center", paddingRight: "2px" }}>
+        Tests passed
+      </Typography>
       <ProgressBarBackground>
         <ProgressBar value={percentage}>
           <ProgressBarText variant="button">{percentage}%</ProgressBarText>

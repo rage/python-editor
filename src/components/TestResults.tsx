@@ -29,7 +29,7 @@ const StyledPaper = styled(({ passed, ...props }) => <Paper {...props} />)`
   padding: 10px;
 `
 
-const StyledTestHeader = styled(({ passed, ...props }) => (
+const TestResultHeader = styled(({ passed, ...props }) => (
   <Typography {...props} />
 ))`
   color: ${({ passed }) => (passed ? "#4caf50" : "#f44336")};
@@ -44,9 +44,9 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
   const passStatus = passed ? "PASS" : "FAIL"
   return (
     <StyledPaper passed={passed}>
-      <StyledTestHeader passed={passed}>
+      <TestResultHeader passed={passed}>
         {passStatus}: {testName}
-      </StyledTestHeader>
+      </TestResultHeader>
       <Typography>{feedback}</Typography>
     </StyledPaper>
   )
@@ -90,9 +90,7 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
 
   return (
     <div>
-      <Typography style={{ fontSize: "20" }}>Test Results</Typography>
       <FormControlLabel
-        style={{ float: "right" }}
         label="Show all"
         control={
           <Checkbox
@@ -102,7 +100,6 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
           />
         }
       />
-      <TestProgressBar percentage={passedTestsPercentage} />
       {showResults()}
     </div>
   )

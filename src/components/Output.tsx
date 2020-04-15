@@ -11,6 +11,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 import TestResults from "./TestResults"
+import TestProgressBar from "./TestProgressBar"
 import { OutputObject, TestResultObject } from "../types"
 
 type OutputProps = {
@@ -21,6 +22,7 @@ type OutputProps = {
   sendInput: (input: string) => void
   isRunning: boolean
   handleStop: () => void
+  testing: boolean
 }
 
 const ContainerBox = styled.div`
@@ -111,6 +113,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     sendInput,
     isRunning,
     handleStop,
+    testing,
   } = props
 
   const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
@@ -187,6 +190,15 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     <CircularProgress size={25} color="inherit" disableShrink />
   )
 
+  const titleText = testing ? "Test Results" : "Output"
+
+  const passedTestsSum = testResults.reduce((passed: number, result: any) => {
+    return passed + (result.passed ? 1 : 0)
+  }, 0)
+  const passedTestsPercentage = Math.round(
+    (passedTestsSum / testResults.length) * 100,
+  )
+
   return (
     <ContainerBox data-cy="output-container">
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
@@ -195,22 +207,39 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             inputRequested={inputRequested}
             container
             item
-            justify="space-between"
             direction="row"
+            alignItems="center"
+            justify="space-between"
           >
-            <OutputTitle>Output</OutputTitle>
-            <Grid container item xs={8} alignItems="center" justify="flex-end">
+            <Grid item xs={"auto"}>
+              <OutputTitle>{titleText}</OutputTitle>
+            </Grid>
+            {testing ? (
+              <Grid item xs={6}>
+                <TestProgressBar percentage={50} />
+              </Grid>
+            ) : null}
+            <Grid
+              container
+              item
+              xs={testing ? 3 : 9}
+              alignItems="center"
+              justify="flex-end"
+            >
               {statusIcon}
               <StatusText>{statusText}</StatusText>
-              <MarginedButton
-                onClick={handleStop}
-                variant="contained"
-                color="secondary"
-                disabled={!isRunning}
-                data-cy="output-title-stop-btn"
-              >
-                Stop
-              </MarginedButton>
+              {testing ? null : (
+                <MarginedButton
+                  onClick={handleStop}
+                  variant="contained"
+                  color="secondary"
+                  disabled={!isRunning}
+                  data-cy="output-title-stop-btn"
+                >
+                  Stop
+                </MarginedButton>
+              )}
+
               <MarginedButton
                 onClick={closeOutput}
                 variant="contained"
