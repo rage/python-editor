@@ -5,8 +5,8 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  Grid,
 } from "@material-ui/core"
-import TestProgressBar from "./TestProgressBar"
 
 type TestResultsProps = {
   results: {
@@ -56,12 +56,6 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
   results,
 }) => {
   const [showAll, setShowAll] = useState(false)
-  const passedTestsSum = results.reduce((passed: number, result: any) => {
-    return passed + (result.passed ? 1 : 0)
-  }, 0)
-  const passedTestsPercentage = Math.round(
-    (passedTestsSum / results.length) * 100,
-  )
 
   const showResults = () => {
     if (!showAll) {
@@ -89,19 +83,25 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
   if (!results || results.length === 0) return null
 
   return (
-    <div>
-      <FormControlLabel
-        label="Show all"
-        control={
-          <Checkbox
-            checked={showAll}
-            onChange={() => setShowAll(!showAll)}
-            color="primary"
+    <Grid container direction="row" justify="space-between">
+      <Grid item xs={10}>
+        {showResults()}
+      </Grid>
+      <Grid item>
+        <Paper style={{ paddingLeft: "10px" }}>
+          <FormControlLabel
+            label="Show all"
+            control={
+              <Checkbox
+                checked={showAll}
+                onChange={() => setShowAll(!showAll)}
+                color="primary"
+              />
+            }
           />
-        }
-      />
-      {showResults()}
-    </div>
+        </Paper>
+      </Grid>
+    </Grid>
   )
 }
 

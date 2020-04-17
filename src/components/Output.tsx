@@ -211,12 +211,12 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             alignItems="center"
             justify="space-between"
           >
-            <Grid item xs={"auto"}>
+            <Grid item xs="auto">
               <OutputTitle>{titleText}</OutputTitle>
             </Grid>
             {testing ? (
               <Grid item xs={6}>
-                <TestProgressBar percentage={50} />
+                <TestProgressBar percentage={passedTestsPercentage} />
               </Grid>
             ) : null}
             <Grid

@@ -12,6 +12,8 @@ const ProgressBarBackground = styled.div`
   height: 25px;
   overflow: hidden;
   text-align: center;
+  position: relative;
+  border-radius: 1px;
 `
 
 interface ProgressBarProps {
@@ -25,28 +27,26 @@ const ProgressBar = styled.div<ProgressBarProps>`
 `
 
 const ProgressBarText = styled(Typography)`
-  padding: 2px;
-  position: relative;
-  z-index: 1;
+  width: 100%;
   color: white;
+  z-index: 1;
+  display: block;
+  position: absolute;
 `
 
 const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
   percentage,
 }) => {
-  if (!percentage) return null
+  if (!percentage && percentage !== 0) return null
 
   return (
-    <div>
-      <Typography style={{ textAlign: "center", paddingRight: "2px" }}>
-        Tests passed
-      </Typography>
+    <>
+      <Typography align="center">Tests passed</Typography>
       <ProgressBarBackground>
-        <ProgressBar value={percentage}>
-          <ProgressBarText variant="button">{percentage}%</ProgressBarText>
-        </ProgressBar>
+        <ProgressBarText variant="button">{percentage}%</ProgressBarText>
+        <ProgressBar value={percentage} />
       </ProgressBarBackground>
-    </div>
+    </>
   )
 }
 
