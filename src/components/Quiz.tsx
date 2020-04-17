@@ -235,8 +235,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
           </>
         )}
       </Select>
-      <Button variant="contained" onClick={runTests}>
-        Run test
+      <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
+        Run tests
       </Button>
       <PyEditor
         handleRun={handleRun}

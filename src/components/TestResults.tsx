@@ -43,7 +43,7 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
 }) => {
   const passStatus = passed ? "PASS" : "FAIL"
   return (
-    <StyledPaper passed={passed}>
+    <StyledPaper passed={passed} data-cy="test-result">
       <TestResultHeader passed={passed}>
         {passStatus}: {testName}
       </TestResultHeader>
@@ -96,6 +96,7 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
                 checked={showAll}
                 onChange={() => setShowAll(!showAll)}
                 color="primary"
+                data-cy="show-all-results-checkbox"
               />
             }
           />

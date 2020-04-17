@@ -212,4 +212,28 @@ describe("The Playground", () => {
       cy.contains(testString)
     })
   })
+
+  describe("Running default tests", () => {
+    it("displays testing title in output title box", () => {
+      cy.visit("/")
+      cy.get("[data-cy=run-tests-btn]").click()
+      cy.contains("Test Results")
+    })
+
+    it("displays passed tests progress bar on output title", () => {
+      cy.get("[data-cy=run-tests-btn]").click()
+      cy.contains("Tests passed")
+      cy.contains("83%")
+    })
+
+    it("initially shows output of one failed test only", () => {
+      cy.get("[data-cy=test-result]").should("have.length", 1)
+      cy.get("[data-cy=test-result]").contains("FAIL")
+    })
+
+    it('checking "Show all" shows all test results', () => {
+      cy.get("[data-cy=show-all-results-checkbox]").click()
+      cy.get("[data-cy=test-result]").should("have.length", 6)
+    })
+  })
 })
