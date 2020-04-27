@@ -74,16 +74,22 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   useEffect(() => {
     getZippedQuiz(url, token)
       .then(zip =>
-        getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile),
+        Promise.all([
+          getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile),
+          getFileEntries(zip, "test", testFiles, setTestFiles, null),
+        ]),
       )
-      .then(fileEntries => {
-        setSrcFiles(() => fileEntries)
+      .then(allFileEntries => {
+        setSrcFiles(() => allFileEntries[0])
+        setTestFiles(() =>
+          allFileEntries[1].filter(f => f.shortName !== "__init__.py"),
+        )
       })
   }, [])
 
   return (
     <>
-      <Quiz initialFiles={srcFiles} />
+      <Quiz initialFiles={srcFiles} loadedTestFiles={testFiles} />
     </>
   )
 }
