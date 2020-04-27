@@ -216,12 +216,25 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setOutput([])
   }
 
-  const runTests = () => {
-    console.log("Running tests")
+  const runTests = (testCode = null) => {
     setOutput([])
     setRunning(true)
     setTesting(true)
-    worker.postMessage({ type: "runTests" })
+    worker.postMessage({ type: "runTests", msg: testCode })
+  }
+
+  const runTestsWrapped = () => {
+    const testFile = testFiles[0]
+    const testContent = testFile?.content
+    try {
+      if (!testContent) {
+        throw "FileError: No tests found"
+      }
+      const wrapped = wrap(testContent, [])
+      return runTests(wrapped)
+    } catch (error) {
+      return handleRun(`print("${error}")`)
+    }
   }
 
   return (
@@ -245,8 +258,15 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
           </>
         )}
       </Select>
-      <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
+      <Button
+        variant="contained"
+        onClick={() => runTests()}
+        data-cy="run-tests-btn"
+      >
         Run tests
+      </Button>
+      <Button variant="contained" onClick={runTestsWrapped}>
+        Run tests with wrapped imports
       </Button>
       <PyEditor
         handleRun={handleRun}
