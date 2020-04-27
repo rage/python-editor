@@ -14,6 +14,7 @@ import { OutputObject, TestResultObject } from "../types"
 
 type QuizProps = {
   initialFiles: Array<FileEntry>
+  loadedTestFiles: Array<FileEntry>
 }
 
 let worker = new Worker("./worker.js")
@@ -25,16 +26,29 @@ const defaultFile: FileEntry = {
   content: "",
 }
 
-const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
+const Quiz: React.FunctionComponent<QuizProps> = ({
+  initialFiles,
+  loadedTestFiles,
+}) => {
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject[]>([])
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [inputRequested, setInputRequested] = useState(false)
   const [files, setFiles] = useState([defaultFile])
+  const [testFiles, setTestFiles] = useState([defaultFile])
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
   const [running, setRunning] = useState(false)
   const [testing, setTesting] = useState(false)
+
+  useEffect(() => {
+    setFiles(initialFiles)
+    changeFile(initialFiles[0].shortName, initialFiles)
+  }, [initialFiles])
+
+  useEffect(() => {
+    setTestFiles(loadedTestFiles)
+  }, [loadedTestFiles])
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -124,6 +138,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
       console.log(msg)
       setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
       setWorkerAvailable(true)
+      setRunning(false)
     } else if (type === "ready") {
       setWorkerAvailable(true)
     } else if (type === "print_batch") {
@@ -185,11 +200,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     let firstMatch = fileSet.filter(({ shortName }) => shortName === name)[0]
     return firstMatch
   }
-
-  useEffect(() => {
-    setFiles(initialFiles)
-    changeFile(initialFiles[0].shortName, initialFiles)
-  }, [initialFiles])
 
   const stopWorker = () => {
     if (!workerAvailable) {
@@ -292,6 +302,47 @@ from .main import greetWorld
 greetWorld()
 `
 
+const defaultTests = `# No quiz has been loaded.
+import unittest
+import StringIO
+import sys
+import .main
+
+def points(*args):
+    def jsonify_arr(arr):
+        return str(arr).replace("'", '"')
+
+    def wrapper(fn):
+        print('Points: {"name": "{}", "points": {}}'.format(fn.__name__, jsonify_arr(list(args))))
+        return fn
+    return wrapper
+
+class TestDefaultFunctions(unittest.TestCase):
+
+    @points('2.1')
+    def test_foo(self):
+        foo()
+        sys.stdout = StringIO.StringIO()
+        foo()
+        output = sys.stdout.getvalue().strip()
+        sys.stdout = sys.__stdout__
+        self.assertEqual(output, 'Hello world!')
+
+    @points('2.2')
+    def test_hello(self):
+        greetWorld()
+        sys.stdout = StringIO.StringIO()
+        greetWorld()
+        output = sys.stdout.getvalue().strip()
+        sys.stdout = sys.__stdout__
+        self.assertEqual(output, 'Hello world!')
+
+if __name__ == '__main__':
+    # Running tests requires verbosity > 1 at the moment 
+    # Make sure to run with command unittest.main(2) or equal
+    unittest.main(2)
+`
+
 const defaultUtilsContent = `# No quiz has been loaded.
 # This is the default file utils.py
 
@@ -325,6 +376,14 @@ Quiz.defaultProps = {
       shortName: "test.py",
       originalContent: defaultTestContent,
       content: defaultTestContent,
+    },
+  ],
+  loadedTestFiles: [
+    {
+      fullName: "test_main.py",
+      shortName: "test_main.py",
+      originalContent: defaultTests,
+      content: defaultTests,
     },
   ],
 }

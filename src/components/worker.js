@@ -157,24 +157,13 @@ def points(*args):
         return fn
     return wrapper
 
-class TestStringMethods(unittest.TestCase):
+class TestDefaultTest(unittest.TestCase):
 
     @points('1.1')
     def test_upper(self):
         self.assertEqual('foo'.upper(), 'FOO')
 
     @points('1.2')
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
-
-class TestOtherThings(unittest.TestCase):
-
-    @points('2.1')
-    def test_failing(self):
-        self.assertEqual('foobar', 'foo')
-
-    @points('2.2')
     def test_hello(self):
         sys.stdout = StringIO.StringIO()
         hello()
@@ -183,15 +172,6 @@ class TestOtherThings(unittest.TestCase):
 
         self.assertEqual(output, 'Hello world!')
 
-@points('3.1', '3.2')
-class TestClassPoints(unittest.TestCase):
-    
-    def test_true(self):
-        self.assertEqual('foo', 'foo')
-
-    def test_trueagain(self):
-        self.assertEqual('foo', 'foo')
-    
 if __name__ == '__main__':
     # Running tests requires verbosity > 1 at the moment 
     # Make sure to run with command unittest.main(2) or equal
