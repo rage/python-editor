@@ -136,7 +136,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       setInputRequested(true)
     } else if (type === "error") {
       console.log(msg)
-      setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
+      setOutput(output.concat({ id: uuid(), type: "error", text: msg + "\n" }))
       setWorkerAvailable(true)
       setRunning(false)
     } else if (type === "ready") {
@@ -162,7 +162,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         feedback: result.feedback || null,
         points: result.points,
       }))
-      setTestResults(results)
+      setTestResults(prev => prev.concat(results))
     }
   }
 
@@ -193,6 +193,12 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }
 
   const getContentByShortName = (name: string, fileSet: Array<any>) => {
+    /* When running tests, take into account that 
+       changes in the selected file are not in state yet */
+    if (testing && name === selectedFile.shortName) {
+      return editorValue
+    }
+
     return getFileByShortName(name, fileSet).content
   }
 
@@ -216,7 +222,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setOutput([])
   }
 
-  const runTests = (testCode = null) => {
+  const runTests = (testCode?: string) => {
     setOutput([])
     setRunning(true)
     setTesting(true)
@@ -224,17 +230,19 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }
 
   const runTestsWrapped = () => {
-    const testFile = testFiles[0]
-    const testContent = testFile?.content
-    try {
-      if (!testContent) {
-        throw "FileError: No tests found"
+    setTestResults([])
+    testFiles.forEach(testFile => {
+      const testContent = testFile?.content
+      try {
+        if (!testContent) {
+          throw "FileError: No tests found"
+        }
+        const wrapped = wrap(testContent, [])
+        return runTests(wrapped)
+      } catch (error) {
+        return handleRun(`print("${error}")`)
       }
-      const wrapped = wrap(testContent, [])
-      return runTests(wrapped)
-    } catch (error) {
-      return handleRun(`print("${error}")`)
-    }
+    })
   }
 
   return (
@@ -258,14 +266,14 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
           </>
         )}
       </Select>
-      <Button
-        variant="contained"
-        onClick={() => runTests()}
-        data-cy="run-tests-btn"
-      >
+      <Button variant="contained" onClick={() => runTests()}>
         Run tests
       </Button>
-      <Button variant="contained" onClick={runTestsWrapped}>
+      <Button
+        variant="contained"
+        onClick={runTestsWrapped}
+        data-cy="run-tests-btn"
+      >
         Run tests with wrapped imports
       </Button>
       <PyEditor
