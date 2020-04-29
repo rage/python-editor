@@ -132,7 +132,19 @@ function run(code) {
     })
     .catch(e => {
       console.log(e)
-      postMessage({ type: "error", msg: e.toString() })
+      if (testing) {
+        postMessage({
+          type: "test_error",
+          msg: {
+            testName: "Running a test file failed",
+            passed: false,
+            feedback: e.toString(),
+            points: [],
+          },
+        })
+      } else {
+        postMessage({ type: "error", msg: e.toString() })
+      }
     })
     .finally(() => {
       running = false

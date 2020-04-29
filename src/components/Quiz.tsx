@@ -163,6 +163,17 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         points: result.points,
       }))
       setTestResults(prev => prev.concat(results))
+    } else if (type === "test_error") {
+      setRunning(false)
+      setTestResults(prev =>
+        prev.concat({
+          id: uuid(),
+          testName: msg.testName,
+          passed: msg.passed,
+          feedback: msg.feedback || null,
+          points: msg.points,
+        }),
+      )
     }
   }
 
@@ -240,7 +251,15 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         const wrapped = wrap(testContent, [])
         return runTests(wrapped)
       } catch (error) {
-        return handleRun(`print("${error}")`)
+        setTestResults(prev =>
+          prev.concat({
+            id: uuid(),
+            testName: "Running a test file failed",
+            passed: false,
+            feedback: error.toString(),
+            points: [],
+          }),
+        )
       }
     })
   }
