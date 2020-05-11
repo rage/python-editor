@@ -12,6 +12,7 @@ import {
 } from "../services/import_parsing"
 
 type QuizProps = {
+  submitQuiz: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
 }
 
@@ -24,7 +25,10 @@ const defaultFile: FileEntry = {
   content: "",
 }
 
-const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
+const Quiz: React.FunctionComponent<QuizProps> = ({
+  submitQuiz,
+  initialFiles,
+}) => {
   const [output, setOutput] = useState<any>([])
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [inputRequested, setInputRequested] = useState(false)
@@ -32,6 +36,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
   const [running, setRunning] = useState(false)
+  const [submiting, setSubmitting] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -151,6 +156,16 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   }
 
   const handleChange = (e: any) => {
+    setStateForSelectedFile()
+    changeFile(e.target.value, files)
+  }
+
+  const handleSubmit = () => {
+    setStateForSelectedFile()
+    setSubmitting(true)
+  }
+
+  const setStateForSelectedFile = () => {
     setFiles((prev: any) =>
       prev.map((file: any) =>
         file.shortName === selectedFile.shortName
@@ -158,7 +173,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
           : file,
       ),
     )
-    changeFile(e.target.value, files)
   }
 
   const changeFile = (shortName: string, fileList: Array<object>) => {
@@ -179,6 +193,15 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     setFiles(initialFiles)
     changeFile(initialFiles[0].shortName, initialFiles)
   }, [initialFiles])
+
+  useEffect(() => {
+    if (submiting) {
+      submitQuiz(files).then(data => {
+        alert(data)
+        setSubmitting(false)
+      })
+    }
+  }, [submiting])
 
   const stopWorker = () => {
     if (!workerAvailable) {
@@ -221,7 +244,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         handleRunWrapped={handleRunWrapped}
         allowRun={workerAvailable}
         handleStop={stopWorker}
+        handleSubmit={handleSubmit}
         isRunning={running}
+        isSubmitting={submiting}
         editorValue={editorValue}
         setEditorValue={setEditorValue}
       />
@@ -272,6 +297,7 @@ def getLocality():
 `
 
 Quiz.defaultProps = {
+  submitQuiz: () => Promise.resolve("default submission called"),
   initialFiles: [
     {
       fullName: "main.py",

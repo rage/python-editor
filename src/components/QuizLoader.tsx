@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { Quiz, defaultFile } from "./Quiz"
-import { getZippedQuiz } from "../services/quiz"
+import { getZippedQuiz, submitQuiz } from "../services/quiz"
 
 type QuizLoaderProps = {
   url: string
@@ -76,7 +76,10 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
 
   return (
     <>
-      <Quiz initialFiles={srcFiles} />
+      <Quiz
+        initialFiles={srcFiles}
+        submitQuiz={files => submitQuiz(url, token, files)}
+      />
     </>
   )
 }

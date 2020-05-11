@@ -1,11 +1,12 @@
 import axios from "axios"
 import JSZip from "jszip"
+import { FileEntry } from "../components/QuizLoader"
 
 const getZippedQuiz = (url: string, token: string): Promise<JSZip> => {
   return axios
     .request({
       responseType: "arraybuffer",
-      url,
+      url: url + "/download",
       method: "get",
       headers: {
         Authorization: "Bearer " + token,
@@ -17,4 +18,38 @@ const getZippedQuiz = (url: string, token: string): Promise<JSZip> => {
     })
 }
 
-export { getZippedQuiz }
+const submitQuiz = async (
+  url: string,
+  token: string,
+  files: Array<FileEntry>,
+): Promise<string> => {
+  const zip = new JSZip()
+  const form = new FormData()
+  files.forEach(file => {
+    zip.file(file.fullName, file.content)
+  })
+  form.append("submission[file]", await zip.generateAsync({ type: "blob" }))
+
+  return axios
+    .request({
+      url: url + "/submissions",
+      method: "post",
+      data: form,
+      headers: {
+        Authorization: "Bearer " + token,
+        client: "python_editor",
+        client_version: "0.5.0",
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then(res => {
+      console.log(res.data)
+      return res.data.show_submission_url
+    })
+    .catch(error => {
+      console.error(error)
+      return "Error when submiting"
+    })
+}
+
+export { getZippedQuiz, submitQuiz }
