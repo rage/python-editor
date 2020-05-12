@@ -2,20 +2,40 @@ import axios from "axios"
 import JSZip from "jszip"
 import { FileEntry } from "../components/QuizLoader"
 
-const getZippedQuiz = (url: string, token: string): Promise<JSZip> => {
-  return axios
+const getHeaders = (token: string) => ({
+  Authorization: `Bearer ${token}`,
+  client: "python_editor",
+  client_version: "0.5.0",
+})
+
+const getZippedQuiz = (
+  url: string,
+  token: string,
+): [Promise<JSZip>, Promise<string>] => {
+  const headers = getHeaders(token)
+  const zip = axios
     .request({
       responseType: "arraybuffer",
-      url: url + "/download",
+      url: `${url}/download`,
       method: "get",
-      headers: {
-        Authorization: "Bearer " + token,
-      },
+      headers,
     })
     .then(res => {
       const zip = new JSZip()
       return zip.loadAsync(res.data)
     })
+  const submissionUrl = axios
+    .request({
+      responseType: "json",
+      url,
+      method: "get",
+      headers,
+    })
+    .then(res => {
+      console.log(res.data)
+      return `https://tmc.mooc.fi/api/v8/core/exercises/${res.data.id}`
+    })
+  return [zip, submissionUrl]
 }
 
 const submitQuiz = async (
@@ -36,9 +56,7 @@ const submitQuiz = async (
       method: "post",
       data: form,
       headers: {
-        Authorization: "Bearer " + token,
-        client: "python_editor",
-        client_version: "0.5.0",
+        ...getHeaders(token),
         "Content-Type": "multipart/form-data",
       },
     })

@@ -16,9 +16,12 @@ const StyledButton = styled(props => <Button variant="contained" {...props} />)`
 `
 
 const App = () => {
-  const url = useInput("url", "")
+  const organization = useInput("organization", "")
+  const course = useInput("course", "")
+  const exercise = useInput("exercise", "")
   const token = useInput("token", "")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
+  const url = `https://tmc.mooc.fi/api/v8/org/${organization.value}/courses/${course.value}/exercises/${exercise.value}`
   const handleLoad = () => {
     event.preventDefault()
     setFetch(true)
@@ -35,7 +38,17 @@ const App = () => {
   return (
     <>
       <div>
-        <StyledTextField {...url} label="Quiz url" data-cy="url-input" />
+        <StyledTextField
+          {...organization}
+          label="Organization slug"
+          data-cy="organization-input"
+        />
+        <StyledTextField {...course} label="Course" data-cy="course-input" />
+        <StyledTextField
+          {...exercise}
+          label="Exercise"
+          data-cy="exercise-input"
+        />
         <StyledTextField {...token} label="User token" data-cy="token-input" />
         <StyledButton onClick={handleLoad} data-cy="load-btn">
           Load Quiz
@@ -44,7 +57,7 @@ const App = () => {
           Unload Quiz
         </StyledButton>
       </div>
-      {fetch && loadQuiz(url.value, token.value)}
+      {fetch && loadQuiz(url, token.value)}
       {!fetch && <Quiz />}
     </>
   )

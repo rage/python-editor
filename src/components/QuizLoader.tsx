@@ -25,6 +25,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   const [text, setText] = useState("Initial text")
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
+  const [submissionUrl, setSubmissionUrl] = useState("")
   const mainSourceFile = "__main__.py"
 
   const getFileEntries = (
@@ -65,10 +66,12 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }
 
   useEffect(() => {
-    getZippedQuiz(url, token)
-      .then(zip =>
-        getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile),
-      )
+    Promise.all(getZippedQuiz(url, token))
+      .then(result => {
+        const [zip, subm] = result
+        setSubmissionUrl(() => subm)
+        return getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile)
+      })
       .then(fileEntries => {
         setSrcFiles(() => fileEntries)
       })
@@ -78,7 +81,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     <>
       <Quiz
         initialFiles={srcFiles}
-        submitQuiz={files => submitQuiz(url, token, files)}
+        submitQuiz={files => submitQuiz(submissionUrl, token, files)}
       />
     </>
   )
