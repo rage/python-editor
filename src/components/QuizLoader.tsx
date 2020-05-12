@@ -82,6 +82,9 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       <Quiz
         initialFiles={srcFiles}
         submitQuiz={files => submitQuiz(submissionUrl, token, files)}
+        submitToPaste={files =>
+          submitQuiz(submissionUrl, token, files, { paste: true })
+        }
       />
     </>
   )

@@ -2,6 +2,10 @@ import axios from "axios"
 import JSZip from "jszip"
 import { FileEntry } from "../components/QuizLoader"
 
+interface SubmitOptions {
+  paste?: boolean
+}
+
 const getHeaders = (token: string) => ({
   Authorization: `Bearer ${token}`,
   client: "python_editor",
@@ -42,12 +46,18 @@ const submitQuiz = async (
   url: string,
   token: string,
   files: Array<FileEntry>,
+  submitOptions?: SubmitOptions,
 ): Promise<string> => {
+  const paste = submitOptions?.paste || false
   const zip = new JSZip()
   const form = new FormData()
   files.forEach(file => {
     zip.file(file.fullName, file.content)
   })
+  if (paste) {
+    console.log("this is paste submission")
+    form.append("paste", "1")
+  }
   form.append("submission[file]", await zip.generateAsync({ type: "blob" }))
 
   return axios
@@ -62,7 +72,7 @@ const submitQuiz = async (
     })
     .then(res => {
       console.log(res.data)
-      return res.data.show_submission_url
+      return paste ? res.data.paste_url : res.data.show_submission_url
     })
     .catch(error => {
       console.error(error)

@@ -13,6 +13,7 @@ import {
 
 type QuizProps = {
   submitQuiz: (files: Array<FileEntry>) => Promise<string>
+  submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
 }
 
@@ -27,6 +28,7 @@ const defaultFile: FileEntry = {
 
 const Quiz: React.FunctionComponent<QuizProps> = ({
   submitQuiz,
+  submitToPaste,
   initialFiles,
 }) => {
   const [output, setOutput] = useState<any>([])
@@ -36,7 +38,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
   const [running, setRunning] = useState(false)
-  const [submiting, setSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<{
+    submiting: boolean
+    paste?: boolean
+  }>({ submiting: false })
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -160,9 +165,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     changeFile(e.target.value, files)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (paste: boolean) => {
     setStateForSelectedFile()
-    setSubmitting(true)
+    setSubmitStatus({ submiting: true, paste })
   }
 
   const setStateForSelectedFile = () => {
@@ -195,13 +200,14 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }, [initialFiles])
 
   useEffect(() => {
-    if (submiting) {
-      submitQuiz(files).then(data => {
+    if (submitStatus.submiting) {
+      const submiter = submitStatus.paste ? submitToPaste : submitQuiz
+      submiter(files).then(data => {
         alert(data)
-        setSubmitting(false)
+        setSubmitStatus(() => ({ submiting: false }))
       })
     }
-  }, [submiting])
+  }, [submitStatus])
 
   const stopWorker = () => {
     if (!workerAvailable) {
@@ -244,9 +250,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         handleRunWrapped={handleRunWrapped}
         allowRun={workerAvailable}
         handleStop={stopWorker}
-        handleSubmit={handleSubmit}
         isRunning={running}
-        isSubmitting={submiting}
+        handleSubmit={() => handleSubmit(false)}
+        handlePasteSubmit={() => handleSubmit(true)}
+        isSubmitting={submitStatus.submiting}
         editorValue={editorValue}
         setEditorValue={setEditorValue}
       />
@@ -298,6 +305,7 @@ def getLocality():
 
 Quiz.defaultProps = {
   submitQuiz: () => Promise.resolve("default submission called"),
+  submitToPaste: () => Promise.resolve("default paste called"),
   initialFiles: [
     {
       fullName: "main.py",

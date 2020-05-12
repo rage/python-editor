@@ -8,8 +8,9 @@ type PyEditorProps = {
   handleRunWrapped: (code: string) => void
   allowRun?: boolean
   handleStop: () => void
-  handleSubmit: () => void
   isRunning: boolean
+  handleSubmit: () => void
+  handlePasteSubmit: () => void
   isSubmitting: boolean
   editorValue: string
   setEditorValue: React.Dispatch<React.SetStateAction<string>>
@@ -25,6 +26,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   allowRun = true,
   handleStop,
   handleSubmit,
+  handlePasteSubmit,
   isRunning,
   isSubmitting,
   editorValue,
@@ -84,6 +86,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         data-cy="submit-btn"
       >
         Submit exercise
+      </StyledButton>
+      <StyledButton
+        onClick={handlePasteSubmit}
+        disabled={isSubmitting}
+        data-cy="tmc-paste-btn"
+      >
+        Send to TMC paste
       </StyledButton>
       <ControlledEditor
         value={editorValue}
