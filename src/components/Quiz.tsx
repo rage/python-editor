@@ -251,9 +251,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         allowRun={workerAvailable}
         handleStop={stopWorker}
         isRunning={running}
-        handleSubmit={() => handleSubmit(false)}
-        handlePasteSubmit={() => handleSubmit(true)}
-        isSubmitting={submitStatus.submiting}
         editorValue={editorValue}
         setEditorValue={setEditorValue}
       />
@@ -263,6 +260,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         inputRequested={inputRequested}
         sendInput={sendInput}
         isRunning={running}
+        handleSubmit={() => handleSubmit(false)}
+        handlePasteSubmit={() => handleSubmit(true)}
+        isSubmitting={submitStatus.submiting}
         handleStop={stopWorker}
       />
     </div>

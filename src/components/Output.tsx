@@ -17,6 +17,9 @@ type OutputProps = {
   inputRequested: boolean
   sendInput: (input: string) => void
   isRunning: boolean
+  handleSubmit: () => void
+  handlePasteSubmit: () => void
+  isSubmitting: boolean
   handleStop: () => void
 }
 
@@ -106,6 +109,9 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     inputRequested,
     sendInput,
     isRunning,
+    handleSubmit,
+    handlePasteSubmit,
+    isSubmitting,
     handleStop,
   } = props
 
@@ -198,6 +204,22 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                 data-cy="output-title-stop-btn"
               >
                 Stop
+              </MarginedButton>
+              <MarginedButton
+                onClick={handleSubmit}
+                variant="contained"
+                disabled={isSubmitting}
+                data-cy="submit-btn"
+              >
+                Submit solution
+              </MarginedButton>
+              <MarginedButton
+                onClick={handlePasteSubmit}
+                variant="contained"
+                disabled={isSubmitting}
+                data-cy="paste-btn"
+              >
+                Send to TMC Paste
               </MarginedButton>
               <MarginedButton
                 onClick={closeOutput}
