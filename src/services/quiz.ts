@@ -72,12 +72,51 @@ const submitQuiz = async (
     })
     .then(res => {
       console.log(res.data)
-      return paste ? res.data.paste_url : res.data.show_submission_url
+      return paste ? res.data.paste_url : res.data.submission_url
     })
     .catch(error => {
       console.error(error)
-      return "Error when submiting"
+      return "Error when submitting"
     })
 }
 
-export { getZippedQuiz, submitQuiz }
+const fetchSubmissionResult = async (
+  url: string,
+  token: string,
+): Promise<any> => {
+  const headers = getHeaders(token)
+  let resultObject
+  let timeWaited = 0
+  let statusProcessing = true
+  while (statusProcessing) {
+    const submissionStatusUrl = await axios
+      .request({
+        responseType: "json",
+        url,
+        method: "get",
+        headers,
+      })
+      .then(res => {
+        console.log(res.data)
+        return res.data
+      })
+      .catch(err => {
+        console.log(err)
+      })
+
+    if (submissionStatusUrl.status !== "processing") {
+      statusProcessing = false
+      resultObject = submissionStatusUrl.test_cases
+    } else if (timeWaited >= 10000) {
+      // TODO: Return test result objekt
+      resultObject = [{ name: `Submission took really long time.` }]
+      break
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2500))
+    timeWaited += 2500
+  }
+  return resultObject
+}
+
+export { getZippedQuiz, submitQuiz, fetchSubmissionResult }

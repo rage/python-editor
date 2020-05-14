@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react"
 import { Quiz, defaultFile } from "./Quiz"
-import { getZippedQuiz, submitQuiz } from "../services/quiz"
+import {
+  getZippedQuiz,
+  submitQuiz,
+  fetchSubmissionResult,
+} from "../services/quiz"
 
 type QuizLoaderProps = {
   organization: string
@@ -69,6 +73,12 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     return { fullName: "", shortName: "", originalContent: "", content: "" }
   }
 
+  const submitAndWaitResult = async (files: Array<FileEntry>) => {
+    const resultUrl = await submitQuiz(submissionUrl, token, files)
+    const testCases = await fetchSubmissionResult(resultUrl, token)
+    return testCases[0].name
+  }
+
   useEffect(() => {
     const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
     Promise.all(getZippedQuiz(url, token))
@@ -86,7 +96,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     <>
       <Quiz
         initialFiles={srcFiles}
-        submitQuiz={files => submitQuiz(submissionUrl, token, files)}
+        submitQuiz={submitAndWaitResult}
         submitToPaste={files =>
           submitQuiz(submissionUrl, token, files, { paste: true })
         }

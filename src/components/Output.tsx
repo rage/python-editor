@@ -169,17 +169,23 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     ),
   )
 
-  const statusText = !isRunning
-    ? null
-    : inputRequested
-    ? "Waiting for input"
-    : "Running"
+  const getStatusText = () => {
+    if (isRunning) {
+      return inputRequested ? "Waiting for input" : "Running"
+    } else if (isSubmitting) {
+      return "Submitting"
+    }
+    return null
+  }
 
-  const statusIcon = !isRunning ? null : inputRequested ? (
-    <FontAwesomeIcon icon={faExclamation} />
-  ) : (
-    <CircularProgress size={25} color="inherit" disableShrink />
-  )
+  const getStatusIcon = () => {
+    if (isRunning && inputRequested) {
+      return <FontAwesomeIcon icon={faExclamation} />
+    } else if (isRunning || isSubmitting) {
+      return <CircularProgress size={25} color="inherit" disableShrink />
+    }
+    return null
+  }
 
   return (
     <ContainerBox data-cy="output-container">
@@ -194,8 +200,8 @@ const Output: React.FunctionComponent<OutputProps> = props => {
           >
             <OutputTitle>Output</OutputTitle>
             <Grid container item xs={8} alignItems="center" justify="flex-end">
-              {statusIcon}
-              <StatusText>{statusText}</StatusText>
+              {getStatusIcon()}
+              <StatusText>{getStatusText()}</StatusText>
               <MarginedButton
                 onClick={handleStop}
                 variant="contained"
@@ -208,7 +214,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
               <MarginedButton
                 onClick={handleSubmit}
                 variant="contained"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isRunning}
                 data-cy="submit-btn"
               >
                 Submit solution
@@ -216,7 +222,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
               <MarginedButton
                 onClick={handlePasteSubmit}
                 variant="contained"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isRunning}
                 data-cy="paste-btn"
               >
                 Send to TMC Paste
@@ -224,6 +230,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
               <MarginedButton
                 onClick={closeOutput}
                 variant="contained"
+                disabled={isSubmitting}
                 data-cy="close-btn"
               >
                 Close
