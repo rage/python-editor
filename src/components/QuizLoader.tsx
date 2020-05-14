@@ -3,7 +3,9 @@ import { Quiz, defaultFile } from "./Quiz"
 import { getZippedQuiz, submitQuiz } from "../services/quiz"
 
 type QuizLoaderProps = {
-  url: string
+  organization: string
+  course: string
+  exercise: string
   token: string
 }
 
@@ -19,7 +21,9 @@ type FileEntry = {
     file whose path contains "/src/__main__.py".
 */
 const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
-  url,
+  organization,
+  course,
+  exercise,
   token,
 }) => {
   const [text, setText] = useState("Initial text")
@@ -66,6 +70,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }
 
   useEffect(() => {
+    const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
     Promise.all(getZippedQuiz(url, token))
       .then(result => {
         const [zip, subm] = result

@@ -21,7 +21,6 @@ const App = () => {
   const exercise = useInput("exercise", "")
   const token = useInput("token", "")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
-  const url = `https://tmc.mooc.fi/api/v8/org/${organization.value}/courses/${course.value}/exercises/${exercise.value}`
   const handleLoad = () => {
     event.preventDefault()
     setFetch(true)
@@ -30,9 +29,18 @@ const App = () => {
     event.preventDefault()
     setFetch(false)
   }
-  const loadQuiz = (url, token) => {
-    console.log(`Got url=${url}, token=${token}`)
-    return <QuizLoader url={url} token={token} />
+  const loadQuiz = (organization, course, exercise, token) => {
+    console.log(
+      `Got organization=${organization}, course=${course}, exercise=${exercise}, token=${token}`,
+    )
+    return (
+      <QuizLoader
+        organization={organization}
+        course={course}
+        exercise={exercise}
+        token={token}
+      />
+    )
   }
 
   return (
@@ -57,7 +65,8 @@ const App = () => {
           Unload Quiz
         </StyledButton>
       </div>
-      {fetch && loadQuiz(url, token.value)}
+      {fetch &&
+        loadQuiz(organization.value, course.value, exercise.value, token.value)}
       {!fetch && <Quiz />}
     </>
   )
