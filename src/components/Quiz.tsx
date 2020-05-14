@@ -13,6 +13,8 @@ import {
 import { OutputObject, TestResultObject } from "../types"
 
 type QuizProps = {
+  submitQuiz: (files: Array<FileEntry>) => Promise<string>
+  submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
 }
 
@@ -25,7 +27,11 @@ const defaultFile: FileEntry = {
   content: "",
 }
 
-const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
+const Quiz: React.FunctionComponent<QuizProps> = ({
+  submitQuiz,
+  submitToPaste,
+  initialFiles,
+}) => {
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject[]>([])
   const [workerAvailable, setWorkerAvailable] = useState(true)
@@ -34,6 +40,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
   const [running, setRunning] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<{
+    submiting: boolean
+    paste?: boolean
+  }>({ submiting: false })
   const [testing, setTesting] = useState(false)
 
   function handleRun(code: string) {
@@ -167,6 +177,16 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
   }
 
   const handleChange = (e: any) => {
+    setStateForSelectedFile()
+    changeFile(e.target.value, files)
+  }
+
+  const handleSubmit = (paste: boolean) => {
+    setStateForSelectedFile()
+    setSubmitStatus({ submiting: true, paste })
+  }
+
+  const setStateForSelectedFile = () => {
     setFiles((prev: any) =>
       prev.map((file: any) =>
         file.shortName === selectedFile.shortName
@@ -174,7 +194,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
           : file,
       ),
     )
-    changeFile(e.target.value, files)
   }
 
   const changeFile = (shortName: string, fileList: Array<object>) => {
@@ -195,6 +214,16 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
     setFiles(initialFiles)
     changeFile(initialFiles[0].shortName, initialFiles)
   }, [initialFiles])
+
+  useEffect(() => {
+    if (submitStatus.submiting) {
+      const submiter = submitStatus.paste ? submitToPaste : submitQuiz
+      submiter(files).then(data => {
+        alert(data)
+        setSubmitStatus(() => ({ submiting: false }))
+      })
+    }
+  }, [submitStatus])
 
   const stopWorker = () => {
     if (!workerAvailable) {
@@ -259,6 +288,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({ initialFiles }) => {
         inputRequested={inputRequested}
         sendInput={sendInput}
         isRunning={running}
+        handleSubmit={() => handleSubmit(false)}
+        handlePasteSubmit={() => handleSubmit(true)}
+        isSubmitting={submitStatus.submiting}
         handleStop={stopWorker}
         testing={testing}
       />
@@ -301,6 +333,8 @@ def getLocality():
 `
 
 Quiz.defaultProps = {
+  submitQuiz: () => Promise.resolve("default submission called"),
+  submitToPaste: () => Promise.resolve("default paste called"),
   initialFiles: [
     {
       fullName: "main.py",

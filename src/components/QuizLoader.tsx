@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react"
 import { Quiz, defaultFile } from "./Quiz"
-import { getZippedQuiz } from "../services/quiz"
+import {
+  getZippedQuiz,
+  submitQuiz,
+  fetchSubmissionResult,
+} from "../services/quiz"
 
 type QuizLoaderProps = {
-  url: string
+  organization: string
+  course: string
+  exercise: string
   token: string
 }
 
@@ -19,12 +25,15 @@ type FileEntry = {
     file whose path contains "/src/__main__.py".
 */
 const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
-  url,
+  organization,
+  course,
+  exercise,
   token,
 }) => {
   const [text, setText] = useState("Initial text")
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
+  const [submissionUrl, setSubmissionUrl] = useState("")
   const mainSourceFile = "__main__.py"
 
   const getFileEntries = (
@@ -64,11 +73,20 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     return { fullName: "", shortName: "", originalContent: "", content: "" }
   }
 
+  const submitAndWaitResult = async (files: Array<FileEntry>) => {
+    const resultUrl = await submitQuiz(submissionUrl, token, files)
+    const testCases = await fetchSubmissionResult(resultUrl, token)
+    return testCases[0].name
+  }
+
   useEffect(() => {
-    getZippedQuiz(url, token)
-      .then(zip =>
-        getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile),
-      )
+    const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
+    Promise.all(getZippedQuiz(url, token))
+      .then(result => {
+        const [zip, subm] = result
+        setSubmissionUrl(() => subm)
+        return getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile)
+      })
       .then(fileEntries => {
         setSrcFiles(() => fileEntries)
       })
@@ -76,7 +94,13 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
 
   return (
     <>
-      <Quiz initialFiles={srcFiles} />
+      <Quiz
+        initialFiles={srcFiles}
+        submitQuiz={submitAndWaitResult}
+        submitToPaste={files =>
+          submitQuiz(submissionUrl, token, files, { paste: true })
+        }
+      />
     </>
   )
 }

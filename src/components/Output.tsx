@@ -21,6 +21,9 @@ type OutputProps = {
   inputRequested: boolean
   sendInput: (input: string) => void
   isRunning: boolean
+  handleSubmit: () => void
+  handlePasteSubmit: () => void
+  isSubmitting: boolean
   handleStop: () => void
   testing: boolean
 }
@@ -112,6 +115,9 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     inputRequested,
     sendInput,
     isRunning,
+    handleSubmit,
+    handlePasteSubmit,
+    isSubmitting,
     handleStop,
     testing,
   } = props
@@ -178,17 +184,23 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     return null
   }
 
-  const statusText = !isRunning
-    ? null
-    : inputRequested
-    ? "Waiting for input"
-    : "Running"
+  const getStatusText = () => {
+    if (isRunning) {
+      return inputRequested ? "Waiting for input" : "Running"
+    } else if (isSubmitting) {
+      return "Submitting"
+    }
+    return null
+  }
 
-  const statusIcon = !isRunning ? null : inputRequested ? (
-    <FontAwesomeIcon icon={faExclamation} />
-  ) : (
-    <CircularProgress size={25} color="inherit" disableShrink />
-  )
+  const getStatusIcon = () => {
+    if (isRunning && inputRequested) {
+      return <FontAwesomeIcon icon={faExclamation} />
+    } else if (isRunning || isSubmitting) {
+      return <CircularProgress size={25} color="inherit" disableShrink />
+    }
+    return null
+  }
 
   const titleText = testing ? "Test Results" : "Output"
 
@@ -226,8 +238,8 @@ const Output: React.FunctionComponent<OutputProps> = props => {
               alignItems="center"
               justify="flex-end"
             >
-              {statusIcon}
-              <StatusText>{statusText}</StatusText>
+              {getStatusIcon()}
+              <StatusText>{getStatusText()}</StatusText>
               {testing ? null : (
                 <MarginedButton
                   onClick={handleStop}
@@ -241,8 +253,17 @@ const Output: React.FunctionComponent<OutputProps> = props => {
               )}
 
               <MarginedButton
+                onClick={handleSubmit}
+                variant="contained"
+                disabled={isSubmitting || isRunning}
+                data-cy="submit-btn"
+              >
+                Submit solution
+              </MarginedButton>
+              <MarginedButton
                 onClick={closeOutput}
                 variant="contained"
+                disabled={isSubmitting}
                 data-cy="close-btn"
               >
                 Close

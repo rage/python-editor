@@ -16,7 +16,9 @@ const StyledButton = styled(props => <Button variant="contained" {...props} />)`
 `
 
 const App = () => {
-  const url = useInput("url", "")
+  const organization = useInput("organization", "")
+  const course = useInput("course", "")
+  const exercise = useInput("exercise", "")
   const token = useInput("token", "")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
   const handleLoad = () => {
@@ -27,15 +29,34 @@ const App = () => {
     event.preventDefault()
     setFetch(false)
   }
-  const loadQuiz = (url, token) => {
-    console.log(`Got url=${url}, token=${token}`)
-    return <QuizLoader url={url} token={token} />
+  const loadQuiz = (organization, course, exercise, token) => {
+    console.log(
+      `Got organization=${organization}, course=${course}, exercise=${exercise}, token=${token}`,
+    )
+    return (
+      <QuizLoader
+        organization={organization}
+        course={course}
+        exercise={exercise}
+        token={token}
+      />
+    )
   }
 
   return (
     <>
       <div>
-        <StyledTextField {...url} label="Quiz url" data-cy="url-input" />
+        <StyledTextField
+          {...organization}
+          label="Organization slug"
+          data-cy="organization-input"
+        />
+        <StyledTextField {...course} label="Course" data-cy="course-input" />
+        <StyledTextField
+          {...exercise}
+          label="Exercise"
+          data-cy="exercise-input"
+        />
         <StyledTextField {...token} label="User token" data-cy="token-input" />
         <StyledButton onClick={handleLoad} data-cy="load-btn">
           Load Quiz
@@ -44,7 +65,8 @@ const App = () => {
           Unload Quiz
         </StyledButton>
       </div>
-      {fetch && loadQuiz(url.value, token.value)}
+      {fetch &&
+        loadQuiz(organization.value, course.value, exercise.value, token.value)}
       {!fetch && <Quiz />}
     </>
   )
