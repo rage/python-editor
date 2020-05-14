@@ -10,9 +10,13 @@ import {
 } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
+import TestResults from "./TestResults"
+import TestProgressBar from "./TestProgressBar"
+import { OutputObject, TestResultObject } from "../types"
 
 type OutputProps = {
-  outputText: { id: string; type: string; text: string }[]
+  outputContent: OutputObject[]
+  testResults: TestResultObject[]
   clearOutput: () => void
   inputRequested: boolean
   sendInput: (input: string) => void
@@ -21,6 +25,7 @@ type OutputProps = {
   handlePasteSubmit: () => void
   isSubmitting: boolean
   handleStop: () => void
+  testing: boolean
 }
 
 const ContainerBox = styled.div`
@@ -104,7 +109,8 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const {
-    outputText,
+    outputContent,
+    testResults,
     clearOutput,
     inputRequested,
     sendInput,
@@ -113,6 +119,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     handlePasteSubmit,
     isSubmitting,
     handleStop,
+    testing,
   } = props
 
   const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
@@ -133,7 +140,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   useEffect(() => {
     scrollToBottom()
     if (inputRequested) focusOnInputField()
-  }, [inputRequested, outputText])
+  }, [inputRequested, outputContent])
 
   useEffect(() => {
     if (isRunning && !render) {
@@ -161,13 +168,21 @@ const Output: React.FunctionComponent<OutputProps> = props => {
 
   if (!render) return null
 
-  const outputElems = outputText.map(output =>
-    output.type !== "input" ? (
-      <React.Fragment key={output.id}>{output.text}</React.Fragment>
-    ) : (
-      <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
-    ),
-  )
+  const showOutput = () => {
+    if (outputContent && outputContent.length > 0) {
+      return outputContent.map(output =>
+        output.type === "input" ? (
+          <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
+        ) : (
+          <React.Fragment key={output.id}>{output.text}</React.Fragment>
+        ),
+      )
+    } else if (testResults) {
+      return <TestResults results={testResults} />
+    }
+
+    return null
+  }
 
   const getStatusText = () => {
     if (isRunning) {
@@ -187,6 +202,15 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     return null
   }
 
+  const titleText = testing ? "Test Results" : "Output"
+
+  const passedTestsSum = testResults.reduce((passed: number, result: any) => {
+    return passed + (result.passed ? 1 : 0)
+  }, 0)
+  const passedTestsPercentage = Math.round(
+    (passedTestsSum / testResults.length) * 100,
+  )
+
   return (
     <ContainerBox data-cy="output-container">
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
@@ -195,22 +219,39 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             inputRequested={inputRequested}
             container
             item
-            justify="space-between"
             direction="row"
+            alignItems="center"
+            justify="space-between"
           >
-            <OutputTitle>Output</OutputTitle>
-            <Grid container item xs={8} alignItems="center" justify="flex-end">
+            <Grid item xs="auto">
+              <OutputTitle>{titleText}</OutputTitle>
+            </Grid>
+            {testing ? (
+              <Grid item xs={6}>
+                <TestProgressBar percentage={passedTestsPercentage} />
+              </Grid>
+            ) : null}
+            <Grid
+              container
+              item
+              xs={testing ? 3 : 9}
+              alignItems="center"
+              justify="flex-end"
+            >
               {getStatusIcon()}
               <StatusText>{getStatusText()}</StatusText>
-              <MarginedButton
-                onClick={handleStop}
-                variant="contained"
-                color="secondary"
-                disabled={!isRunning}
-                data-cy="output-title-stop-btn"
-              >
-                Stop
-              </MarginedButton>
+              {testing ? null : (
+                <MarginedButton
+                  onClick={handleStop}
+                  variant="contained"
+                  color="secondary"
+                  disabled={!isRunning}
+                  data-cy="output-title-stop-btn"
+                >
+                  Stop
+                </MarginedButton>
+              )}
+
               <MarginedButton
                 onClick={handleSubmit}
                 variant="contained"
@@ -218,14 +259,6 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                 data-cy="submit-btn"
               >
                 Submit solution
-              </MarginedButton>
-              <MarginedButton
-                onClick={handlePasteSubmit}
-                variant="contained"
-                disabled={isSubmitting || isRunning}
-                data-cy="paste-btn"
-              >
-                Send to TMC Paste
               </MarginedButton>
               <MarginedButton
                 onClick={closeOutput}
@@ -238,7 +271,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             </Grid>
           </OutputTitleBox>
           <StyledOutput item ref={outputRef}>
-            {outputElems}
+            {showOutput()}
             {inputRequested && (
               <TextField
                 inputRef={userInputFieldRef}
