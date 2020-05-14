@@ -13,7 +13,7 @@ import {
 import { OutputObject, TestResultObject } from "../types"
 
 type QuizProps = {
-  submitQuiz: (files: Array<FileEntry>) => Promise<string>
+  submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject[]>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
 }
@@ -217,11 +217,17 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
 
   useEffect(() => {
     if (submitStatus.submiting) {
-      const submiter = submitStatus.paste ? submitToPaste : submitQuiz
-      submiter(files).then(data => {
-        alert(data)
+      if (submitStatus.paste) {
+        alert(submitToPaste(files).then(res => res))
         setSubmitStatus(() => ({ submiting: false }))
-      })
+      } else {
+        submitQuiz(files).then(data => {
+          console.log(data)
+          clearOutput()
+          setTestResults(data)
+          setSubmitStatus(() => ({ submiting: false }))
+        })
+      }
     }
   }, [submitStatus])
 
@@ -333,7 +339,7 @@ def getLocality():
 `
 
 Quiz.defaultProps = {
-  submitQuiz: () => Promise.resolve("default submission called"),
+  submitQuiz: () => Promise.resolve([]),
   submitToPaste: () => Promise.resolve("default paste called"),
   initialFiles: [
     {

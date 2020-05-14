@@ -75,8 +75,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
 
   const submitAndWaitResult = async (files: Array<FileEntry>) => {
     const resultUrl = await submitQuiz(submissionUrl, token, files)
-    const testCases = await fetchSubmissionResult(resultUrl, token)
-    return testCases[0].name
+    return await fetchSubmissionResult(resultUrl.submissionUrl, token)
   }
 
   useEffect(() => {
@@ -98,7 +97,9 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         initialFiles={srcFiles}
         submitQuiz={submitAndWaitResult}
         submitToPaste={files =>
-          submitQuiz(submissionUrl, token, files, { paste: true })
+          submitQuiz(submissionUrl, token, files, { paste: true }).then(
+            res => res.pasteUrl || "",
+          )
         }
       />
     </>

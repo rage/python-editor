@@ -1,6 +1,7 @@
 import axios from "axios"
 import JSZip from "jszip"
 import { FileEntry } from "../components/QuizLoader"
+import { SubmissionResponse, TestResultObject } from "../types"
 
 interface SubmitOptions {
   paste?: boolean
@@ -35,10 +36,7 @@ const getZippedQuiz = (
       method: "get",
       headers,
     })
-    .then(res => {
-      console.log(res.data)
-      return `https://tmc.mooc.fi/api/v8/core/exercises/${res.data.id}`
-    })
+    .then(res => `https://tmc.mooc.fi/api/v8/core/exercises/${res.data.id}`)
   return [zip, submissionUrl]
 }
 
@@ -47,7 +45,7 @@ const submitQuiz = async (
   token: string,
   files: Array<FileEntry>,
   submitOptions?: SubmitOptions,
-): Promise<string> => {
+): Promise<SubmissionResponse> => {
   const paste = submitOptions?.paste || false
   const zip = new JSZip()
   const form = new FormData()
@@ -70,26 +68,23 @@ const submitQuiz = async (
         "Content-Type": "multipart/form-data",
       },
     })
-    .then(res => {
-      console.log(res.data)
-      return paste ? res.data.paste_url : res.data.submission_url
-    })
-    .catch(error => {
-      console.error(error)
-      return "Error when submitting"
-    })
+    .then(res => ({
+      pasteUrl: paste ? res.data.paste_url : undefined,
+      showSubmissionUrl: res.data.show_submission_url,
+      submissionUrl: res.data.submission_url,
+    }))
 }
 
 const fetchSubmissionResult = async (
   url: string,
   token: string,
-): Promise<any> => {
+): Promise<TestResultObject[]> => {
   const headers = getHeaders(token)
-  let resultObject
+  let resultObject: TestResultObject[] = []
   let timeWaited = 0
   let statusProcessing = true
   while (statusProcessing) {
-    const submissionStatusUrl = await axios
+    const submissionStatus = await axios
       .request({
         responseType: "json",
         url,
@@ -104,12 +99,20 @@ const fetchSubmissionResult = async (
         console.log(err)
       })
 
-    if (submissionStatusUrl.status !== "processing") {
+    if (submissionStatus.status !== "processing") {
+      console.log(submissionStatus)
       statusProcessing = false
-      resultObject = submissionStatusUrl.test_cases
+      const tests = submissionStatus.test_cases as any[]
+      resultObject = tests.map((test, index) => ({
+        id: index.toString(),
+        testName: test.name,
+        passed: test.successful,
+        feedback: test.message,
+        points: [],
+      }))
     } else if (timeWaited >= 10000) {
       // TODO: Return test result objekt
-      resultObject = [{ name: `Submission took really long time.` }]
+      console.log("Tests timed out")
       break
     }
 

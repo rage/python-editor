@@ -4,6 +4,12 @@ export type OutputObject = {
   text: string
 }
 
+export type SubmissionResponse = {
+  pasteUrl?: string
+  showSubmissionUrl: string
+  submissionUrl: string
+}
+
 export type TestResultObject = {
   id: string
   testName: string
