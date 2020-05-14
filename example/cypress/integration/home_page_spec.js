@@ -1,5 +1,7 @@
 const program = '# A simple program\nprint("hello from", "python")\n'
-const inputUrl = "http://www.foo.bar"
+const inputOrganization = "test"
+const inputCourse = "python-test"
+const inputExercise = "osa01-01_hymio"
 const inputToken = "123abc000"
 
 describe("The Playground", () => {
@@ -8,19 +10,49 @@ describe("The Playground", () => {
       cy.visit("/")
     })
 
-    it("has a url input field", () => {
-      cy.get("[data-cy=url-input]")
+    it("has a organization input field", () => {
+      cy.get("[data-cy=organization-input]")
         .find("input")
-        .type(inputUrl)
-        .should("have.value", inputUrl)
+        .type(inputOrganization)
+        .should("have.value", inputOrganization)
     })
 
-    it("can get url from local storage", () => {
+    it("can get organization from local storage", () => {
       cy.visit("/")
-      window.localStorage.setItem("url", inputUrl)
-      cy.get("[data-cy=url-input]")
+      window.localStorage.setItem("organization", inputOrganization)
+      cy.get("[data-cy=organization-input]")
         .find("input")
-        .should("have.value", inputUrl)
+        .should("have.value", inputOrganization)
+    })
+
+    it("has a course input field", () => {
+      cy.get("[data-cy=course-input]")
+        .find("input")
+        .type(inputCourse)
+        .should("have.value", inputCourse)
+    })
+
+    it("can get course from local storage", () => {
+      cy.visit("/")
+      window.localStorage.setItem("course", inputCourse)
+      cy.get("[data-cy=course-input]")
+        .find("input")
+        .should("have.value", inputCourse)
+    })
+
+    it("has an exercise input field", () => {
+      cy.get("[data-cy=exercise-input]")
+        .find("input")
+        .type(inputExercise)
+        .should("have.value", inputExercise)
+    })
+
+    it("can get exercise from local storage", () => {
+      cy.visit("/")
+      window.localStorage.setItem("exercise", inputExercise)
+      cy.get("[data-cy=exercise-input]")
+        .find("input")
+        .should("have.value", inputExercise)
     })
 
     it("has a user token input field", () => {
