@@ -72,7 +72,11 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     }
   }
 
-  const wrap = (source: string, presentlyImported: Array<string>) => {
+  const wrap = (
+    source: string,
+    presentlyImported: Array<string>,
+    isTesting: boolean = false,
+  ) => {
     const importAllPattern = /^import \./
     const importSomePattern = /^from \.\w+ import/
     const sourceLines = source.split("\n")
@@ -81,7 +85,12 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         return replaceImportAll(parseImportAll(line), num, presentlyImported)
       }
       return line.match(importSomePattern)
-        ? replaceImportSome(parseImportSome(line), num, presentlyImported)
+        ? replaceImportSome(
+            parseImportSome(line),
+            num,
+            presentlyImported,
+            isTesting,
+          )
         : line
     })
     return lines.join("\n")
@@ -108,6 +117,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     im: PythonImportSome,
     lineNumber: number,
     presentlyImported: Array<string>,
+    testing: boolean,
   ): string => {
     const sourceShortName = im.pkg.slice(1) + ".py"
     if (presentlyImported.includes(sourceShortName)) {
@@ -124,7 +134,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     const head = `def ${functionName}():\n`
     const body = sourceLines.join("\n") + "\n"
     const ret = `\treturn ${names}\n`
-    const tail = `${names} = ${functionName}()`
+    const tail = testing
+      ? `${names} = ${functionName}`
+      : `${names} = ${functionName}()`
     return head + body + ret + tail
   }
 
@@ -233,6 +245,67 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setOutput([])
   }
 
+  // Modifies given test file content with Skulpt compatible imports
+  const modifyTestSkulptCompatible = (content: string, shortName: string) => {
+    const usedModule = shortName.slice(0, -3)
+    let testContent = content
+    const testFileBeginningImports = `
+import unittest
+import sys
+import StringIO
+
+from .${usedModule} import ${usedModule}
+module_name = ${usedModule}
+
+def points(*args):
+    def jsonify_arr(arr):
+        return str(arr).replace("'", '"')
+
+    def wrapper(fn):
+        print('Points: {"name": "{}", "points": {}}'.format(fn.__name__, jsonify_arr(list(args))))
+        return fn
+    return wrapper
+
+def use_input(val):
+    sys.stdin = StringIO.StringIO(val+'\\n'+val)
+
+def get_stdout_from(fn):
+    fn()
+    sys.stdout = StringIO.StringIO()
+    fn()
+    output = sys.stdout.getvalue().strip()
+    sys.stdout = sys.__stdout__
+    return output
+
+`
+    // Find the first test class replace the contents before it
+    const firstPointsIdx = testContent.indexOf("@points")
+    const firstTestClassIdx = testContent.indexOf("class")
+    if (firstPointsIdx !== -1 && firstPointsIdx < firstTestClassIdx) {
+      testContent = testContent.slice(firstPointsIdx)
+    } else {
+      testContent = testContent.slice(firstTestClassIdx)
+    }
+
+    // Add a test setup method at the beginning of every test class
+    const setUp = `
+
+    def setUp(self):
+        self.module = module_name`
+
+    const regex = /\(unittest.TestCase\):/g
+    let result = null
+    while ((result = regex.exec(testContent))) {
+      const testClassBegin = result.index + "(unittest.TestCase):".length
+      testContent =
+        testContent.substring(0, testClassBegin) +
+        setUp +
+        testContent.substring(testClassBegin)
+    }
+
+    return testFileBeginningImports + testContent
+  }
+
   const runTests = (testCode?: string) => {
     setOutput([])
     setRunning(true)
@@ -243,13 +316,17 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const runTestsWrapped = () => {
     setTestResults([])
     testFiles.forEach(testFile => {
-      const testContent = testFile?.content
+      let testContent = testFile?.content
+      const modifiedTestContent = modifyTestSkulptCompatible(
+        testContent,
+        selectedFile.shortName,
+      )
       try {
         if (!testContent) {
           throw "FileError: No tests found"
         }
-        const wrapped = wrap(testContent, [])
-        return runTests(wrapped)
+        const wrappedTestContent = wrap(modifiedTestContent, [], true)
+        return runTests(wrappedTestContent)
       } catch (error) {
         setTestResults(prev =>
           prev.concat({
@@ -318,90 +395,50 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   )
 }
 
-const defaultSrcContent = `# No quiz has been loaded.
-# This is the default file main.py
-
-from .utils import greeting, getLocality
-
-def greetWorld():
-  print(greeting(getLocality()))
-
-def foo():
-  print("foo!")
-  
+const defaultSrcContent = `
+syote = input("anna syöte: ")
+print(syote)
+print(syote)
 `
 
-// const defaultTestContent = `# No quiz has been loaded.
+// Test file in the format that's used with TMC
 
-// import unittest
-
-// class TestFunctions(unittest.TestCase):
-//   def test_arithmetic(self):
-//     self.assertEqual(42, 40+2)
-
-// unittest.main()
-// `
-const defaultTestContent = `# No quiz has been loaded.
-# This is the default file test.py
-
-from .main import greetWorld
-
-greetWorld()
-`
-
-const defaultTests = `# No quiz has been loaded.
+const defaultTests = `
 import unittest
-import StringIO
+from tmc import points
+from tmc.utils import get_stdout, load_module, reload_module
+from io import StringIO
 import sys
-import .main
 
-def points(*args):
-    def jsonify_arr(arr):
-        return str(arr).replace("'", '"')
+module_name='src.main'
 
-    def wrapper(fn):
-        print('Points: {"name": "{}", "points": {}}'.format(fn.__name__, jsonify_arr(list(args))))
-        return fn
-    return wrapper
+def use_input(val):
+    sys.stdin = StringIO(val)
 
-class TestDefaultFunctions(unittest.TestCase):
+def get_stdout_from(fn):
+    reload_module(fn)
+    return get_stdout()
 
-    @points('2.1')
-    def test_foo(self):
-        foo()
-        sys.stdout = StringIO.StringIO()
-        foo()
-        output = sys.stdout.getvalue().strip()
-        sys.stdout = sys.__stdout__
-        self.assertEqual(output, 'Hello world!')
+@points('1.3')
+class SyoteTest(unittest.TestCase):
 
-    @points('2.2')
-    def test_hello(self):
-        greetWorld()
-        sys.stdout = StringIO.StringIO()
-        greetWorld()
-        output = sys.stdout.getvalue().strip()
-        sys.stdout = sys.__stdout__
-        self.assertEqual(output, 'Hello world!')
+    @classmethod
+    def setUpClass(cls):
+        use_input(" ")
+        cls.module = load_module(module_name)
+
+    def test_syotteen_tulostus_1(self):
+        use_input("Pekka")
+        output = get_stdout_from(self.module)
+        self.assertEqual(output, 'anna syöte: Pekka\\nPekka', 'Tuloste ei toiminut oikein syötteellä: Pekka')
+
+    def test_syotteen_tulostus_2(self):
+        use_input("Ada")
+        output = get_stdout_from(self.module)
+        self.assertEqual(output, 'anna syöte: Ada\\nAda', 'Tuloste ei toiminut oikein syötteellä: Ada')
 
 if __name__ == '__main__':
-    # Running tests requires verbosity > 1 at the moment 
-    # Make sure to run with command unittest.main(2) or equal
     unittest.main(2)
-`
-
-const defaultUtilsContent = `# No quiz has been loaded.
-# This is the default file utils.py
-
-# Mutually recursive imports are disallowed.
-# Try uncommenting the line below!
-#from .main import foo
-
-def greeting(recipient):
-  return "Hello " + recipient + "!"
-
-def getLocality():
-  return "world"
 `
 
 Quiz.defaultProps = {
@@ -411,18 +448,6 @@ Quiz.defaultProps = {
       shortName: "main.py",
       originalContent: defaultSrcContent,
       content: defaultSrcContent,
-    },
-    {
-      fullName: "utils.py",
-      shortName: "utils.py",
-      originalContent: defaultUtilsContent,
-      content: defaultUtilsContent,
-    },
-    {
-      fullName: "test.py",
-      shortName: "test.py",
-      originalContent: defaultTestContent,
-      content: defaultTestContent,
     },
   ],
   loadedTestFiles: [
