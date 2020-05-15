@@ -40,6 +40,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
   const [running, setRunning] = useState(false)
+  const [aborted, setAborted] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<{
     submitting: boolean
     paste?: boolean
@@ -53,6 +54,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       setTestResults(undefined)
       setWorkerAvailable(false)
       setRunning(true)
+      setAborted(false)
       setTesting(false)
       worker.postMessage({ type: "run", msg: code })
     } else {
@@ -241,6 +243,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     }
     worker.postMessage({ type: "stop" })
     setRunning(false)
+    setAborted(true)
     setInputRequested(false)
   }
 
@@ -297,6 +300,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         inputRequested={inputRequested}
         sendInput={sendInput}
         isRunning={running}
+        isAborted={aborted}
         handleSubmit={() => handleSubmit(false)}
         handlePasteSubmit={() => handleSubmit(true)}
         pasteUrl={pasteUrl}

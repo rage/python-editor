@@ -22,6 +22,7 @@ type OutputProps = {
   inputRequested: boolean
   sendInput: (input: string) => void
   isRunning: boolean
+  isAborted: boolean
   handleSubmit: () => void
   handlePasteSubmit: () => void
   pasteUrl: string
@@ -119,6 +120,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     inputRequested,
     sendInput,
     isRunning,
+    isAborted,
     handleSubmit,
     handlePasteSubmit,
     pasteUrl,
@@ -315,6 +317,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                   disabled={
                     isSubmitting ||
                     isRunning ||
+                    isAborted ||
                     outputContent.some(item => item.type === "error")
                   }
                   data-cy="submit-btn"
