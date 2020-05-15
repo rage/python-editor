@@ -1,5 +1,5 @@
 {
-  "name": "moocfi-editor",
+  "name": "moocfi-python-editor",
   "version": "0.5.0",
   "description": "",
   "main": "dist/index.js",
