@@ -74,16 +74,53 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }
 
   const submitAndWaitResult = async (files: Array<FileEntry>) => {
-    const resultUrl = await submitQuiz(submissionUrl, token, files)
-    const testCases = await fetchSubmissionResult(resultUrl, token)
-    return testCases[0].name
+    const wrapError = (status: number, message: string) => ({
+      points: [],
+      testCases: [
+        {
+          id: "0",
+          testName: "Exercise submission",
+          passed: false,
+          feedback: `Error ${status}: ${message}`,
+        },
+      ],
+    })
+    const submitResult = await submitQuiz(submissionUrl, token, files)
+    if (submitResult.err) {
+      return wrapError(submitResult.val.status, submitResult.val.message)
+    }
+    const serverResult = await fetchSubmissionResult(
+      submitResult.val.submissionUrl,
+      token,
+    )
+    if (serverResult.err) {
+      return wrapError(serverResult.val.status, serverResult.val.message)
+    }
+    return serverResult.val
+  }
+
+  const submitToPaste = async (files: FileEntry[]) => {
+    const submitResult = await submitQuiz(submissionUrl, token, files, {
+      paste: true,
+    })
+    return submitResult.ok
+      ? submitResult.val.pasteUrl || ""
+      : submitResult.val.message
   }
 
   useEffect(() => {
     const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
-    Promise.all(getZippedQuiz(url, token))
+    getZippedQuiz(url, token)
       .then(result => {
-        const [zip, subm] = result
+        if (result.err) {
+          return Promise.resolve([
+            {
+              ...defaultFile,
+              content: `# ${result.val.status}: ${result.val.message}`,
+            },
+          ])
+        }
+        const [zip, subm] = result.val
         setSubmissionUrl(() => subm)
         return getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile)
       })
@@ -97,9 +134,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       <Quiz
         initialFiles={srcFiles}
         submitQuiz={submitAndWaitResult}
-        submitToPaste={files =>
-          submitQuiz(submissionUrl, token, files, { paste: true })
-        }
+        submitToPaste={submitToPaste}
       />
     </>
   )

@@ -4,6 +4,7 @@ import { Typography } from "@material-ui/core"
 
 type TestProgressBarProps = {
   percentage: number
+  title: string
 }
 
 const ProgressBarBackground = styled.div`
@@ -36,12 +37,13 @@ const ProgressBarText = styled(Typography)`
 
 const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
   percentage,
+  title,
 }) => {
   if (!percentage && percentage !== 0) return null
 
   return (
     <>
-      <Typography align="center">Tests passed</Typography>
+      <Typography align="center">{title}</Typography>
       <ProgressBarBackground>
         <ProgressBarText variant="button">{percentage}%</ProgressBarText>
         <ProgressBar value={percentage} />

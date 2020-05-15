@@ -1,6 +1,13 @@
 import axios from "axios"
 import JSZip from "jszip"
+import { Result, Err, Ok } from "ts-results"
 import { FileEntry } from "../components/QuizLoader"
+import { SubmissionResponse, TestResultObject } from "../types"
+
+interface Error {
+  status: number
+  message: string
+}
 
 interface SubmitOptions {
   paste?: boolean
@@ -12,10 +19,10 @@ const getHeaders = (token: string) => ({
   client_version: "0.5.0",
 })
 
-const getZippedQuiz = (
+const getZippedQuiz = async (
   url: string,
   token: string,
-): [Promise<JSZip>, Promise<string>] => {
+): Promise<Result<[JSZip, string], Error>> => {
   const headers = getHeaders(token)
   const zip = axios
     .request({
@@ -28,6 +35,13 @@ const getZippedQuiz = (
       const zip = new JSZip()
       return zip.loadAsync(res.data)
     })
+    .catch(error => {
+      console.error(error)
+      throw {
+        status: error.response.status,
+        message: "Failed to download exercise.",
+      }
+    })
   const submissionUrl = axios
     .request({
       responseType: "json",
@@ -35,11 +49,18 @@ const getZippedQuiz = (
       method: "get",
       headers,
     })
-    .then(res => {
-      console.log(res.data)
-      return `https://tmc.mooc.fi/api/v8/core/exercises/${res.data.id}`
+    .then(res => `https://tmc.mooc.fi/api/v8/core/exercises/${res.data.id}`)
+    .catch(error => {
+      throw {
+        status: error.response.status,
+        message: "Failed to download exercise.",
+      }
     })
-  return [zip, submissionUrl]
+  try {
+    return new Ok(await Promise.all([zip, submissionUrl]))
+  } catch (error) {
+    return new Err(error)
+  }
 }
 
 const submitQuiz = async (
@@ -47,7 +68,7 @@ const submitQuiz = async (
   token: string,
   files: Array<FileEntry>,
   submitOptions?: SubmitOptions,
-): Promise<string> => {
+): Promise<Result<SubmissionResponse, Error>> => {
   const paste = submitOptions?.paste || false
   const zip = new JSZip()
   const form = new FormData()
@@ -55,7 +76,6 @@ const submitQuiz = async (
     zip.file(file.fullName, file.content)
   })
   if (paste) {
-    console.log("this is paste submission")
     form.append("paste", "1")
   }
   form.append("submission[file]", await zip.generateAsync({ type: "blob" }))
@@ -70,26 +90,32 @@ const submitQuiz = async (
         "Content-Type": "multipart/form-data",
       },
     })
-    .then(res => {
-      console.log(res.data)
-      return paste ? res.data.paste_url : res.data.submission_url
-    })
+    .then(
+      result =>
+        new Ok({
+          pasteUrl: paste ? result.data.paste_url : undefined,
+          showSubmissionUrl: result.data.show_submission_url,
+          submissionUrl: result.data.submission_url,
+        }),
+    )
     .catch(error => {
-      console.error(error)
-      return "Error when submitting"
+      const status = error.response.status
+      let message =
+        status === 403 ? "Authentication required" : "Submission process failed"
+      console.error(error.response)
+      return new Err({ status, message })
     })
 }
 
 const fetchSubmissionResult = async (
   url: string,
   token: string,
-): Promise<any> => {
+): Promise<Result<TestResultObject, Error>> => {
   const headers = getHeaders(token)
-  let resultObject
-  let timeWaited = 0
-  let statusProcessing = true
-  while (statusProcessing) {
-    const submissionStatusUrl = await axios
+  const times = [2000, 2000, 1000, 1000, 1000, 2000, 2000, 4000, 8000, 16000]
+  for (const time of times) {
+    await new Promise(resolve => setTimeout(resolve, time))
+    const submissionStatus = await axios
       .request({
         responseType: "json",
         url,
@@ -101,22 +127,31 @@ const fetchSubmissionResult = async (
         return res.data
       })
       .catch(err => {
-        console.log(err)
+        console.error(err.response)
+        return { status: "error", statusCode: err.response.status }
       })
 
-    if (submissionStatusUrl.status !== "processing") {
-      statusProcessing = false
-      resultObject = submissionStatusUrl.test_cases
-    } else if (timeWaited >= 10000) {
-      // TODO: Return test result objekt
-      resultObject = [{ name: `Submission took really long time.` }]
-      break
+    if (submissionStatus.status === "error") {
+      return new Err({
+        status: submissionStatus.statusCode,
+        message: "Submission process failed",
+      })
+    } else if (submissionStatus.status !== "processing") {
+      const tests = submissionStatus.test_cases as any[]
+      const testCases = tests.map((test, index) => ({
+        id: index.toString(),
+        testName: test.name,
+        passed: test.successful,
+        feedback: test.message,
+      }))
+      const points = submissionStatus.points as string[]
+      return new Ok({ points, testCases })
     }
-
-    await new Promise(resolve => setTimeout(resolve, 2500))
-    timeWaited += 2500
   }
-  return resultObject
+  return new Err({
+    status: 418,
+    message: "Submission was taking a really long time.",
+  })
 }
 
 export { getZippedQuiz, submitQuiz, fetchSubmissionResult }
