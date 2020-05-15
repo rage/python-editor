@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import styled, { keyframes } from "styled-components"
 import {
   Button,
@@ -111,6 +111,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const [help, setShowHelp] = useState(false)
+  const [progress, setProgress] = useState(100)
   const {
     outputContent,
     testResults,
@@ -153,6 +154,29 @@ const Output: React.FunctionComponent<OutputProps> = props => {
       if (!open) setOpen(true)
     }
   }, [isRunning])
+
+  useEffect(() => {
+    if (isSubmitting) {
+      setProgress(35)
+    }
+  }, [isSubmitting])
+
+  useEffect(() => {
+    if (isSubmitting) {
+      setTimeout(() => {
+        setProgress(prev => Math.min(prev + 10, 100))
+      }, 2000)
+    }
+  }, [progress])
+
+  // Do not modify, this is optimized.
+  const fakePercentage = () => {
+    const fake = progress / 100
+    return Math.min(
+      Math.round((3 * Math.pow(fake, 2) - 2 * Math.pow(fake, 3)) * 100),
+      99,
+    )
+  }
 
   const closeOutput = () => {
     setOpen(false)
@@ -239,21 +263,26 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             alignItems="center"
             justify="space-between"
           >
-            <Grid item xs="auto">
+            <Grid item xs={2}>
               <OutputTitle>{titleText}</OutputTitle>
             </Grid>
-            {testing ? (
-              <Grid item xs={6}>
-                <TestProgressBar percentage={passedTestsPercentage} />
+            {isSubmitting ? (
+              <Grid item xs={5}>
+                <TestProgressBar
+                  percentage={fakePercentage()}
+                  title={"Submitting to server"}
+                />
               </Grid>
             ) : null}
-            <Grid
-              container
-              item
-              xs={testing ? 3 : 9}
-              alignItems="center"
-              justify="flex-end"
-            >
+            {testing ? (
+              <Grid item xs={5}>
+                <TestProgressBar
+                  percentage={passedTestsPercentage}
+                  title={"Tests passed"}
+                />
+              </Grid>
+            ) : null}
+            <Grid container item xs={5} alignItems="center" justify="flex-end">
               {getStatusIcon()}
               <StatusText>{getStatusText()}</StatusText>
               {testing ? null : (

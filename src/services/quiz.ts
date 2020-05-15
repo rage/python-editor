@@ -81,9 +81,9 @@ const fetchSubmissionResult = async (
 ): Promise<TestResultObject> => {
   const headers = getHeaders(token)
   let resultObject: TestResultObject = { points: [], testCases: [] }
-  let timeWaited = 0
-  let statusProcessing = true
-  while (statusProcessing) {
+  const times = [2000, 2000, 1000, 1000, 1000, 2000, 2000, 4000, 8000, 16000]
+  for (const time of times) {
+    await new Promise(resolve => setTimeout(resolve, time))
     const submissionStatus = await axios
       .request({
         responseType: "json",
@@ -100,26 +100,17 @@ const fetchSubmissionResult = async (
       })
 
     if (submissionStatus.status !== "processing") {
-      console.log(submissionStatus)
-      statusProcessing = false
       const tests = submissionStatus.test_cases as any[]
       const testCases = tests.map((test, index) => ({
         id: index.toString(),
         testName: test.name,
         passed: test.successful,
         feedback: test.message,
-        points: submissionStatus.points,
       }))
       const points = submissionStatus.points as string[]
       resultObject = { points, testCases }
-    } else if (timeWaited >= 10000) {
-      // TODO: Return test result objekt
-      console.log("Tests timed out")
-      break
+      return resultObject
     }
-
-    await new Promise(resolve => setTimeout(resolve, 2500))
-    timeWaited += 2500
   }
   return resultObject
 }
