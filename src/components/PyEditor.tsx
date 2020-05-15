@@ -46,13 +46,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
 
   return (
     <>
-      <StyledButton
+      {/* <StyledButton
         onClick={handleShowValue}
         disabled={!isEditorReady}
         data-cy="print-btn"
       >
         Print editor content
-      </StyledButton>
+      </StyledButton> */}
       <StyledButton
         onClick={() => handleRun(editorValue)}
         disabled={!(isEditorReady && allowRun)}
@@ -60,13 +60,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
       >
         Run code
       </StyledButton>
-      <StyledButton
+      {/* <StyledButton
         onClick={() => handleRunWrapped(editorValue)}
         disabled={!(isEditorReady && allowRun)}
         data-cy="run-wrapped-btn"
       >
         Run with wrapped imports
-      </StyledButton>
+      </StyledButton> */}
       <StyledButton
         onClick={() => handleStop()}
         disabled={!isRunning}

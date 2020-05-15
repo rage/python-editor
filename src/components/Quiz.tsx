@@ -262,25 +262,28 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
 
   return (
     <div style={{ position: "relative", width: "70vw" }}>
-      <p>This is a quiz.</p>
-      <InputLabel id="label">Select File</InputLabel>
-      <Select
-        labelId="label"
-        native
-        value={selectedFile.shortName}
-        onChange={handleChange}
-        data-cy="select-file"
-      >
-        {files.length > 0 && (
-          <>
-            {files.map(({ shortName }) => (
-              <option key={shortName} value={shortName}>
-                {shortName}
-              </option>
-            ))}
-          </>
-        )}
-      </Select>
+      {files.length > 1 && (
+        <>
+          <InputLabel id="label">Select File</InputLabel>
+          <Select
+            labelId="label"
+            native
+            value={selectedFile.shortName}
+            onChange={handleChange}
+            data-cy="select-file"
+          >
+            {
+              <>
+                {files.map(({ shortName }) => (
+                  <option key={shortName} value={shortName}>
+                    {shortName}
+                  </option>
+                ))}
+              </>
+            }
+          </Select>
+        </>
+      )}
       {/* <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
         Run tests
       </Button> */}
