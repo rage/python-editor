@@ -304,7 +304,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                     onClick={showHelp}
                     variant="contained"
                     disabled={isSubmitting || isRunning || help}
-                    data-cy="submit-btn"
+                    data-cy="need-help-btn"
                   >
                     Need help?
                   </MarginedButton>

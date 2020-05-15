@@ -78,17 +78,21 @@ describe("The Playground", () => {
       cy.get("[data-cy=unload-btn]").click()
     })
 
+    /*
     it("has a print editor content button", () => {
       cy.get("[data-cy=print-btn]").click()
     })
+    */
 
     it("has a run code button", () => {
       cy.get("[data-cy=run-btn]").click()
     })
 
+    /*
     it("has a run code with wrapped imports button", () => {
       cy.get("[data-cy=run-wrapped-btn]").click()
     })
+    */
 
     it("has an editor input field", () => {
       cy.visit("/")
@@ -100,6 +104,7 @@ describe("The Playground", () => {
         .type(program)
     })
 
+    /*
     it("editor contents can be displayed as an alert", () => {
       const stub = cy.stub()
       cy.on("window:alert", stub)
@@ -109,6 +114,7 @@ describe("The Playground", () => {
           expect(stub.getCall(0)).to.be.calledWith(program)
         })
     })
+    */
 
     it("Running python code produces output", () => {
       cy.get("[data-cy=run-btn]").click()
@@ -244,7 +250,7 @@ describe("The Playground", () => {
       cy.contains(testString)
     })
   })
-
+  /*
   describe("Running default tests", () => {
     it("displays testing title in output title box", () => {
       cy.visit("/")
@@ -268,4 +274,5 @@ describe("The Playground", () => {
       cy.get("[data-cy=test-result]").should("have.length", 6)
     })
   })
+  */
 })
