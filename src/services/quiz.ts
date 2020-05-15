@@ -78,9 +78,9 @@ const submitQuiz = async (
 const fetchSubmissionResult = async (
   url: string,
   token: string,
-): Promise<TestResultObject[]> => {
+): Promise<TestResultObject> => {
   const headers = getHeaders(token)
-  let resultObject: TestResultObject[] = []
+  let resultObject: TestResultObject = { points: [], testCases: [] }
   let timeWaited = 0
   let statusProcessing = true
   while (statusProcessing) {
@@ -103,13 +103,15 @@ const fetchSubmissionResult = async (
       console.log(submissionStatus)
       statusProcessing = false
       const tests = submissionStatus.test_cases as any[]
-      resultObject = tests.map((test, index) => ({
+      const testCases = tests.map((test, index) => ({
         id: index.toString(),
         testName: test.name,
         passed: test.successful,
         feedback: test.message,
-        points: [],
+        points: submissionStatus.points,
       }))
+      const points = submissionStatus.points as string[]
+      resultObject = { points, testCases }
     } else if (timeWaited >= 10000) {
       // TODO: Return test result objekt
       console.log("Tests timed out")

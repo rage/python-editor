@@ -12,17 +12,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 import TestResults from "./TestResults"
 import TestProgressBar from "./TestProgressBar"
+import Help from "./Help"
 import { OutputObject, TestResultObject } from "../types"
 
 type OutputProps = {
   outputContent: OutputObject[]
-  testResults: TestResultObject[]
+  testResults: TestResultObject | undefined
   clearOutput: () => void
   inputRequested: boolean
   sendInput: (input: string) => void
   isRunning: boolean
   handleSubmit: () => void
   handlePasteSubmit: () => void
+  pasteUrl: string
   isSubmitting: boolean
   handleStop: () => void
   testing: boolean
@@ -108,6 +110,7 @@ const StatusText = styled(Typography)`
 const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
+  const [help, setShowHelp] = useState(false)
   const {
     outputContent,
     testResults,
@@ -117,6 +120,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     isRunning,
     handleSubmit,
     handlePasteSubmit,
+    pasteUrl,
     isSubmitting,
     handleStop,
     testing,
@@ -143,6 +147,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   }, [inputRequested, outputContent])
 
   useEffect(() => {
+    setShowHelp(false)
     if (isRunning && !render) {
       setRender(true)
       if (!open) setOpen(true)
@@ -151,6 +156,10 @@ const Output: React.FunctionComponent<OutputProps> = props => {
 
   const closeOutput = () => {
     setOpen(false)
+  }
+
+  const showHelp = () => {
+    setShowHelp(true)
   }
 
   const onAnimationEnd = () => {
@@ -177,6 +186,8 @@ const Output: React.FunctionComponent<OutputProps> = props => {
           <React.Fragment key={output.id}>{output.text}</React.Fragment>
         ),
       )
+    } else if (help) {
+      return <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
     } else if (testResults) {
       return <TestResults results={testResults} />
     }
@@ -203,13 +214,18 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   }
 
   const titleText = testing ? "Test Results" : "Output"
-
-  const passedTestsSum = testResults.reduce((passed: number, result: any) => {
-    return passed + (result.passed ? 1 : 0)
-  }, 0)
-  const passedTestsPercentage = Math.round(
-    (passedTestsSum / testResults.length) * 100,
-  )
+  let passedTestsPercentage = 0
+  if (testResults) {
+    const passedTestsSum = testResults.testCases.reduce(
+      (passed: number, result: any) => {
+        return passed + (result.passed ? 1 : 0)
+      },
+      0,
+    )
+    passedTestsPercentage = Math.round(
+      (passedTestsSum / testResults.testCases.length) * 100,
+    )
+  }
 
   return (
     <ContainerBox data-cy="output-container">
@@ -251,15 +267,28 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                   Stop
                 </MarginedButton>
               )}
-
-              <MarginedButton
-                onClick={handleSubmit}
-                variant="contained"
-                disabled={isSubmitting || isRunning}
-                data-cy="submit-btn"
-              >
-                Submit solution
-              </MarginedButton>
+              {testResults ? (
+                testResults.testCases.some(test => !test.passed) ? (
+                  <MarginedButton
+                    onClick={showHelp}
+                    variant="contained"
+                    disabled={isSubmitting || isRunning || help}
+                    data-cy="submit-btn"
+                  >
+                    Need help?
+                  </MarginedButton>
+                ) : null
+              ) : null}
+              {testing ? null : (
+                <MarginedButton
+                  onClick={handleSubmit}
+                  variant="contained"
+                  disabled={isSubmitting || isRunning}
+                  data-cy="submit-btn"
+                >
+                  Run tests
+                </MarginedButton>
+              )}
               <MarginedButton
                 onClick={closeOutput}
                 variant="contained"

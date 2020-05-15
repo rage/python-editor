@@ -13,7 +13,7 @@ import {
 import { OutputObject, TestResultObject } from "../types"
 
 type QuizProps = {
-  submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject[]>
+  submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
 }
@@ -33,7 +33,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   initialFiles,
 }) => {
   const [output, setOutput] = useState<OutputObject[]>([])
-  const [testResults, setTestResults] = useState<TestResultObject[]>([])
+  const [testResults, setTestResults] = useState<TestResultObject | undefined>()
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [inputRequested, setInputRequested] = useState(false)
   const [files, setFiles] = useState([defaultFile])
@@ -41,15 +41,16 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const [editorValue, setEditorValue] = useState("")
   const [running, setRunning] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<{
-    submiting: boolean
+    submitting: boolean
     paste?: boolean
-  }>({ submiting: false })
+  }>({ submitting: false })
   const [testing, setTesting] = useState(false)
+  const [pasteUrl, setPasteUrl] = useState("")
 
   function handleRun(code: string) {
     if (workerAvailable) {
       setOutput([])
-      setTestResults([])
+      setTestResults(undefined)
       setWorkerAvailable(false)
       setRunning(true)
       setTesting(false)
@@ -183,7 +184,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
 
   const handleSubmit = (paste: boolean) => {
     setStateForSelectedFile()
-    setSubmitStatus({ submiting: true, paste })
+    setSubmitStatus({ submitting: true, paste })
   }
 
   const setStateForSelectedFile = () => {
@@ -216,16 +217,18 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }, [initialFiles])
 
   useEffect(() => {
-    if (submitStatus.submiting) {
+    if (submitStatus.submitting) {
       if (submitStatus.paste) {
-        alert(submitToPaste(files).then(res => res))
-        setSubmitStatus(() => ({ submiting: false }))
+        submitToPaste(files).then(res => setPasteUrl(res))
+        setSubmitStatus(() => ({ submitting: false }))
       } else {
         submitQuiz(files).then(data => {
           console.log(data)
           clearOutput()
           setTestResults(data)
-          setSubmitStatus(() => ({ submiting: false }))
+          setOutput([])
+          setTesting(true)
+          setSubmitStatus(() => ({ submitting: false }))
         })
       }
     }
@@ -275,9 +278,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
           </>
         )}
       </Select>
-      <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
+      {/* <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
         Run tests
-      </Button>
+      </Button> */}
       <PyEditor
         handleRun={handleRun}
         handleRunWrapped={handleRunWrapped}
@@ -296,7 +299,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         isRunning={running}
         handleSubmit={() => handleSubmit(false)}
         handlePasteSubmit={() => handleSubmit(true)}
-        isSubmitting={submitStatus.submiting}
+        pasteUrl={pasteUrl}
+        isSubmitting={submitStatus.submitting}
         handleStop={stopWorker}
         testing={testing}
       />
@@ -339,7 +343,7 @@ def getLocality():
 `
 
 Quiz.defaultProps = {
-  submitQuiz: () => Promise.resolve([]),
+  submitQuiz: () => Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
   initialFiles: [
     {

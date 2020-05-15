@@ -11,9 +11,11 @@ export type SubmissionResponse = {
 }
 
 export type TestResultObject = {
-  id: string
-  testName: string
-  passed: boolean
-  feedback: string
   points: string[]
+  testCases: Array<{
+    id: string
+    testName: string
+    passed: boolean
+    feedback: string
+  }>
 }

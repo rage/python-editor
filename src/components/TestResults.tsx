@@ -7,16 +7,11 @@ import {
   Checkbox,
   Grid,
 } from "@material-ui/core"
+import { TestResultObject } from "../types"
 
 type TestResultsProps = {
-  results: {
-    id: string
-    testName: string
-    passed: boolean
-    feedback: string
-  }[]
+  results: TestResultObject
 }
-
 type TestResultProps = {
   testName: string
   passed: boolean
@@ -59,18 +54,24 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
 
   const showResults = () => {
     if (!showAll) {
-      const failedTest = results.find(result => result.passed === false)
-      return failedTest ? (
-        <TestResult
-          key={failedTest.id}
-          testName={failedTest.testName}
-          passed={failedTest.passed}
-          feedback={failedTest.feedback}
-        />
-      ) : null
+      const failedTest = results.testCases.filter(
+        result => result.passed === false,
+      )
+      if (failedTest) {
+        return failedTest.map(res => (
+          <TestResult
+            key={res.id}
+            testName={res.testName}
+            passed={res.passed}
+            feedback={res.feedback}
+          />
+        ))
+      } else {
+        console.log("Points", results.points)
+      }
     }
 
-    return results.map(r => (
+    return results.testCases.map(r => (
       <TestResult
         key={r.id}
         testName={r.testName}
@@ -80,7 +81,7 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
     ))
   }
 
-  if (!results || results.length === 0) return null
+  if (!results.testCases || results.testCases.length === 0) return null
 
   return (
     <Grid container direction="row" justify="space-between">
