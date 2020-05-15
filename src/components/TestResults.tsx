@@ -17,6 +17,9 @@ type TestResultProps = {
   passed: boolean
   feedback: string
 }
+type PointsProps = {
+  points: string[]
+}
 
 const StyledPaper = styled(({ passed, ...props }) => <Paper {...props} />)`
   border-left: 10px solid ${({ passed }) => (passed ? "#4caf50" : "#f44336")};
@@ -29,6 +32,14 @@ const TestResultHeader = styled(({ passed, ...props }) => (
 ))`
   color: ${({ passed }) => (passed ? "#4caf50" : "#f44336")};
   font-weight: 700;
+`
+
+const StyledPointsPaper = styled(({ points, ...props }) => (
+  <Paper {...props} />
+))`
+  border-left: 10px solid #4caf50;
+  margin: 5px;
+  padding: 10px;
 `
 
 const TestResult: React.FunctionComponent<TestResultProps> = ({
@@ -47,6 +58,16 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
   )
 }
 
+const Points: React.FunctionComponent<PointsProps> = ({ points }) => {
+  return (
+    <StyledPointsPaper points data-cy="submission-points">
+      <Typography>
+        {"Points gained: "} {points}
+      </Typography>
+    </StyledPointsPaper>
+  )
+}
+
 const TestResults: React.FunctionComponent<TestResultsProps> = ({
   results,
 }) => {
@@ -57,7 +78,7 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
       const failedTest = results.testCases.filter(
         result => result.passed === false,
       )
-      if (failedTest) {
+      if (failedTest.length !== 0) {
         return failedTest.map(res => (
           <TestResult
             key={res.id}
@@ -67,11 +88,11 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
           />
         ))
       } else {
-        console.log("Points", results.points)
+        return <Points points={results.points} />
       }
     }
-
-    return results.testCases.map(r => (
+    const points = <Points points={results.points} />
+    const testResults = results.testCases.map(r => (
       <TestResult
         key={r.id}
         testName={r.testName}
@@ -79,6 +100,11 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
         feedback={r.feedback}
       />
     ))
+    return (
+      <>
+        {results.points.length > 0 ? points : null} {testResults}
+      </>
+    )
   }
 
   if (!results.testCases || results.testCases.length === 0) return null

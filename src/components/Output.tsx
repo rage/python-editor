@@ -312,7 +312,11 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                 <MarginedButton
                   onClick={handleSubmit}
                   variant="contained"
-                  disabled={isSubmitting || isRunning}
+                  disabled={
+                    isSubmitting ||
+                    isRunning ||
+                    outputContent.some(item => item.type === "error")
+                  }
                   data-cy="submit-btn"
                 >
                   Run tests
