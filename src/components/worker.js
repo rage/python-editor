@@ -1,4 +1,3 @@
-importScripts("skulpt.min.js", "skulpt-stdlib.js")
 postMessage({ type: "ready" })
 
 let printBuffer = []
