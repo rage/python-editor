@@ -132,7 +132,7 @@ function run(code) {
     })
     .catch(e => {
       console.log(e)
-      postMessage({ type: "error", msg: e.toString() })
+      printBuffer.push({ type: "error", msg: e.toString() })
     })
     .finally(() => {
       running = false
