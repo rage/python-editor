@@ -1,5 +1,3 @@
-importScripts("skulpt.min.js", "skulpt-stdlib.js")
-let Sk = self.Sk
 postMessage({ type: "ready" })
 
 let printBuffer = []
@@ -90,8 +88,8 @@ function outf(text) {
 
 function builtinRead(x) {
   if (
-    Sk.builtinFiles === undefined ||
-    Sk.builtinFiles["files"][x] === undefined
+    self.Sk.builtinFiles === undefined ||
+    self.Sk.builtinFiles["files"][x] === undefined
   )
     throw "File not found: '" + x + "'"
   return Sk.builtinFiles["files"][x]
@@ -99,27 +97,27 @@ function builtinRead(x) {
 
 function run(code) {
   if (!code || code.length === 0) return
-  Sk.execLimit = 10000
-  Sk.inputfun = function() {
+  self.Sk.execLimit = 10000
+  self.Sk.inputfun = function() {
     printBuffer.push({ type: "input_required" })
     return new Promise((resolve, reject) => {
       self.addEventListener("message", function(e) {
         if (e.data.type === "input") {
           resolve(e.data.msg)
-          Sk.execStart = new Date()
+          self.Sk.execStart = new Date()
         }
       })
     })
   }
-  Sk.configure({
+  self.Sk.configure({
     output: outf,
     read: builtinRead,
-    __future__: Sk.python3,
+    __future__: self.Sk.python3,
   })
 
-  Sk.misceval
+  self.Sk.misceval
     .asyncToPromise(function() {
-      return Sk.importMainWithBody("<stdin>", false, code, true)
+      return self.Sk.importMainWithBody("<stdin>", false, code, true)
     })
     .then(e => {
       console.log("running skulpt completed")

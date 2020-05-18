@@ -11,6 +11,13 @@ import {
   parseImportSome,
 } from "../services/import_parsing"
 import { OutputObject, TestResultObject } from "../types"
+import { skulptMinSource, skulptStdlibSource, workerSource } from "../constants"
+
+const workerRaw = `
+${skulptMinSource}
+${skulptStdlibSource}
+${workerSource}
+`
 
 type QuizProps = {
   submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
@@ -18,7 +25,10 @@ type QuizProps = {
   initialFiles: Array<FileEntry>
 }
 
-let worker = new Worker("./worker.js")
+const blobObject = URL.createObjectURL(
+  new Blob([workerRaw], { type: "application/javascript" }),
+)
+let worker = new Worker(blobObject)
 
 const defaultFile: FileEntry = {
   fullName: "",
@@ -239,7 +249,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const stopWorker = () => {
     if (!workerAvailable) {
       worker.terminate()
-      worker = new Worker("./worker.js")
+      worker = new Worker(blobObject)
     }
     worker.postMessage({ type: "stop" })
     setRunning(false)
