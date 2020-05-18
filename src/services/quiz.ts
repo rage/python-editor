@@ -16,7 +16,7 @@ interface SubmitOptions {
 const getHeaders = (token: string) => ({
   Authorization: `Bearer ${token}`,
   client: "python_editor",
-  client_version: "0.5.0",
+  client_version: "0.5.1",
 })
 
 const getZippedQuiz = async (
