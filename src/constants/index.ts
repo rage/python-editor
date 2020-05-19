@@ -1,17 +1,9 @@
-import fs from "fs"
-import path from "path"
+import skulptMinJsSource64 from "./skulptMinJsSource64"
+import skulptStdlibJsSource64 from "./skulptStdlibJsSource64"
+import workerJsSource64 from "./workerJsSource64"
 
-const skulptMinSource = fs.readFileSync(
-  __dirname + "/../../static/skulpt.min.js",
-  "utf8",
-)
-const skulptStdlibSource = fs.readFileSync(
-  __dirname + "/../../static/skulpt-stdlib.js",
-  "utf8",
-)
-const workerSource = fs.readFileSync(
-  __dirname + "/../components/worker.js",
-  "utf8",
-)
+const skulptMinJsSource = atob(skulptMinJsSource64) + "\n"
+const skulptStdlibJsSource = atob(skulptStdlibJsSource64) + "\n"
+const workerJsSource = atob(workerJsSource64) + "\n"
 
-export { skulptMinSource, skulptStdlibSource, workerSource }
+export { skulptMinJsSource, skulptStdlibJsSource, workerJsSource }

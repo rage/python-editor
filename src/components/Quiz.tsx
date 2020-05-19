@@ -11,13 +11,11 @@ import {
   parseImportSome,
 } from "../services/import_parsing"
 import { OutputObject, TestResultObject } from "../types"
-// import { skulptMinSource, skulptStdlibSource, workerSource } from "../constants"
-
-// const workerRaw = `
-// ${skulptMinSource}
-// ${skulptStdlibSource}
-// ${workerSource}
-// `
+import {
+  skulptMinJsSource,
+  skulptStdlibJsSource,
+  workerJsSource,
+} from "../constants"
 
 type QuizProps = {
   submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
@@ -25,12 +23,12 @@ type QuizProps = {
   initialFiles: Array<FileEntry>
 }
 
-// const blobObject = URL.createObjectURL(
-//   new Blob([workerRaw], { type: "application/javascript" }),
-// )
-// let worker = new Worker(blobObject)
-const workerPath = "/worker.js"
-let worker = new Worker(workerPath)
+const blobObject = URL.createObjectURL(
+  new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
+    type: "application/javascript",
+  }),
+)
+let worker = new Worker(blobObject)
 
 const defaultFile: FileEntry = {
   fullName: "",
@@ -251,7 +249,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const stopWorker = () => {
     if (!workerAvailable) {
       worker.terminate()
-      worker = new Worker(workerPath)
+      worker = new Worker(blobObject)
     }
     worker.postMessage({ type: "stop" })
     setRunning(false)

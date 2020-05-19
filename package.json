@@ -1,13 +1,15 @@
 {
   "name": "moocfi-python-editor",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf ./dist && tsc",
+    "build": "rm -rf ./dist && npm run encode:worker && tsc",
+    "encode:worker": "python bin/generateBase64.py",
     "cypress:open": "cypress open",
     "now-build": "cd example && parcel build index.html --out-dir ../public && cp ../static/* ../public/",
     "prepare": "npm install build",
+    "prepublish": "npm run build",
     "watch": "tsc --watch"
   },
   "keywords": [],
@@ -58,7 +60,7 @@
     "@fortawesome/react-fontawesome": "^0.1.4",
     "@material-ui/core": "^4.0.0",
     "@material-ui/styles": "^4.2.1",
-    "axios": "^0.18.0",
+    "axios": ">=0.18.0",
     "react": ">=16.0.0",
     "react-dom": ">=16.0.0",
     "styled-components": "^4.3.2",
