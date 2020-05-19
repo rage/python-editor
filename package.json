@@ -9,7 +9,7 @@
     "cypress:open": "cypress open",
     "now-build": "cd example && parcel build index.html --out-dir ../public && cp ../static/* ../public/",
     "prepare": "npm install build",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "watch": "tsc --watch"
   },
   "keywords": [],
