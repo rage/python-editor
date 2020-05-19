@@ -36,10 +36,10 @@ const Help: React.FunctionComponent<HelpProps> = props => {
 
   return (
     <div>
-      <h3>
+      <p>
         You can submit your code to TMC Paste and share the link to the course
         discussion channel and ask for help.
-      </h3>
+      </p>
       {pasteTriggered && document.queryCommandSupported("copy") ? (
         <div>
           <StyledInput

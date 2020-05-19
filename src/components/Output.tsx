@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import styled, { keyframes } from "styled-components"
 import {
   Button,
@@ -79,14 +79,14 @@ const OutputTitleBox = styled(({ inputRequested, ...props }) => (
 
 const OutputTitle = styled(Typography)`
   && {
-    font-size: 1.62rem;
+    font-size: 1rem;
     display: inline-block;
     padding: 5px;
   }
 `
 
 const MarginedButton = styled(Button)`
-  margin: 5px;
+  margin: 0 3px !important;
 `
 
 const StyledOutput = styled(Grid)`
@@ -287,7 +287,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
             <Grid container item xs={5} alignItems="center" justify="flex-end">
               {getStatusIcon()}
               <StatusText>{getStatusText()}</StatusText>
-              {testing ? null : (
+              {testing || isSubmitting ? null : (
                 <MarginedButton
                   onClick={handleStop}
                   variant="contained"
@@ -310,7 +310,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                   </MarginedButton>
                 ) : null
               ) : null}
-              {testing ? null : (
+              {testing || isSubmitting ? null : (
                 <MarginedButton
                   onClick={handleSubmit}
                   variant="contained"
