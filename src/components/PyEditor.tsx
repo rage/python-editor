@@ -80,6 +80,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         language="python"
         editorDidMount={handleEditorDidMount}
         onChange={handleChange}
+        options={{ minimap: { enabled: false } }}
       />
     </>
   )

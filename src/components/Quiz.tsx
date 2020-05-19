@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { InputLabel, Select, Button } from "@material-ui/core"
+import { InputLabel, Select } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -262,6 +262,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setOutput([])
   }
 
+  /*
   const runTests = () => {
     console.log("Running tests")
     setOutput([])
@@ -269,9 +270,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setTesting(true)
     worker.postMessage({ type: "runTests" })
   }
+  */
 
   return (
-    <div style={{ position: "relative", width: "70vw" }}>
+    <div style={{ position: "relative", width: "inherit" }}>
       {files.length > 1 && (
         <>
           <InputLabel id="label">Select File</InputLabel>

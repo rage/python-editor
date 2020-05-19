@@ -1,6 +1,6 @@
 {
   "name": "moocfi-python-editor",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -43,7 +43,6 @@
     "parcel-plugin-static-files-copy": "^2.3.1",
     "prettier": "^1.19.1",
     "react": "^16.13.0",
-    "react-app-polyfill": "^1.0.6",
     "react-content-loader": "^4.2.2",
     "react-dom": "^16.13.0",
     "styled-components": "^4.4.1",
@@ -68,7 +67,6 @@
     "jszip": "^3.2.2",
     "jszip-utils": "^0.1.0",
     "monaco-editor": "^0.19.3",
-    "react-app-polyfill": "^1.0.6",
     "ts-results": "^2.0.1",
     "uuid": "^3.4.0"
   },
