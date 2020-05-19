@@ -1,6 +1,6 @@
 {
   "name": "moocfi-python-editor",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -8,13 +8,16 @@
     "encode:worker": "python bin/generateBase64.py",
     "cypress:open": "cypress open",
     "now-build": "cd example && parcel build index.html --out-dir ../public && cp ../static/* ../public/",
-    "prepare": "npm install build",
     "prepublishOnly": "npm run build",
     "watch": "tsc --watch"
   },
   "keywords": [],
   "author": "",
   "license": "Apache-2.0 OR MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rage/python-editor.git"
+  },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.12.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.27",
@@ -25,20 +28,18 @@
     "@material-ui/styles": "^4.9.0",
     "@monaco-editor/react": "^3.0.1",
     "@types/commonmark": "^0.27.4",
-    "@types/jszip": "^3.1.7",
     "@types/node": "^12.0.12",
     "@types/react": "^16.8.20",
     "@types/react-dom": "^16.8.4",
     "@types/styled-components": "^4.4.2",
     "@types/uuid": "^3.4.7",
     "axios": ">=0.18.1",
-    "build": "^0.1.4",
     "commonmark": "^0.29.0",
     "husky": "^3.1.0",
     "jszip": "^3.2.2",
     "jszip-utils": "^0.1.0",
     "lint-staged": "^9.5.0",
-    "monaco-editor": "^0.19.3",
+    "monaco-editor": "^0.20.0",
     "parcel": "^1.12.4",
     "parcel-plugin-static-files-copy": "^2.3.1",
     "prettier": "^1.19.1",
@@ -67,7 +68,6 @@
     "jszip": "^3.2.2",
     "jszip-utils": "^0.1.0",
     "monaco-editor": "^0.19.3",
-    "ts-results": "^2.0.1",
     "uuid": "^3.4.0"
   },
   "husky": {
