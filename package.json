@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf ./dist && npm run encode:worker && tsc",
-    "encode:worker": "python bin/generateBase64.py",
+    "encode:worker": "node bin/generateBase64.js",
     "cypress:open": "cypress open",
     "now-build": "cd example && parcel build index.html --out-dir ../public && cp ../static/* ../public/",
     "prepublishOnly": "npm run build",
