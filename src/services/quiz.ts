@@ -16,7 +16,7 @@ interface SubmitOptions {
 const getHeaders = (token: string) => ({
   Authorization: `Bearer ${token}`,
   client: "python_editor",
-  client_version: "0.6.0",
+  client_version: "0.6.1",
 })
 
 const getZippedQuiz = async (
@@ -31,11 +31,11 @@ const getZippedQuiz = async (
       method: "get",
       headers,
     })
-    .then(res => {
+    .then((res) => {
       const zip = new JSZip()
       return zip.loadAsync(res.data)
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error)
       throw {
         status: error.response.status,
@@ -49,8 +49,8 @@ const getZippedQuiz = async (
       method: "get",
       headers,
     })
-    .then(res => `https://tmc.mooc.fi/api/v8/core/exercises/${res.data.id}`)
-    .catch(error => {
+    .then((res) => `https://tmc.mooc.fi/api/v8/core/exercises/${res.data.id}`)
+    .catch((error) => {
       throw {
         status: error.response.status,
         message: "Failed to download exercise.",
@@ -72,7 +72,7 @@ const submitQuiz = async (
   const paste = submitOptions?.paste || false
   const zip = new JSZip()
   const form = new FormData()
-  files.forEach(file => {
+  files.forEach((file) => {
     zip.file(file.fullName, file.content)
   })
   if (paste) {
@@ -91,14 +91,14 @@ const submitQuiz = async (
       },
     })
     .then(
-      result =>
+      (result) =>
         new Ok({
           pasteUrl: paste ? result.data.paste_url : undefined,
           showSubmissionUrl: result.data.show_submission_url,
           submissionUrl: result.data.submission_url,
         }),
     )
-    .catch(error => {
+    .catch((error) => {
       const status = error.response.status
       let message =
         status === 403 ? "Authentication required" : "Submission process failed"
@@ -114,7 +114,7 @@ const fetchSubmissionResult = async (
   const headers = getHeaders(token)
   const times = [2000, 2000, 1000, 1000, 1000, 2000, 2000, 4000, 8000, 16000]
   for (const time of times) {
-    await new Promise(resolve => setTimeout(resolve, time))
+    await new Promise((resolve) => setTimeout(resolve, time))
     const submissionStatus = await axios
       .request({
         responseType: "json",
@@ -122,11 +122,11 @@ const fetchSubmissionResult = async (
         method: "get",
         headers,
       })
-      .then(res => {
+      .then((res) => {
         console.log(res.data)
         return res.data
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err.response)
         return { status: "error", statusCode: err.response.status }
       })
