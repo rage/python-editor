@@ -1,0 +1,27 @@
+{
+  "id": 90703,
+  "available_points": [
+    {
+      "id": 1004111,
+      "exercise_id": 90703,
+      "name": "1.1",
+      "requires_review": false
+    }
+  ],
+  "awarded_points": ["1.1"],
+  "name": "osa01-01_hymio",
+  "publish_time": null,
+  "deadline": null,
+  "soft_deadline": null,
+  "expired": false,
+  "disabled": false,
+  "completed": true,
+  "model_solution_token_used_on_this_exercise": false,
+  "large_exercises_consume_more_coins": false,
+  "email_verified": true,
+  "course": {
+    "grant_model_solution_token_every_nth_completed_exercise": null,
+    "total_model_solution_tokens": 0,
+    "available_model_solution_tokens": null
+  }
+}

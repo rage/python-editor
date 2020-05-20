@@ -1,0 +1,43 @@
+{
+  "api_version": 7,
+  "all_tests_passed": true,
+  "user_id": 1337,
+  "login": "hello",
+  "course": "test-python-test",
+  "exercise_name": "osa01-01_hymio",
+  "status": "ok",
+  "points": ["1.1"],
+  "validations": null,
+  "valgrind": "",
+  "submission_url": "https://tmc.mooc.fi/submissions/123123",
+  "solution_url": "https://tmc.mooc.fi/exercises/90703/solution",
+  "submitted_at": "2020-05-20T16:04:15.342+03:00",
+  "processing_time": 4,
+  "reviewed": false,
+  "requests_review": false,
+  "paste_url": null,
+  "message_for_paste": null,
+  "missing_review_points": [],
+  "test_cases": [
+    {
+      "name": "test.test_hymio.HymioTest.test_print_hymio",
+      "successful": true,
+      "message": "",
+      "exception": [],
+      "detailed_message": null
+    }
+  ],
+  "feedback_questions": [
+    {
+      "id": 393,
+      "question": "Question A",
+      "kind": "intrange[-10..10]"
+    },
+    {
+      "id": 394,
+      "question": "Question B",
+      "kind": "text"
+    }
+  ],
+  "feedback_answer_url": "https://tmc.mooc.fi/api/v8/core/submissions/7132267/feedback"
+}

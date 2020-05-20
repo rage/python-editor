@@ -2,7 +2,7 @@ const program = '# A simple program\nprint("hello from", "python")\n'
 const inputOrganization = "test"
 const inputCourse = "python-test"
 const inputExercise = "osa01-01_hymio"
-const inputToken = "123abc000"
+const inputToken = "3213hddf"
 
 describe("The Playground", () => {
   describe("The main page", () => {
@@ -222,17 +222,13 @@ describe("The Playground", () => {
     })
 
     it("test.py can be selected and displayed", () => {
-      cy.get("[data-cy=select-file]")
-        .find("select")
-        .select("test.py")
+      cy.get("[data-cy=select-file]").find("select").select("test.py")
       cy.contains("# This is the default file test.py")
     })
 
     it("edits to source files persist", () => {
       const testString = "Romanes eunt domus"
-      cy.get("[data-cy=select-file]")
-        .find("select")
-        .select("main.py")
+      cy.get("[data-cy=select-file]").find("select").select("main.py")
       cy.get(".monaco-editor")
         .first()
         .click()
@@ -240,13 +236,9 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(testString)
-      cy.get("[data-cy=select-file]")
-        .find("select")
-        .select("test.py")
+      cy.get("[data-cy=select-file]").find("select").select("test.py")
       cy.contains("This is the default file test.py")
-      cy.get("[data-cy=select-file]")
-        .find("select")
-        .select("main.py")
+      cy.get("[data-cy=select-file]").find("select").select("main.py")
       cy.contains(testString)
     })
   })
@@ -275,4 +267,115 @@ describe("The Playground", () => {
     })
   })
   */
+  describe("Submitting to server tests", () => {
+    beforeEach(() => {
+      cy.visit("/")
+      window.localStorage.setItem("organization", inputOrganization)
+      window.localStorage.setItem("course", inputCourse)
+      window.localStorage.setItem("exercise", inputExercise)
+      window.localStorage.setItem("token", inputToken)
+      cy.server()
+      cy.fixture("get_exercise.json").as("exercise")
+      cy.fixture("post_submission_content.json").as("sendSubmission")
+      cy.fixture("result_submission_fail.json").as("resultSubmissionFail")
+      cy.fixture("result_submission_passed.json").as("resultSubmissionPass")
+      cy.route({
+        method: "GET",
+        url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
+        response: "@exercise",
+      })
+      // TODO: Download fake zip.
+      // cy.fixture('osa01-01_hymio.zip').as('zip')
+      // cy.route({
+      //   method: 'GET',
+      //   url: '/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio/download',
+      //   response: '@zip',
+      //   headers: { 'cache-control': "private", 'content-type': "application/zip"}
+      // })
+      cy.get("[data-cy=load-btn]").click()
+    })
+
+    it("fail to solve quiz", () => {
+      const testString = "print('Romanes eunt domus')"
+      cy.get(".monaco-editor")
+        .first()
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(testString)
+      cy.contains(testString)
+      cy.get("[data-cy=run-btn]").click()
+      cy.route({
+        method: "POST",
+        url: "/api/v8/core/exercises/90703/submissions",
+        response: "@sendSubmission",
+      })
+      cy.route({
+        method: "GET",
+        url: "/api/v8/core/submissions/123123",
+        response: "@resultSubmissionFail",
+      })
+      cy.get("[data-cy=submit-btn]").click()
+      cy.contains("Submitting to server")
+      cy.contains("0%")
+      cy.contains("FAIL: test.test_hymio.HymioTest.test_print_hymio")
+    })
+
+    it("asks for help works", () => {
+      const testString = "print('Jellou world!')"
+      cy.get(".monaco-editor")
+        .first()
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(testString)
+      cy.contains(testString)
+      cy.get("[data-cy=run-btn]").click()
+      cy.route({
+        method: "POST",
+        url: "/api/v8/core/exercises/90703/submissions",
+        response: "@sendSubmission",
+      })
+      cy.get("[data-cy=submit-btn]").click()
+      cy.contains("Need help?")
+      cy.get("[data-cy=need-help-btn]").click()
+      cy.contains("TMC Paste")
+      cy.get("[data-cy=send-to-paste-btn]").click()
+      cy.get("[data-cy=copy-text-btn]").click()
+      cy.contains("Copied!")
+    })
+
+    it("solve quiz correctly", () => {
+      const testString = "print(':-)')"
+      cy.get(".monaco-editor")
+        .first()
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(testString)
+      cy.contains(testString)
+      cy.get("[data-cy=run-btn]").click()
+      cy.route({
+        method: "POST",
+        url: "/api/v8/core/exercises/90703/submissions",
+        response: "@sendSubmission",
+      })
+      cy.route({
+        method: "GET",
+        url: "/api/v8/core/submissions/123123",
+        response: "@resultSubmissionPass",
+      })
+      cy.get("[data-cy=submit-btn]").click()
+      cy.contains("Submitting to server")
+      cy.wait(250)
+      cy.contains("Tests passed")
+      cy.contains("100%")
+      cy.contains("Points gained: 1.1")
+      cy.get("[data-cy=show-all-results-checkbox]").click()
+      cy.get("[data-cy=test-result]").should("have.length", 1)
+    })
+  })
 })
