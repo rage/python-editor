@@ -6,5 +6,5 @@ DevProfile
 .vscode
 **/cypress/videos
 **/cypress/screenshots
-**/constants/*64.ts
+**/constants/*JsSource.ts
 .cache
