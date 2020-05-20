@@ -67,6 +67,7 @@
     "jszip": "^3.2.2",
     "jszip-utils": "^0.1.0",
     "monaco-editor": "^0.20.0",
+    "ts-results": "^2.0.1",
     "uuid": "^8.0.0"
   },
   "husky": {
