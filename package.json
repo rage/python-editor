@@ -7,7 +7,7 @@
     "build": "rm -rf ./dist && npm run encode:worker && tsc",
     "encode:worker": "node bin/generateBase64.js",
     "cypress:open": "cypress open",
-    "now-build": "cd example && parcel build index.html --out-dir ../public && cp ../static/* ../public/",
+    "now-build": "npm run encode:worker && cd example && parcel build index.html --out-dir ../public && cp ../static/* ../public/",
     "prepublishOnly": "npm run build",
     "watch": "tsc --watch"
   },
