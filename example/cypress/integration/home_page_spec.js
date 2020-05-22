@@ -70,12 +70,32 @@ describe("The Playground", () => {
         .should("have.value", inputToken)
     })
 
-    it("has a load quiz button", () => {
+    it("running code without token gives sign in warning", () => {
+      cy.visit("/")
+      cy.get("[data-cy=run-btn]").click()
+      cy.contains("Sign in to submit exercise")
+    })
+
+    it("running code with token has no sign in warning", () => {
+      cy.visit("/")
+      cy.server()
+      cy.route("GET", "/api/v8/org//courses//exercises//download", "")
+      cy.route("GET", "/api/v8/org//courses//exercises//", "")
+      window.localStorage.setItem("token", inputToken)
       cy.get("[data-cy=load-btn]").click()
+      cy.get("[data-cy=token-input]")
+        .find("input")
+        .should("have.value", inputToken)
+      cy.get("[data-cy=run-btn]").click()
+      cy.contains("Sign in to submit exercise").should("not.exist")
+    })
+
+    it("has a load quiz button", () => {
+      cy.get("[data-cy=load-btn]")
     })
 
     it("has an unload quiz button", () => {
-      cy.get("[data-cy=unload-btn]").click()
+      cy.get("[data-cy=unload-btn]")
     })
 
     /*
@@ -175,8 +195,8 @@ describe("The Playground", () => {
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
       cy.get("[data-cy=run-btn]").click()
-      cy.get("[data-cy=stop-btn]").click()
-      cy.get("[data-cy=stop-btn]").should("be.disabled")
+      cy.get("[data-cy=output-title-stop-btn]").click()
+      cy.get("[data-cy=output-title-stop-btn]").should("be.disabled")
       cy.get("[data-cy=user-input-field]").should("not.exist")
     })
 
@@ -337,6 +357,11 @@ describe("The Playground", () => {
         method: "POST",
         url: "/api/v8/core/exercises/90703/submissions",
         response: "@sendSubmission",
+      })
+      cy.route({
+        method: "GET",
+        url: "/api/v8/core/submissions/123123",
+        response: "@resultSubmissionFail",
       })
       cy.get("[data-cy=submit-btn]").click()
       cy.contains("Need help?")

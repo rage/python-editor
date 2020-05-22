@@ -21,6 +21,7 @@ type QuizProps = {
   submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
+  signedIn: boolean
 }
 
 const blobObject = URL.createObjectURL(
@@ -41,6 +42,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   submitQuiz,
   submitToPaste,
   initialFiles,
+  signedIn,
 }) => {
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
@@ -142,7 +144,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     return head + body + ret + tail
   }
 
-  worker.onmessage = function(e) {
+  worker.onmessage = function (e) {
     const { type, msg } = e.data
     if (type === "print") {
       setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
@@ -161,7 +163,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
           type: "output",
           text,
         }))
-        setOutput(prevState => prevState.concat(prints))
+        setOutput((prevState) => prevState.concat(prints))
       }
     } else if (type === "print_done") {
       setRunning(false)
@@ -231,10 +233,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   useEffect(() => {
     if (submitStatus.submitting) {
       if (submitStatus.paste) {
-        submitToPaste(files).then(res => setPasteUrl(res))
+        submitToPaste(files).then((res) => setPasteUrl(res))
         setSubmitStatus(() => ({ submitting: false }))
       } else {
-        submitQuiz(files).then(data => {
+        submitQuiz(files).then((data) => {
           console.log(data)
           clearOutput()
           setTestResults(data)
@@ -273,7 +275,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   */
 
   return (
-    <div style={{ position: "relative", width: "inherit" }}>
+    <div style={{ position: "relative", width: "inherit", minHeight: "500px" }}>
       {files.length > 1 && (
         <>
           <InputLabel id="label">Select File</InputLabel>
@@ -322,6 +324,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         isSubmitting={submitStatus.submitting}
         handleStop={stopWorker}
         testing={testing}
+        signedIn={signedIn}
       />
     </div>
   )

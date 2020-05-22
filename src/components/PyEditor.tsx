@@ -2,6 +2,8 @@ import React, { useState } from "react"
 import { ControlledEditor } from "@monaco-editor/react"
 import styled from "styled-components"
 import { Button } from "@material-ui/core"
+import { faPlay } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 type PyEditorProps = {
   handleRun: (code: string) => void
@@ -13,7 +15,9 @@ type PyEditorProps = {
   setEditorValue: React.Dispatch<React.SetStateAction<string>>
 }
 
-const StyledButton = styled(props => <Button variant="contained" {...props} />)`
+const StyledButton = styled((props) => (
+  <Button variant="contained" {...props} />
+))`
   margin: 1rem;
 `
 
@@ -58,7 +62,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
         disabled={!(isEditorReady && allowRun)}
         data-cy="run-btn"
       >
-        Run code
+        <FontAwesomeIcon color="#32CD32" icon={faPlay} />
       </StyledButton>
       {/* <StyledButton
         onClick={() => handleRunWrapped(editorValue)}
@@ -67,13 +71,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
       >
         Run with wrapped imports
       </StyledButton> */}
-      <StyledButton
+      {/*<StyledButton
         onClick={() => handleStop()}
         disabled={!isRunning}
         data-cy="stop-btn"
       >
         Stop
-      </StyledButton>
+      </StyledButton>*/}
       <ControlledEditor
         value={editorValue}
         height="60vh"

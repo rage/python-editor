@@ -75,24 +75,23 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
 
   const showResults = () => {
     if (!showAll) {
-      const failedTest = results.testCases.filter(
-        result => result.passed === false,
+      const failedTest = results.testCases.find(
+        (result) => result.passed === false,
       )
-      if (failedTest.length !== 0) {
-        return failedTest.map(res => (
+      if (failedTest) {
+        return (
           <TestResult
-            key={res.id}
-            testName={res.testName}
-            passed={res.passed}
-            feedback={res.feedback}
+            key={failedTest.id}
+            testName={failedTest.testName}
+            passed={failedTest.passed}
+            feedback={failedTest.feedback}
           />
-        ))
-      } else {
-        return <Points points={results.points} />
+        )
       }
+      return <Points points={results.points} />
     }
     const points = <Points points={results.points} />
-    const testResults = results.testCases.map(r => (
+    const testResults = results.testCases.map((r) => (
       <TestResult
         key={r.id}
         testName={r.testName}

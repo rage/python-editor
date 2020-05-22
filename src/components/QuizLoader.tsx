@@ -30,9 +30,9 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   exercise,
   token,
 }) => {
-  const [text, setText] = useState("Initial text")
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
+  const [signedIn, setSignedIn] = useState(token !== "" && token !== null)
   const [submissionUrl, setSubmissionUrl] = useState("")
   const mainSourceFile = "__main__.py"
 
@@ -111,7 +111,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   useEffect(() => {
     const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
     getZippedQuiz(url, token)
-      .then(result => {
+      .then((result) => {
         if (result.err) {
           return Promise.resolve([
             {
@@ -124,7 +124,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         setSubmissionUrl(() => subm)
         return getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile)
       })
-      .then(fileEntries => {
+      .then((fileEntries) => {
         setSrcFiles(() => fileEntries)
       })
   }, [])
@@ -135,6 +135,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         initialFiles={srcFiles}
         submitQuiz={submitAndWaitResult}
         submitToPaste={submitToPaste}
+        signedIn={signedIn}
       />
     </>
   )

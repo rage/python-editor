@@ -9,7 +9,10 @@ import {
   CircularProgress,
 } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faExclamation } from "@fortawesome/free-solid-svg-icons"
+import {
+  faExclamation,
+  faExclamationTriangle,
+} from "@fortawesome/free-solid-svg-icons"
 import TestResults from "./TestResults"
 import TestProgressBar from "./TestProgressBar"
 import Help from "./Help"
@@ -29,11 +32,12 @@ type OutputProps = {
   isSubmitting: boolean
   handleStop: () => void
   testing: boolean
+  signedIn: boolean
 }
 
 const ContainerBox = styled.div`
   bottom: 0;
-  height: 210px;
+  height: 50%;
   overflow: hidden;
   position: absolute;
   width: 100%;
@@ -60,10 +64,10 @@ const hide = keyframes`
 `
 
 const AnimatedOutputBox = styled(Paper)<{ open: boolean }>`
-  animation: ${props => (props.open ? show : hide)} 0.3s ease-in-out;
+  animation: ${(props) => (props.open ? show : hide)} 0.3s ease-in-out;
   bottom: 0;
-  height: 210px;
   position: absolute;
+  height: 100%;
   width: 100%;
 `
 
@@ -75,6 +79,14 @@ const OutputTitleBox = styled(({ inputRequested, ...props }) => (
   color: white;
   border-radius: 3px 3px 0 0;
   padding: 5px;
+`
+
+const WarningBox = styled(Grid)`
+  background-color: #ff9800;
+  color: white;
+  border-radius: 3px 3px 0 0;
+  padding: 8px;
+  font-size: 1.25rem;
 `
 
 const OutputTitle = styled(Typography)`
@@ -91,7 +103,7 @@ const MarginedButton = styled(Button)`
 
 const StyledOutput = styled(Grid)`
   padding: 10px;
-  height: 140px;
+  height: 100%;
   overflow: auto;
   white-space: pre-wrap;
 `
@@ -108,7 +120,7 @@ const StatusText = styled(Typography)`
   margin: 10px;
 `
 
-const Output: React.FunctionComponent<OutputProps> = props => {
+const Output: React.FunctionComponent<OutputProps> = (props) => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const [help, setShowHelp] = useState(false)
@@ -127,6 +139,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     isSubmitting,
     handleStop,
     testing,
+    signedIn,
   } = props
 
   const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
@@ -166,7 +179,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   useEffect(() => {
     if (isSubmitting) {
       setTimeout(() => {
-        setProgress(prev => Math.min(prev + 10, 100))
+        setProgress((prev) => Math.min(prev + 10, 100))
       }, 2000)
     }
   }, [progress])
@@ -205,7 +218,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
 
   const showOutput = () => {
     if (outputContent && outputContent.length > 0) {
-      return outputContent.map(output =>
+      return outputContent.map((output) =>
         output.type === "input" ? (
           <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
         ) : (
@@ -257,6 +270,12 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     <ContainerBox data-cy="output-container">
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
         <Grid container direction="column">
+          {!signedIn && (
+            <WarningBox>
+              <FontAwesomeIcon icon={faExclamationTriangle} /> Sign in to submit
+              exercise
+            </WarningBox>
+          )}
           <OutputTitleBox
             inputRequested={inputRequested}
             container
@@ -299,7 +318,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                 </MarginedButton>
               )}
               {testResults ? (
-                testResults.testCases.some(test => !test.passed) ? (
+                testResults.testCases.some((test) => !test.passed) ? (
                   <MarginedButton
                     onClick={showHelp}
                     variant="contained"
@@ -318,11 +337,12 @@ const Output: React.FunctionComponent<OutputProps> = props => {
                     isSubmitting ||
                     isRunning ||
                     isAborted ||
-                    outputContent.some(item => item.type === "error")
+                    !signedIn ||
+                    outputContent.some((item) => item.type === "error")
                   }
                   data-cy="submit-btn"
                 >
-                  Run tests
+                  Submit
                 </MarginedButton>
               )}
               <MarginedButton
