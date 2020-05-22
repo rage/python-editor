@@ -3,6 +3,7 @@ import JSZip from "jszip"
 import { Result, Err, Ok } from "ts-results"
 import { FileEntry } from "../components/QuizLoader"
 import { SubmissionResponse, TestResultObject } from "../types"
+import { EDITOR_NAME, EDITOR_VERSION } from "../constants"
 
 interface Error {
   status: number
@@ -15,8 +16,8 @@ interface SubmitOptions {
 
 const getHeaders = (token: string) => ({
   Authorization: `Bearer ${token}`,
-  client: "python_editor",
-  client_version: "0.6.1",
+  client: EDITOR_NAME,
+  client_version: EDITOR_VERSION,
 })
 
 const getZippedQuiz = async (
