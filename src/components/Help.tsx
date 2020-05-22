@@ -7,16 +7,18 @@ type HelpProps = {
   pasteUrl: string
 }
 
-const StyledButton = styled(props => <Button variant="contained" {...props} />)`
+const StyledButton = styled((props) => (
+  <Button variant="contained" {...props} />
+))`
   margin: 1rem;
 `
 
-const StyledInput = styled(props => <Input {...props} />)`
+const StyledInput = styled((props) => <Input {...props} />)`
   margin: 1rem;
   width: 50%;
 `
 
-const Help: React.FunctionComponent<HelpProps> = props => {
+const Help: React.FunctionComponent<HelpProps> = (props) => {
   const { handlePasteSubmit, pasteUrl } = props
 
   const [pasteTriggered, setPasteTriggered] = useState(false)
@@ -48,7 +50,9 @@ const Help: React.FunctionComponent<HelpProps> = props => {
             data-cy="paste-input"
             readOnly
           />
-          <StyledButton onClick={copyToClipboard}>Copy text</StyledButton>
+          <StyledButton data-cy="copy-text-btn" onClick={copyToClipboard}>
+            Copy text
+          </StyledButton>
           {copySuccess}
         </div>
       ) : null}

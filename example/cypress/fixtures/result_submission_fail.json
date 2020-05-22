@@ -1,0 +1,38 @@
+{
+  "api_version": 7,
+  "all_tests_passed": false,
+  "user_id": 1337,
+  "login": "hymio",
+  "course": "test-python-test",
+  "exercise_name": "osa01-01_hymio",
+  "status": "fail",
+  "points": [],
+  "validations": null,
+  "valgrind": "",
+  "submission_url": "https://tmc.mooc.fi/submissions/123123",
+  "solution_url": "https://tmc.mooc.fi/exercises/90703/solution",
+  "submitted_at": "2020-05-20T15:20:32.950+03:00",
+  "processing_time": 4,
+  "reviewed": false,
+  "requests_review": false,
+  "paste_url": null,
+  "message_for_paste": null,
+  "missing_review_points": [],
+  "test_cases": [
+    {
+      "name": "test.test_hymio.HymioTest.test_print_hymio",
+      "successful": false,
+      "message": "':' != ':-)'\n- :\n+ :-)\n : Epämuodostunut hymiö.",
+      "exception": [
+        "  File \"/usr/local/lib/python3.7/unittest/case.py\", line 59, in testPartExecutor\n    yield\n",
+        "  File \"/usr/local/lib/python3.7/unittest/case.py\", line 615, in run\n    testMethod()\n",
+        "  File \"/app/test/test_hymio.py\", line 16, in test_print_hymio\n    self.assertEquals(output, \":-)\", \"Epämuodostunut hymiö.\")\n",
+        "  File \"/usr/local/lib/python3.7/unittest/case.py\", line 1338, in deprecated_func\n    return original_func(*args, **kwargs)\n",
+        "  File \"/usr/local/lib/python3.7/unittest/case.py\", line 839, in assertEqual\n    assertion_func(first, second, msg=msg)\n",
+        "  File \"/usr/local/lib/python3.7/unittest/case.py\", line 1220, in assertMultiLineEqual\n    self.fail(self._formatMessage(msg, standardMsg))\n",
+        "  File \"/usr/local/lib/python3.7/unittest/case.py\", line 680, in fail\n    raise self.failureException(msg)\n"
+      ],
+      "detailed_message": null
+    }
+  ]
+}
