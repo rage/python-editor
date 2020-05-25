@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from "react"
 import styled, { keyframes } from "styled-components"
-import {
-  Button,
-  Paper,
-  Grid,
-  Typography,
-  TextField,
-  CircularProgress,
-} from "@material-ui/core"
+import { Paper, Grid, TextField } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {
-  faExclamation,
-  faExclamationTriangle,
-} from "@fortawesome/free-solid-svg-icons"
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
 import TestResults from "./TestResults"
-import TestProgressBar from "./TestProgressBar"
+import OutputTitle from "./OutputTitle"
 import Help from "./Help"
 import { OutputObject, TestResultObject } from "../types"
 
@@ -72,21 +62,11 @@ const hide = keyframes`
 `
 
 const AnimatedOutputBox = styled(Paper)<{ open: boolean }>`
-  animation: ${(props) => (props.open ? show : hide)} 0.3s ease-in-out;
+  animation: ${props => (props.open ? show : hide)} 0.3s ease-in-out;
   bottom: 0;
   position: absolute;
   height: 100%;
   width: 100%;
-`
-
-const OutputTitleBox = styled(({ inputRequested, ...props }) => (
-  <Grid {...props} />
-))`
-  background-color: ${({ inputRequested }) =>
-    inputRequested ? "#FF9800" : "#2196f3"};
-  color: white;
-  border-radius: 3px 3px 0 0;
-  padding: 5px;
 `
 
 const WarningBox = styled(Grid)`
@@ -95,18 +75,6 @@ const WarningBox = styled(Grid)`
   border-radius: 3px 3px 0 0;
   padding: 8px;
   font-size: 1.25rem;
-`
-
-const OutputTitle = styled(Typography)`
-  && {
-    font-size: 1rem;
-    display: inline-block;
-    padding: 5px;
-  }
-`
-
-const MarginedButton = styled(Button)`
-  margin: 0 3px !important;
 `
 
 const StyledOutput = styled(Grid)`
@@ -126,15 +94,10 @@ const StyledUserInput = styled.span`
   padding: 3px;
 `
 
-const StatusText = styled(Typography)`
-  margin: 10px;
-`
-
-const Output: React.FunctionComponent<OutputProps> = (props) => {
+const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const [help, setShowHelp] = useState(false)
-  const [progress, setProgress] = useState(100)
   const {
     outputContent,
     testResults,
@@ -181,29 +144,6 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
     }
   }, [isRunning])
 
-  useEffect(() => {
-    if (isSubmitting) {
-      setProgress(35)
-    }
-  }, [isSubmitting])
-
-  useEffect(() => {
-    if (isSubmitting) {
-      setTimeout(() => {
-        setProgress((prev) => Math.min(prev + 10, 100))
-      }, 2000)
-    }
-  }, [progress])
-
-  // Do not modify, this is optimized.
-  const fakePercentage = () => {
-    const fake = progress / 100
-    return Math.min(
-      Math.round((3 * Math.pow(fake, 2) - 2 * Math.pow(fake, 3)) * 100),
-      99,
-    )
-  }
-
   const closeOutput = () => {
     setOpen(false)
   }
@@ -229,7 +169,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
 
   const showOutput = () => {
     if (outputContent && outputContent.length > 0) {
-      return outputContent.map((output) =>
+      return outputContent.map(output =>
         output.type === "input" ? (
           <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
         ) : (
@@ -245,37 +185,9 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
     return null
   }
 
-  const getStatusText = () => {
-    if (isRunning) {
-      return inputRequested ? "Waiting for input" : "Running"
-    } else if (isSubmitting) {
-      return "Submitting"
-    }
-    return null
-  }
-
-  const getStatusIcon = () => {
-    if (isRunning && inputRequested) {
-      return <FontAwesomeIcon icon={faExclamation} />
-    } else if (isRunning || isSubmitting) {
-      return <CircularProgress size={25} color="inherit" disableShrink />
-    }
-    return null
-  }
-
-  const titleText = testing ? "Test Results" : "Output"
-  let passedTestsPercentage = 0
-  if (testResults) {
-    const passedTestsSum = testResults.testCases.reduce(
-      (passed: number, result: any) => {
-        return passed + (result.passed ? 1 : 0)
-      },
-      0,
-    )
-    passedTestsPercentage = Math.round(
-      (passedTestsSum / testResults.testCases.length) * 100,
-    )
-  }
+  const outputContentIncludesErrors = outputContent.some(
+    item => item.type === "error",
+  )
 
   return (
     <ContainerBox height={outputHeight} data-cy="output-container">
@@ -287,85 +199,21 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
               exercise
             </WarningBox>
           )}
-          <OutputTitleBox
+          <OutputTitle
             inputRequested={inputRequested}
-            container
-            item
-            direction="row"
-            alignItems="center"
-            justify="space-between"
-          >
-            <Grid item xs={2}>
-              <OutputTitle>{titleText}</OutputTitle>
-            </Grid>
-            {isSubmitting ? (
-              <Grid item xs={5}>
-                <TestProgressBar
-                  percentage={fakePercentage()}
-                  title={"Submitting to server"}
-                />
-              </Grid>
-            ) : null}
-            {testing ? (
-              <Grid item xs={5}>
-                <TestProgressBar
-                  percentage={passedTestsPercentage}
-                  title={"Tests passed"}
-                />
-              </Grid>
-            ) : null}
-            <Grid container item xs={5} alignItems="center" justify="flex-end">
-              {getStatusIcon()}
-              <StatusText>{getStatusText()}</StatusText>
-              {testing || isSubmitting ? null : (
-                <MarginedButton
-                  onClick={handleStop}
-                  variant="contained"
-                  color="secondary"
-                  disabled={!isRunning}
-                  data-cy="output-title-stop-btn"
-                >
-                  Stop
-                </MarginedButton>
-              )}
-              {testResults ? (
-                testResults.testCases.some((test) => !test.passed) ? (
-                  <MarginedButton
-                    onClick={showHelp}
-                    variant="contained"
-                    disabled={isSubmitting || isRunning || help}
-                    data-cy="need-help-btn"
-                  >
-                    Need help?
-                  </MarginedButton>
-                ) : null
-              ) : null}
-              {testing || isSubmitting || inputRequested ? null : (
-                <MarginedButton
-                  onClick={handleSubmit}
-                  variant="contained"
-                  disabled={
-                    isSubmitting ||
-                    isRunning ||
-                    isAborted ||
-                    !signedIn ||
-                    outputContent.some((item) => item.type === "error")
-                  }
-                  data-cy="submit-btn"
-                >
-                  Submit
-                </MarginedButton>
-              )}
-              <MarginedButton
-                onClick={closeOutput}
-                variant="contained"
-                disabled={isSubmitting}
-                data-cy="close-btn"
-              >
-                Close
-              </MarginedButton>
-            </Grid>
-          </OutputTitleBox>
+            isRunning={isRunning}
+            isSubmitting={isSubmitting}
+            isAborted={isAborted}
+            testing={testing}
+            testResults={testResults}
+            closeOutput={closeOutput}
+            handleStop={handleStop}
+            showHelp={showHelp}
+            help={help}
+            handleSubmit={handleSubmit}
+            signedIn={signedIn}
+            hasErrors={outputContentIncludesErrors}
+          />
           <StyledOutput item ref={outputRef}>
             {showOutput()}
             {inputRequested && (
