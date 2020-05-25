@@ -5,8 +5,10 @@ import {
   submitQuiz,
   fetchSubmissionResult,
 } from "../services/quiz"
+import { TestResultObject } from "../types"
 
 type QuizLoaderProps = {
+  onSubmissionResults?: (submissionResults: TestResultObject) => void
   organization: string
   course: string
   exercise: string
@@ -25,6 +27,7 @@ type FileEntry = {
     file whose path contains "/src/__main__.py".
 */
 const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
+  onSubmissionResults,
   organization,
   course,
   exercise,
@@ -135,6 +138,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         initialFiles={srcFiles}
         submitQuiz={submitAndWaitResult}
         submitToPaste={submitToPaste}
+        onSubmissionResults={onSubmissionResults}
         signedIn={signedIn}
       />
     </>

@@ -20,6 +20,7 @@ import {
 type QuizProps = {
   submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
+  onSubmissionResults?: (submissionResults: TestResultObject) => void
   initialFiles: Array<FileEntry>
   signedIn: boolean
 }
@@ -41,6 +42,7 @@ const defaultFile: FileEntry = {
 const Quiz: React.FunctionComponent<QuizProps> = ({
   submitQuiz,
   submitToPaste,
+  onSubmissionResults,
   initialFiles,
   signedIn,
 }) => {
@@ -243,6 +245,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
           setOutput([])
           setTesting(true)
           setSubmitStatus(() => ({ submitting: false }))
+          onSubmissionResults?.(data)
         })
       }
     }
@@ -367,6 +370,9 @@ def getLocality():
 Quiz.defaultProps = {
   submitQuiz: () => Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
+  onSubmissionResults: (result) => {
+    console.log(result)
+  },
   initialFiles: [
     {
       fullName: "main.py",
