@@ -3,9 +3,8 @@ import styled, { keyframes } from "styled-components"
 import { Paper, Grid, TextField } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
-import TestResults from "./TestResults"
 import OutputTitle from "./OutputTitle"
-import Help from "./Help"
+import OutputContent from "./OutputContent"
 import { OutputObject, TestResultObject } from "../types"
 
 type OutputProps = {
@@ -77,23 +76,6 @@ const WarningBox = styled(Grid)`
   font-size: 1.25rem;
 `
 
-const StyledOutput = styled(Grid)`
-  padding: 10px;
-  max-height: 500px;
-  height: 175px;
-  min-height: 150px;
-  overflow: auto;
-  white-space: pre-wrap;
-`
-
-const StyledUserInput = styled.span`
-  background-color: #efefef;
-  border-radius: 3px 3px 3px 3px;
-  color: #292929;
-  margin: 3px;
-  padding: 3px;
-`
-
 const Output: React.FunctionComponent<OutputProps> = props => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
@@ -115,26 +97,6 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     signedIn,
     outputHeight,
   } = props
-
-  const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
-  const userInputFieldRef: React.RefObject<HTMLInputElement> = React.createRef()
-
-  const scrollToBottom = () => {
-    if (outputRef && outputRef.current) {
-      outputRef.current.scrollTop = outputRef.current.scrollHeight
-    }
-  }
-
-  const focusOnInputField = () => {
-    if (userInputFieldRef && userInputFieldRef.current) {
-      userInputFieldRef.current.focus({ preventScroll: true })
-    }
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-    if (inputRequested) focusOnInputField()
-  }, [inputRequested, outputContent])
 
   useEffect(() => {
     setShowHelp(false)
@@ -159,31 +121,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
     }
   }
 
-  const keyPressOnInput = (e: any) => {
-    if (e.key === "Enter" && inputRequested) {
-      sendInput(e.target.value)
-    }
-  }
-
   if (!render) return null
-
-  const showOutput = () => {
-    if (outputContent && outputContent.length > 0) {
-      return outputContent.map(output =>
-        output.type === "input" ? (
-          <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
-        ) : (
-          <React.Fragment key={output.id}>{output.text}</React.Fragment>
-        ),
-      )
-    } else if (help) {
-      return <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
-    } else if (testResults) {
-      return <TestResults results={testResults} />
-    }
-
-    return null
-  }
 
   const outputContentIncludesErrors = outputContent.some(
     item => item.type === "error",
@@ -195,40 +133,34 @@ const Output: React.FunctionComponent<OutputProps> = props => {
         <Grid container direction="column">
           {!signedIn && (
             <WarningBox>
-              <FontAwesomeIcon icon={faExclamationTriangle} /> Sign in to submit
-              exercise
+              <FontAwesomeIcon icon={faExclamationTriangle} />
+              Sign in to submit exercise
             </WarningBox>
           )}
           <OutputTitle
+            testResults={testResults}
             inputRequested={inputRequested}
             isRunning={isRunning}
-            isSubmitting={isSubmitting}
             isAborted={isAborted}
+            isSubmitting={isSubmitting}
             testing={testing}
-            testResults={testResults}
-            closeOutput={closeOutput}
-            handleStop={handleStop}
-            showHelp={showHelp}
             help={help}
-            handleSubmit={handleSubmit}
             signedIn={signedIn}
             hasErrors={outputContentIncludesErrors}
+            handleSubmit={handleSubmit}
+            handleStop={handleStop}
+            closeOutput={closeOutput}
+            showHelp={showHelp}
           />
-          <StyledOutput item ref={outputRef}>
-            {showOutput()}
-            {inputRequested && (
-              <TextField
-                inputRef={userInputFieldRef}
-                label="Enter input and press 'Enter'"
-                margin="dense"
-                variant="outlined"
-                InputLabelProps={{ shrink: true }}
-                onKeyPress={keyPressOnInput}
-                style={{ display: "block" }}
-                data-cy="user-input-field"
-              />
-            )}
-          </StyledOutput>
+          <OutputContent
+            inputRequested={inputRequested}
+            outputContent={outputContent}
+            help={help}
+            handlePasteSubmit={handlePasteSubmit}
+            pasteUrl={pasteUrl}
+            sendInput={sendInput}
+            testResults={testResults}
+          />
         </Grid>
       </AnimatedOutputBox>
     </ContainerBox>
