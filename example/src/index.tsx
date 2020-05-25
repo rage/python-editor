@@ -6,13 +6,15 @@ import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
 import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
 
-const StyledTextField = styled(props => (
+const StyledTextField = styled((props) => (
   <TextField variant="outlined" fullWidth {...props} />
 ))`
   margin: 1rem;
 `
 
-const StyledButton = styled(props => <Button variant="contained" {...props} />)`
+const StyledButton = styled((props) => (
+  <Button variant="contained" {...props} />
+))`
   margin: 1rem;
 `
 
@@ -40,6 +42,7 @@ const App = () => {
         course={course}
         exercise={exercise}
         token={token}
+        height={"550px"}
       />
     )
   }
@@ -68,7 +71,7 @@ const App = () => {
       </div>
       {fetch &&
         loadQuiz(organization.value, course.value, exercise.value, token.value)}
-      {!fetch && <Quiz />}
+      {!fetch && <Quiz editorHeight={"550px"} />}
     </>
   )
 }

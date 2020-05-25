@@ -13,6 +13,8 @@ type QuizLoaderProps = {
   course: string
   exercise: string
   token: string
+  height?: string
+  outputHeight?: string
 }
 
 type FileEntry = {
@@ -32,6 +34,8 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   course,
   exercise,
   token,
+  height,
+  outputHeight,
 }) => {
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
@@ -140,6 +144,8 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         submitToPaste={submitToPaste}
         onSubmissionResults={onSubmissionResults}
         signedIn={signedIn}
+        editorHeight={height}
+        outputHeight={outputHeight}
       />
     </>
   )

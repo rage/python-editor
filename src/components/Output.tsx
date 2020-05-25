@@ -33,14 +33,22 @@ type OutputProps = {
   handleStop: () => void
   testing: boolean
   signedIn: boolean
+  outputHeight: string | undefined
+}
+
+interface ContainerBoxProps {
+  height?: string
 }
 
 const ContainerBox = styled.div`
-  bottom: 0;
-  height: 50%;
   overflow: hidden;
   position: absolute;
   width: 100%;
+  bottom: 0;
+  max-height: 500px;
+  min-height: 200px;
+  height: ${(props: ContainerBoxProps) =>
+    props.height ? props.height : "250px"};
 `
 
 const show = keyframes`
@@ -103,7 +111,9 @@ const MarginedButton = styled(Button)`
 
 const StyledOutput = styled(Grid)`
   padding: 10px;
-  height: 100%;
+  max-height: 500px;
+  height: 175px;
+  min-height: 150px;
   overflow: auto;
   white-space: pre-wrap;
 `
@@ -140,6 +150,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
     handleStop,
     testing,
     signedIn,
+    outputHeight,
   } = props
 
   const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
@@ -267,7 +278,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
   }
 
   return (
-    <ContainerBox data-cy="output-container">
+    <ContainerBox height={outputHeight} data-cy="output-container">
       <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
         <Grid container direction="column">
           {!signedIn && (
@@ -329,7 +340,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
                   </MarginedButton>
                 ) : null
               ) : null}
-              {testing || isSubmitting ? null : (
+              {testing || isSubmitting || inputRequested ? null : (
                 <MarginedButton
                   onClick={handleSubmit}
                   variant="contained"

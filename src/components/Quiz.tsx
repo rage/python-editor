@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { InputLabel, Select } from "@material-ui/core"
+import { InputLabel, Select, Grid } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -23,6 +23,8 @@ type QuizProps = {
   onSubmissionResults?: (submissionResults: TestResultObject) => void
   initialFiles: Array<FileEntry>
   signedIn: boolean
+  editorHeight?: string
+  outputHeight?: string
 }
 
 const blobObject = URL.createObjectURL(
@@ -45,6 +47,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   onSubmissionResults,
   initialFiles,
   signedIn,
+  editorHeight,
+  outputHeight,
 }) => {
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
@@ -278,7 +282,14 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   */
 
   return (
-    <div style={{ position: "relative", width: "inherit", minHeight: "500px" }}>
+    <div
+      style={{
+        position: "relative",
+        width: "inherit",
+        minHeight: "400px",
+        maxHeight: "1000px",
+      }}
+    >
       {files.length > 1 && (
         <>
           <InputLabel id="label">Select File</InputLabel>
@@ -312,6 +323,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         isRunning={running}
         editorValue={editorValue}
         setEditorValue={setEditorValue}
+        editorHeight={editorHeight}
       />
       <Output
         outputContent={output}
@@ -328,6 +340,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         handleStop={stopWorker}
         testing={testing}
         signedIn={signedIn}
+        outputHeight={outputHeight}
       />
     </div>
   )

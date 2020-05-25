@@ -5,6 +5,17 @@ import { Button } from "@material-ui/core"
 import { faPlay } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
+interface EditorWrapperProps {
+  height?: string
+}
+
+const EditorWrapper = styled.div`
+  min-height: 400px;
+  border: 1px dashed black;
+  height: ${(props: EditorWrapperProps) =>
+    props.height ? props.height : "100%"};
+`
+
 type PyEditorProps = {
   handleRun: (code: string) => void
   handleRunWrapped: (code: string) => void
@@ -13,13 +24,12 @@ type PyEditorProps = {
   isRunning: boolean
   editorValue: string
   setEditorValue: React.Dispatch<React.SetStateAction<string>>
+  editorHeight: string | undefined
 }
 
 const StyledButton = styled((props) => (
   <Button variant="contained" {...props} />
-))`
-  margin: 1rem;
-`
+))``
 
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   handleRun,
@@ -29,6 +39,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   isRunning,
   editorValue,
   setEditorValue,
+  editorHeight,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
 
@@ -78,14 +89,19 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
       >
         Stop
       </StyledButton>*/}
-      <ControlledEditor
-        value={editorValue}
-        height="60vh"
-        language="python"
-        editorDidMount={handleEditorDidMount}
-        onChange={handleChange}
-        options={{ minimap: { enabled: false } }}
-      />
+      <EditorWrapper height={editorHeight}>
+        <ControlledEditor
+          value={editorValue}
+          language="python"
+          editorDidMount={handleEditorDidMount}
+          onChange={handleChange}
+          options={{
+            minimap: { enabled: false },
+            wordWrap: "on",
+            scrollBeyondLastLine: false,
+          }}
+        />
+      </EditorWrapper>
     </>
   )
 }
