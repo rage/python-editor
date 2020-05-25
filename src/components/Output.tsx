@@ -48,7 +48,7 @@ const ContainerBox = styled.div`
   max-height: 500px;
   min-height: 200px;
   height: ${(props: ContainerBoxProps) =>
-    props.height ? props.height : "250px"};
+    props.height ? props.height : "200px"};
 `
 
 const show = keyframes`
@@ -73,7 +73,7 @@ const hide = keyframes`
 
 const AnimatedOutputBox = styled(Paper)<{ open: boolean }>`
   animation: ${(props) => (props.open ? show : hide)} 0.3s ease-in-out;
-  bottom: 0;
+  bottom: 4px 4px 0px 0px;
   position: absolute;
   height: 100%;
   width: 100%;
@@ -112,7 +112,7 @@ const MarginedButton = styled(Button)`
 const StyledOutput = styled(Grid)`
   padding: 10px;
   max-height: 500px;
-  height: 175px;
+  height: 150px;
   min-height: 150px;
   overflow: auto;
   white-space: pre-wrap;

@@ -11,9 +11,9 @@ interface EditorWrapperProps {
 
 const EditorWrapper = styled.div`
   min-height: 400px;
-  border: 1px dashed black;
+  border: 1px inset;
   height: ${(props: EditorWrapperProps) =>
-    props.height ? props.height : "100%"};
+    props.height ? props.height : "450px"};
 `
 
 type PyEditorProps = {
@@ -99,6 +99,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
             minimap: { enabled: false },
             wordWrap: "on",
             scrollBeyondLastLine: false,
+            hideCursorInOverviewRuler: true,
           }}
         />
       </EditorWrapper>

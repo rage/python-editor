@@ -3,7 +3,7 @@ import skulptStdlibJsSource from "./skulptStdlibJsSource"
 import workerJsSource from "./workerJsSource"
 
 const EDITOR_NAME = "moocfi_python_editor"
-const EDITOR_VERSION = "0.6.6"
+const EDITOR_VERSION = "0.6.7"
 
 export {
   EDITOR_NAME,
