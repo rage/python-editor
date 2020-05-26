@@ -1,5 +1,5 @@
 export type FeedBackAnswer = {
-  id: number
+  questionId: number
   answer: string | number
 }
 

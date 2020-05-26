@@ -32,7 +32,10 @@ const mockQuestions: TestResultObject["feedbackQuestions"] = [
 ]
 
 type QuizProps = {
-  submitFeedback: (feedback: Array<FeedBackAnswer>) => void
+  submitFeedback: (
+    testResults: TestResultObject,
+    feedback: Array<FeedBackAnswer>,
+  ) => void
   submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   onSubmissionResults?: (submissionResults: TestResultObject) => void
@@ -313,7 +316,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
           awardedPoints={testResults?.points}
           onSubmitFeedback={(feedback) => {
             setShowFeedbackForm(false)
-            submitFeedback(feedback)
+            if (testResults) {
+              submitFeedback(testResults, feedback)
+            }
           }}
           solutionUrl={testResults?.solutionUrl}
           feedbackQuestions={testResults?.feedbackQuestions || mockQuestions}

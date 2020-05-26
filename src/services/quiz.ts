@@ -2,7 +2,7 @@ import axios from "axios"
 import JSZip from "jszip"
 import { Result, Err, Ok } from "ts-results"
 import { FileEntry } from "../components/QuizLoader"
-import { SubmissionResponse, TestResultObject } from "../types"
+import { SubmissionResponse, TestResultObject, FeedBackAnswer } from "../types"
 import { EDITOR_NAME, EDITOR_VERSION } from "../constants"
 
 interface Error {
@@ -162,4 +162,32 @@ const fetchSubmissionResult = async (
   })
 }
 
-export { getZippedQuiz, submitQuiz, fetchSubmissionResult }
+const submitFeedback = async (
+  url: string,
+  token: string,
+  feedback: Array<FeedBackAnswer>,
+): Promise<void> => {
+  const form = new FormData()
+  feedback.forEach((answer, index) => {
+    form.append(`answers[${index}][question_id]`, answer.questionId.toString())
+    form.append(`answers[${index}][answer]`, answer.answer.toString())
+  })
+  return axios
+    .request({
+      url,
+      method: "post",
+      data: form,
+      headers: {
+        ...getHeaders(token),
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => {
+      console.log(res.data)
+    })
+    .catch((error) => {
+      console.error(error.response)
+    })
+}
+
+export { getZippedQuiz, submitQuiz, fetchSubmissionResult, submitFeedback }

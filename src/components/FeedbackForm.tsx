@@ -6,7 +6,6 @@ import { Button, Paper, Slider, Typography, TextField } from "@material-ui/core"
 
 const Background = styled(Paper)`
   width: 80%;
-  height: 300px;
   margin: 10%;
   padding: 10px;
 `
@@ -85,7 +84,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
             (item.kind === "intrange" && item.value >= item.min) ||
             (item.kind === "text" && item.value.toString().trim() !== ""),
         )
-        .map((item) => ({ id: item.id, answer: item.value })),
+        .map((item) => ({ questionId: item.id, answer: item.value })),
     )
     setFormState([])
   }

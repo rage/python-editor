@@ -4,6 +4,7 @@ import {
   getZippedQuiz,
   submitQuiz,
   fetchSubmissionResult,
+  submitFeedback,
 } from "../services/quiz"
 import { TestResultObject, FeedBackAnswer } from "../types"
 
@@ -116,10 +117,6 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       : submitResult.val.message
   }
 
-  const submitFeedback = (feedback: Array<FeedBackAnswer>) => {
-    console.log(feedback)
-  }
-
   useEffect(() => {
     const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
     getZippedQuiz(url, token)
@@ -145,7 +142,11 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     <>
       <Quiz
         initialFiles={srcFiles}
-        submitFeedback={submitFeedback}
+        submitFeedback={(testResults, feedback) => {
+          if (testResults.feedbackAnswerUrl) {
+            submitFeedback(testResults.feedbackAnswerUrl, token, feedback)
+          }
+        }}
         submitQuiz={submitAndWaitResult}
         submitToPaste={submitToPaste}
         onSubmissionResults={onSubmissionResults}
