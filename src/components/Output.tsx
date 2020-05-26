@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from "react"
 import styled, { keyframes } from "styled-components"
-import {
-  Button,
-  Paper,
-  Grid,
-  Typography,
-  TextField,
-  CircularProgress,
-} from "@material-ui/core"
+import { Paper, Grid } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {
-  faExclamation,
-  faExclamationTriangle,
-} from "@fortawesome/free-solid-svg-icons"
-import TestResults from "./TestResults"
-import TestProgressBar from "./TestProgressBar"
-import Help from "./Help"
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
+import OutputTitle from "./OutputTitle"
+import OutputContent from "./OutputContent"
 import { OutputObject, TestResultObject } from "../types"
 
 type OutputProps = {
@@ -48,7 +37,7 @@ const ContainerBox = styled.div`
   max-height: 500px;
   min-height: 200px;
   height: ${(props: ContainerBoxProps) =>
-    props.height ? props.height : "200px"};
+    props.height ? props.height : "250px"};
 `
 
 const show = keyframes`
@@ -73,20 +62,11 @@ const hide = keyframes`
 
 const AnimatedOutputBox = styled(Paper)<{ open: boolean }>`
   animation: ${(props) => (props.open ? show : hide)} 0.3s ease-in-out;
-  bottom: 4px 4px 0px 0px;
+  bottom: 0;
+  border: 4px 4px 0px 0px;
   position: absolute;
   height: 100%;
   width: 100%;
-`
-
-const OutputTitleBox = styled(({ inputRequested, ...props }) => (
-  <Grid {...props} />
-))`
-  background-color: ${({ inputRequested }) =>
-    inputRequested ? "#FF9800" : "#2196f3"};
-  color: white;
-  border-radius: 3px 3px 0 0;
-  padding: 5px;
 `
 
 const WarningBox = styled(Grid)`
@@ -97,44 +77,10 @@ const WarningBox = styled(Grid)`
   font-size: 1.25rem;
 `
 
-const OutputTitle = styled(Typography)`
-  && {
-    font-size: 1rem;
-    display: inline-block;
-    padding: 5px;
-  }
-`
-
-const MarginedButton = styled(Button)`
-  margin: 0 3px !important;
-`
-
-const StyledOutput = styled(Grid)`
-  padding: 10px;
-  max-height: 500px;
-  height: 150px;
-  min-height: 150px;
-  overflow: auto;
-  white-space: pre-wrap;
-`
-
-const StyledUserInput = styled.span`
-  background-color: #efefef;
-  border-radius: 3px 3px 3px 3px;
-  color: #292929;
-  margin: 3px;
-  padding: 3px;
-`
-
-const StatusText = styled(Typography)`
-  margin: 10px;
-`
-
 const Output: React.FunctionComponent<OutputProps> = (props) => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const [help, setShowHelp] = useState(false)
-  const [progress, setProgress] = useState(100)
   const {
     outputContent,
     testResults,
@@ -153,26 +99,6 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
     outputHeight,
   } = props
 
-  const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
-  const userInputFieldRef: React.RefObject<HTMLInputElement> = React.createRef()
-
-  const scrollToBottom = () => {
-    if (outputRef && outputRef.current) {
-      outputRef.current.scrollTop = outputRef.current.scrollHeight
-    }
-  }
-
-  const focusOnInputField = () => {
-    if (userInputFieldRef && userInputFieldRef.current) {
-      userInputFieldRef.current.focus({ preventScroll: true })
-    }
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-    if (inputRequested) focusOnInputField()
-  }, [inputRequested, outputContent])
-
   useEffect(() => {
     setShowHelp(false)
     if (isRunning && !render) {
@@ -180,29 +106,6 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
       if (!open) setOpen(true)
     }
   }, [isRunning])
-
-  useEffect(() => {
-    if (isSubmitting) {
-      setProgress(35)
-    }
-  }, [isSubmitting])
-
-  useEffect(() => {
-    if (isSubmitting) {
-      setTimeout(() => {
-        setProgress((prev) => Math.min(prev + 10, 100))
-      }, 2000)
-    }
-  }, [progress])
-
-  // Do not modify, this is optimized.
-  const fakePercentage = () => {
-    const fake = progress / 100
-    return Math.min(
-      Math.round((3 * Math.pow(fake, 2) - 2 * Math.pow(fake, 3)) * 100),
-      99,
-    )
-  }
 
   const closeOutput = () => {
     setOpen(false)
@@ -219,63 +122,11 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
     }
   }
 
-  const keyPressOnInput = (e: any) => {
-    if (e.key === "Enter" && inputRequested) {
-      sendInput(e.target.value)
-    }
-  }
-
   if (!render) return null
 
-  const showOutput = () => {
-    if (outputContent && outputContent.length > 0) {
-      return outputContent.map((output) =>
-        output.type === "input" ? (
-          <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
-        ) : (
-          <React.Fragment key={output.id}>{output.text}</React.Fragment>
-        ),
-      )
-    } else if (help) {
-      return <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
-    } else if (testResults) {
-      return <TestResults results={testResults} />
-    }
-
-    return null
-  }
-
-  const getStatusText = () => {
-    if (isRunning) {
-      return inputRequested ? "Waiting for input" : "Running"
-    } else if (isSubmitting) {
-      return "Submitting"
-    }
-    return null
-  }
-
-  const getStatusIcon = () => {
-    if (isRunning && inputRequested) {
-      return <FontAwesomeIcon icon={faExclamation} />
-    } else if (isRunning || isSubmitting) {
-      return <CircularProgress size={25} color="inherit" disableShrink />
-    }
-    return null
-  }
-
-  const titleText = testing ? "Test Results" : "Output"
-  let passedTestsPercentage = 0
-  if (testResults) {
-    const passedTestsSum = testResults.testCases.reduce(
-      (passed: number, result: any) => {
-        return passed + (result.passed ? 1 : 0)
-      },
-      0,
-    )
-    passedTestsPercentage = Math.round(
-      (passedTestsSum / testResults.testCases.length) * 100,
-    )
-  }
+  const outputContentIncludesErrors = outputContent.some(
+    (item) => item.type === "error",
+  )
 
   return (
     <ContainerBox height={outputHeight} data-cy="output-container">
@@ -283,104 +134,34 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
         <Grid container direction="column">
           {!signedIn && (
             <WarningBox>
-              <FontAwesomeIcon icon={faExclamationTriangle} /> Sign in to submit
-              exercise
+              <FontAwesomeIcon icon={faExclamationTriangle} />
+              Sign in to submit exercise
             </WarningBox>
           )}
-          <OutputTitleBox
+          <OutputTitle
+            testResults={testResults}
             inputRequested={inputRequested}
-            container
-            item
-            direction="row"
-            alignItems="center"
-            justify="space-between"
-          >
-            <Grid item xs={2}>
-              <OutputTitle>{titleText}</OutputTitle>
-            </Grid>
-            {isSubmitting ? (
-              <Grid item xs={5}>
-                <TestProgressBar
-                  percentage={fakePercentage()}
-                  title={"Submitting to server"}
-                />
-              </Grid>
-            ) : null}
-            {testing ? (
-              <Grid item xs={5}>
-                <TestProgressBar
-                  percentage={passedTestsPercentage}
-                  title={"Tests passed"}
-                />
-              </Grid>
-            ) : null}
-            <Grid container item xs={5} alignItems="center" justify="flex-end">
-              {getStatusIcon()}
-              <StatusText>{getStatusText()}</StatusText>
-              {testing || isSubmitting ? null : (
-                <MarginedButton
-                  onClick={handleStop}
-                  variant="contained"
-                  color="secondary"
-                  disabled={!isRunning}
-                  data-cy="output-title-stop-btn"
-                >
-                  Stop
-                </MarginedButton>
-              )}
-              {testResults ? (
-                testResults.testCases.some((test) => !test.passed) ? (
-                  <MarginedButton
-                    onClick={showHelp}
-                    variant="contained"
-                    disabled={isSubmitting || isRunning || help}
-                    data-cy="need-help-btn"
-                  >
-                    Need help?
-                  </MarginedButton>
-                ) : null
-              ) : null}
-              {testing || isSubmitting || inputRequested ? null : (
-                <MarginedButton
-                  onClick={handleSubmit}
-                  variant="contained"
-                  disabled={
-                    isSubmitting ||
-                    isRunning ||
-                    isAborted ||
-                    !signedIn ||
-                    outputContent.some((item) => item.type === "error")
-                  }
-                  data-cy="submit-btn"
-                >
-                  Submit
-                </MarginedButton>
-              )}
-              <MarginedButton
-                onClick={closeOutput}
-                variant="contained"
-                disabled={isSubmitting}
-                data-cy="close-btn"
-              >
-                Close
-              </MarginedButton>
-            </Grid>
-          </OutputTitleBox>
-          <StyledOutput item ref={outputRef}>
-            {showOutput()}
-            {inputRequested && (
-              <TextField
-                inputRef={userInputFieldRef}
-                label="Enter input and press 'Enter'"
-                margin="dense"
-                variant="outlined"
-                InputLabelProps={{ shrink: true }}
-                onKeyPress={keyPressOnInput}
-                style={{ display: "block" }}
-                data-cy="user-input-field"
-              />
-            )}
-          </StyledOutput>
+            isRunning={isRunning}
+            isAborted={isAborted}
+            isSubmitting={isSubmitting}
+            testing={testing}
+            help={help}
+            signedIn={signedIn}
+            hasErrors={outputContentIncludesErrors}
+            handleSubmit={handleSubmit}
+            handleStop={handleStop}
+            closeOutput={closeOutput}
+            showHelp={showHelp}
+          />
+          <OutputContent
+            inputRequested={inputRequested}
+            outputContent={outputContent}
+            help={help}
+            handlePasteSubmit={handlePasteSubmit}
+            pasteUrl={pasteUrl}
+            sendInput={sendInput}
+            testResults={testResults}
+          />
         </Grid>
       </AnimatedOutputBox>
     </ContainerBox>
