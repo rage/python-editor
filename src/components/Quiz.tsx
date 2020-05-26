@@ -10,14 +10,29 @@ import {
   parseImportAll,
   parseImportSome,
 } from "../services/import_parsing"
-import { OutputObject, TestResultObject } from "../types"
+import { OutputObject, TestResultObject, FeedBackAnswer } from "../types"
 import {
   skulptMinJsSource,
   skulptStdlibJsSource,
   workerJsSource,
 } from "../constants"
+import FeedbackForm from "./FeedbackForm"
+
+const mockQuestions: TestResultObject["feedbackQuestions"] = [
+  {
+    id: 0,
+    kind: "intrange[-5..5]",
+    question: "How awesome?",
+  },
+  {
+    id: 1,
+    kind: "text",
+    question: "Miten meni näin omasta mielestä?",
+  },
+]
 
 type QuizProps = {
+  submitFeedback: (feedback: Array<FeedBackAnswer>) => void
   submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   onSubmissionResults?: (submissionResults: TestResultObject) => void
@@ -42,6 +57,7 @@ const defaultFile: FileEntry = {
 }
 
 const Quiz: React.FunctionComponent<QuizProps> = ({
+  submitFeedback,
   submitQuiz,
   submitToPaste,
   onSubmissionResults,
@@ -65,6 +81,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }>({ submitting: false })
   const [testing, setTesting] = useState(false)
   const [pasteUrl, setPasteUrl] = useState("")
+  const [showFeedbackForm, setShowFeedbackForm] = useState(true)
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -249,6 +266,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
           setOutput([])
           setTesting(true)
           setSubmitStatus(() => ({ submitting: false }))
+          setShowFeedbackForm(data.allTestsPassed || false)
           onSubmissionResults?.(data)
         })
       }
@@ -290,6 +308,17 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         maxHeight: "1000px",
       }}
     >
+      {showFeedbackForm && (
+        <FeedbackForm
+          awardedPoints={testResults?.points}
+          onSubmitFeedback={(feedback) => {
+            setShowFeedbackForm(false)
+            submitFeedback(feedback)
+          }}
+          solutionUrl={testResults?.solutionUrl}
+          feedbackQuestions={testResults?.feedbackQuestions || mockQuestions}
+        />
+      )}
       {files.length > 1 && (
         <>
           <InputLabel id="label">Select File</InputLabel>

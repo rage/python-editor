@@ -5,7 +5,7 @@ import {
   submitQuiz,
   fetchSubmissionResult,
 } from "../services/quiz"
-import { TestResultObject } from "../types"
+import { TestResultObject, FeedBackAnswer } from "../types"
 
 type QuizLoaderProps = {
   onSubmissionResults?: (submissionResults: TestResultObject) => void
@@ -100,6 +100,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       submitResult.val.submissionUrl,
       token,
     )
+    console.log(serverResult)
     if (serverResult.err) {
       return wrapError(serverResult.val.status, serverResult.val.message)
     }
@@ -113,6 +114,10 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     return submitResult.ok
       ? submitResult.val.pasteUrl || ""
       : submitResult.val.message
+  }
+
+  const submitFeedback = (feedback: Array<FeedBackAnswer>) => {
+    console.log(feedback)
   }
 
   useEffect(() => {
@@ -140,6 +145,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     <>
       <Quiz
         initialFiles={srcFiles}
+        submitFeedback={submitFeedback}
         submitQuiz={submitAndWaitResult}
         submitToPaste={submitToPaste}
         onSubmissionResults={onSubmissionResults}

@@ -1,3 +1,8 @@
+export type FeedBackAnswer = {
+  id: number
+  answer: string | number
+}
+
 export type OutputObject = {
   id: string
   type: string
@@ -11,6 +16,7 @@ export type SubmissionResponse = {
 }
 
 export type TestResultObject = {
+  allTestsPassed?: boolean
   points: string[]
   testCases: Array<{
     id: string
@@ -18,4 +24,11 @@ export type TestResultObject = {
     passed: boolean
     feedback: string
   }>
+  feedbackQuestions?: Array<{
+    id: number
+    question: string
+    kind: string
+  }>
+  feedbackAnswerUrl?: string
+  solutionUrl?: string
 }

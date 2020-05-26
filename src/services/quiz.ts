@@ -146,7 +146,14 @@ const fetchSubmissionResult = async (
         feedback: test.message,
       }))
       const points = submissionStatus.points as string[]
-      return new Ok({ points, testCases })
+      return new Ok({
+        allTestsPassed: submissionStatus.all_tests_passed,
+        points,
+        testCases,
+        feedbackQuestions: submissionStatus.feedback_questions,
+        feedbackAnswerUrl: submissionStatus.feedback_answer_url,
+        solutionUrl: submissionStatus.solution_url,
+      })
     }
   }
   return new Err({
