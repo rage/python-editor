@@ -10,10 +10,11 @@ interface EditorWrapperProps {
 }
 
 const EditorWrapper = styled.div`
-  min-height: 400px;
+  min-height: 300px;
+  max-height: 950px;
   border: 1px inset;
   height: ${(props: EditorWrapperProps) =>
-    props.height ? props.height : "450px"};
+    props.height ? props.height : "500px"};
 `
 
 type PyEditorProps = {
