@@ -37,7 +37,7 @@ const ContainerBox = styled.div`
   max-height: 500px;
   min-height: 200px;
   height: ${(props: ContainerBoxProps) =>
-    props.height ? props.height : "200px"};
+    props.height ? props.height : "250px"};
 `
 
 const show = keyframes`
