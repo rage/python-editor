@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import styled, { keyframes } from "styled-components"
-import { Paper, Grid, TextField } from "@material-ui/core"
+import { Paper, Grid } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
 import OutputTitle from "./OutputTitle"
@@ -37,7 +37,7 @@ const ContainerBox = styled.div`
   max-height: 500px;
   min-height: 200px;
   height: ${(props: ContainerBoxProps) =>
-    props.height ? props.height : "250px"};
+    props.height ? props.height : "200px"};
 `
 
 const show = keyframes`
@@ -61,8 +61,9 @@ const hide = keyframes`
 `
 
 const AnimatedOutputBox = styled(Paper)<{ open: boolean }>`
-  animation: ${props => (props.open ? show : hide)} 0.3s ease-in-out;
+  animation: ${(props) => (props.open ? show : hide)} 0.3s ease-in-out;
   bottom: 0;
+  border: 4px 4px 0px 0px;
   position: absolute;
   height: 100%;
   width: 100%;
@@ -76,7 +77,7 @@ const WarningBox = styled(Grid)`
   font-size: 1.25rem;
 `
 
-const Output: React.FunctionComponent<OutputProps> = props => {
+const Output: React.FunctionComponent<OutputProps> = (props) => {
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const [help, setShowHelp] = useState(false)
@@ -124,7 +125,7 @@ const Output: React.FunctionComponent<OutputProps> = props => {
   if (!render) return null
 
   const outputContentIncludesErrors = outputContent.some(
-    item => item.type === "error",
+    (item) => item.type === "error",
   )
 
   return (

@@ -18,8 +18,8 @@ type OutputContentProps = {
 const StyledOutput = styled(Grid)`
   padding: 10px;
   max-height: 500px;
-  height: 175px;
-  min-height: 150px;
+  height: 150px;
+  min-height: 125px;
   overflow: auto;
   white-space: pre-wrap;
 `
@@ -32,7 +32,7 @@ const StyledUserInput = styled.span`
   padding: 3px;
 `
 
-const OutputContent: React.FunctionComponent<OutputContentProps> = props => {
+const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   const {
     inputRequested,
     outputContent,
@@ -70,7 +70,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = props => {
 
   const showOutput = () => {
     if (outputContent && outputContent.length > 0) {
-      return outputContent.map(output =>
+      return outputContent.map((output) =>
         output.type === "input" ? (
           <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
         ) : (
