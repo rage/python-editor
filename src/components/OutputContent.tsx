@@ -13,13 +13,19 @@ type OutputContentProps = {
   pasteUrl: string
   sendInput: (input: string) => void
   testResults: TestResultObject | undefined
+  outputHeight: string | undefined
+}
+
+interface StyledOutputProps {
+  height?: string
 }
 
 const StyledOutput = styled(Grid)`
   padding: 10px;
-  max-height: 500px;
-  height: 150px;
-  min-height: 125px;
+  display: table-cell;
+  max-height: ${(props: StyledOutputProps) =>
+    props.height ? props.height : "175px"};
+  min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
 `
@@ -41,6 +47,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
     pasteUrl,
     sendInput,
     testResults,
+    outputHeight,
   } = props
   const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
   const userInputFieldRef: React.RefObject<HTMLInputElement> = React.createRef()
@@ -87,7 +94,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   }
 
   return (
-    <StyledOutput item ref={outputRef}>
+    <StyledOutput height={outputHeight} item ref={outputRef}>
       {showOutput()}
       {inputRequested && (
         <TextField

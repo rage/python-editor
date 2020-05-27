@@ -286,8 +286,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       style={{
         position: "relative",
         width: "inherit",
-        minHeight: "400px",
-        maxHeight: "1000px",
       }}
     >
       {files.length > 1 && (

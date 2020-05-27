@@ -14,7 +14,7 @@ const EditorWrapper = styled.div`
   max-height: 950px;
   border: 1px inset;
   height: ${(props: EditorWrapperProps) =>
-    props.height ? props.height : "500px"};
+    props.height ? props.height : "400px"};
 `
 
 type PyEditorProps = {
@@ -101,6 +101,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
             wordWrap: "on",
             scrollBeyondLastLine: false,
             hideCursorInOverviewRuler: true,
+            scrollbar: { alwaysConsumeMouseWheel: false },
           }}
         />
       </EditorWrapper>
