@@ -42,7 +42,7 @@ const App = () => {
         course={course}
         exercise={exercise}
         token={token}
-        height={"550px"}
+        height={"400px"}
       />
     )
   }
@@ -71,7 +71,7 @@ const App = () => {
       </div>
       {fetch &&
         loadQuiz(organization.value, course.value, exercise.value, token.value)}
-      {!fetch && <Quiz editorHeight={"550px"} />}
+      {!fetch && <Quiz editorHeight={"400px"} outputHeight={"250px"} />}
     </>
   )
 }

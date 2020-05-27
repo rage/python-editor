@@ -25,24 +25,17 @@ type OutputProps = {
   outputHeight: string | undefined
 }
 
-interface ContainerBoxProps {
-  height?: string
-}
-
 const ContainerBox = styled.div`
   overflow: hidden;
   position: absolute;
   width: 100%;
   bottom: 0;
-  max-height: 500px;
-  min-height: 200px;
-  height: ${(props: ContainerBoxProps) =>
-    props.height ? props.height : "250px"};
+  min-height: 100px;
 `
 
-const show = keyframes`
+const show = (animateHeight: string | undefined) => keyframes`
     from {
-      transform: translateY(210px);
+      transform: translateY(${animateHeight ? animateHeight : "225px"});
     }
 
     to  {
@@ -50,21 +43,25 @@ const show = keyframes`
     }
   }
 `
-const hide = keyframes`
+const hide = (animateHeight: string | undefined) => keyframes`
   from {
     transform: translateY(0px);
   }
 
   to {
-    transform: translateY(210px);
+    transform: translateY(${animateHeight ? animateHeight : "225px"});
   }
 `
 
-const AnimatedOutputBox = styled(Paper)<{ open: boolean }>`
-  animation: ${(props) => (props.open ? show : hide)} 0.3s ease-in-out;
-  bottom: 0;
+const AnimatedOutputBox = styled(Paper)<{
+  open: boolean
+  animateFrom: string | undefined
+}>`
+  animation: ${(props) =>
+      props.open ? show(props.animateFrom) : hide(props.animateFrom)}
+    0.2s ease-in-out;
   border: 4px 4px 0px 0px;
-  position: absolute;
+  position: relative;
   height: 100%;
   width: 100%;
 `
@@ -129,8 +126,12 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
   )
 
   return (
-    <ContainerBox height={outputHeight} data-cy="output-container">
-      <AnimatedOutputBox open={open} onAnimationEnd={onAnimationEnd}>
+    <ContainerBox data-cy="output-container">
+      <AnimatedOutputBox
+        animateFrom={outputHeight}
+        open={open}
+        onAnimationEnd={onAnimationEnd}
+      >
         <Grid container direction="column">
           {!signedIn && (
             <WarningBox>
@@ -161,6 +162,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
             pasteUrl={pasteUrl}
             sendInput={sendInput}
             testResults={testResults}
+            outputHeight={outputHeight}
           />
         </Grid>
       </AnimatedOutputBox>
