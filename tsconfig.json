@@ -5,6 +5,7 @@
     "noFallthroughCasesInSwitch": true,
     "outDir": "./dist",
     "target": "es5",
+    "downlevelIteration": true,
     "lib": ["dom", "esnext"],
     "module": "esnext",
     "moduleResolution": "node",

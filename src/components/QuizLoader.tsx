@@ -101,7 +101,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       submitResult.val.submissionUrl,
       token,
     )
-    console.log(serverResult)
+    // console.log(serverResult)
     if (serverResult.err) {
       return wrapError(serverResult.val.status, serverResult.val.message)
     }

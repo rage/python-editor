@@ -42,7 +42,7 @@ const App = () => {
         course={course}
         exercise={exercise}
         token={token}
-        height={"400px"}
+        height={"420px"}
       />
     )
   }

@@ -124,7 +124,7 @@ const fetchSubmissionResult = async (
         headers,
       })
       .then((res) => {
-        console.log(res.data)
+        // console.log(res.data)
         return res.data
       })
       .catch((err) => {
@@ -183,7 +183,7 @@ const submitFeedback = async (
       },
     })
     .then((res) => {
-      console.log(res.data)
+      // console.log(res.data)
     })
     .catch((error) => {
       console.error(error.response)

@@ -315,7 +315,7 @@ describe("The Playground", () => {
       cy.get("[data-cy=load-btn]").click()
     })
 
-    it("fail to solve quiz", () => {
+    it("fail to solve quiz, shows correct information", () => {
       const testString = "print('Romanes eunt domus')"
       cy.get(".monaco-editor")
         .first()
@@ -342,7 +342,7 @@ describe("The Playground", () => {
       cy.contains("FAIL: test.test_hymio.HymioTest.test_print_hymio")
     })
 
-    it("asks for help works", () => {
+    it("ask for help works with failed tests", () => {
       const testString = "print('Jellou world!')"
       cy.get(".monaco-editor")
         .first()
@@ -372,7 +372,7 @@ describe("The Playground", () => {
       cy.contains("Copied!")
     })
 
-    it("solve quiz correctly", () => {
+    it("solve quiz correctly gives points, congratulates, feedback form, model solution", () => {
       const testString = "print(':-)')"
       cy.get(".monaco-editor")
         .first()
@@ -399,6 +399,11 @@ describe("The Playground", () => {
       cy.contains("Tests passed")
       cy.contains("100%")
       cy.contains("Points gained: 1.1")
+      cy.contains("Question A")
+      cy.contains("Question B")
+      cy.contains("Congratulations")
+      cy.contains("View model solution")
+      cy.get("[data-cy=no-feedback]").click()
       cy.get("[data-cy=show-all-results-checkbox]").click()
       cy.get("[data-cy=test-result]").should("have.length", 1)
     })

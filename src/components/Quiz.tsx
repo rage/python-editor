@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { InputLabel, Select, Grid } from "@material-ui/core"
+import { InputLabel, Select } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -17,34 +17,6 @@ import {
   workerJsSource,
 } from "../constants"
 import FeedbackForm from "./FeedbackForm"
-
-const mockQuestions: TestResultObject["feedbackQuestions"] = [
-  {
-    id: 0,
-    kind: "intrange[-5..5]",
-    question: "How awesome?",
-  },
-  {
-    id: 1,
-    kind: "text",
-    question: "Miten meni näin omasta mielestä?",
-  },
-  {
-    id: 2,
-    kind: "text",
-    question: "Miten meni näin omasta mielestä?",
-  },
-  {
-    id: 3,
-    kind: "text",
-    question: "Miten meni näin omasta mielestä?",
-  },
-  {
-    id: 4,
-    kind: "text",
-    question: "Miten meni näin omasta mielestä?",
-  },
-]
 
 type QuizProps = {
   submitFeedback: (
@@ -99,7 +71,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }>({ submitting: false })
   const [testing, setTesting] = useState(false)
   const [pasteUrl, setPasteUrl] = useState("")
-  const [showFeedbackForm, setShowFeedbackForm] = useState(true)
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -278,7 +250,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         setSubmitStatus(() => ({ submitting: false }))
       } else {
         submitQuiz(files).then((data) => {
-          console.log(data)
+          // console.log(data)
           clearOutput()
           setTestResults(data)
           setOutput([])
@@ -333,9 +305,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
               submitFeedback(testResults, feedback)
             }
           }}
+          editorHeight={editorHeight}
           onClose={() => setShowFeedbackForm(false)}
           solutionUrl={testResults?.solutionUrl}
-          feedbackQuestions={testResults?.feedbackQuestions || mockQuestions}
+          feedbackQuestions={testResults?.feedbackQuestions}
         />
       )}
       {files.length > 1 && (
@@ -432,7 +405,7 @@ Quiz.defaultProps = {
   submitQuiz: () => Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
   onSubmissionResults: (result) => {
-    console.log(result)
+    // console.log(result)
   },
   initialFiles: [
     {
