@@ -35,6 +35,13 @@ const ProgressBarText = styled(Typography)`
   position: absolute;
 `
 
+const ProgressBarTitle = styled(Typography)`
+  && {
+    text-align: center;
+    color: white;
+  }
+`
+
 const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
   percentage,
   title,
@@ -43,7 +50,7 @@ const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
 
   return (
     <>
-      <Typography align="center">{title}</Typography>
+      <ProgressBarTitle>{title}</ProgressBarTitle>
       <ProgressBarBackground>
         <ProgressBarText variant="button">{percentage}%</ProgressBarText>
         <ProgressBar value={percentage} />

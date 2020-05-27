@@ -38,7 +38,7 @@ const StyledUserInput = styled.span`
   padding: 3px;
 `
 
-const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
+const OutputContent: React.FunctionComponent<OutputContentProps> = props => {
   const {
     inputRequested,
     outputContent,
@@ -77,7 +77,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
 
   const showOutput = () => {
     if (outputContent && outputContent.length > 0) {
-      return outputContent.map((output) =>
+      return outputContent.map(output =>
         output.type === "input" ? (
           <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
         ) : (
@@ -99,7 +99,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
       {inputRequested && (
         <TextField
           inputRef={userInputFieldRef}
-          label="Enter input and press 'Enter'"
+          label={`Enter input and press "Enter"`}
           margin="dense"
           variant="outlined"
           InputLabelProps={{ shrink: true }}
