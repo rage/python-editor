@@ -23,7 +23,10 @@ type OutputTitleProps = {
 }
 
 const StatusText = styled(Typography)`
-  margin: 10px;
+  && {
+    margin: 0 10px 0 10px;
+    color: white;
+  }
 `
 
 const MarginedButton = styled(Button)`
@@ -42,9 +45,10 @@ const OutputTitleBox = styled(({ inputRequested, ...props }) => (
 
 const OutputTitleText = styled(Typography)`
   && {
-    font-size: 1rem;
+    font-size: 1.1rem;
     display: inline-block;
     padding: 5px;
+    color: white;
   }
 `
 
@@ -151,7 +155,13 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = props => {
           />
         </Grid>
       ) : null}
-      <Grid container item xs={5} alignItems="center" justify="flex-end">
+      <Grid
+        container
+        item
+        xs={isRunning ? 6 : 5}
+        alignItems="center"
+        justify="flex-end"
+      >
         {getStatusIcon()}
         <StatusText>{getStatusText()}</StatusText>
         {testing || isSubmitting ? null : (
