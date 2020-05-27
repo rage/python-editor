@@ -26,6 +26,7 @@ const Question = styled.div`
 
 type FeedbackFormProps = {
   onSubmitFeedback: (feedback: Array<FeedBackAnswer>) => void
+  onClose: () => void
   awardedPoints?: Array<string>
   feedbackQuestions: TestResultObject["feedbackQuestions"]
   solutionUrl?: string
@@ -49,6 +50,7 @@ type FormQuestion = {
 const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   awardedPoints,
   onSubmitFeedback,
+  onClose,
   feedbackQuestions,
   solutionUrl,
 }) => {
@@ -143,6 +145,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
         <form onSubmit={onSubmit}>
           {mapQuestions()}
           <Button type="submit">Submit</Button>
+          <Button onClick={onClose}>Don't send</Button>
         </form>
       </Background>
     </Overlay>

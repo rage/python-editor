@@ -29,6 +29,21 @@ const mockQuestions: TestResultObject["feedbackQuestions"] = [
     kind: "text",
     question: "Miten meni näin omasta mielestä?",
   },
+  {
+    id: 2,
+    kind: "text",
+    question: "Miten meni näin omasta mielestä?",
+  },
+  {
+    id: 3,
+    kind: "text",
+    question: "Miten meni näin omasta mielestä?",
+  },
+  {
+    id: 4,
+    kind: "text",
+    question: "Miten meni näin omasta mielestä?",
+  },
 ]
 
 type QuizProps = {
@@ -320,6 +335,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
               submitFeedback(testResults, feedback)
             }
           }}
+          onClose={() => setShowFeedbackForm(false)}
           solutionUrl={testResults?.solutionUrl}
           feedbackQuestions={testResults?.feedbackQuestions || mockQuestions}
         />
