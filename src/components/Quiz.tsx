@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { InputLabel, Select, Grid } from "@material-ui/core"
+import { InputLabel, Select, Snackbar } from "@material-ui/core"
+import MuiAlert, { AlertProps } from "@material-ui/lab/Alert"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -11,14 +12,23 @@ import {
   parseImportAll,
   parseImportSome,
 } from "../services/import_parsing"
-import { OutputObject, TestResultObject } from "../types"
+import { OutputObject, TestResultObject, FeedBackAnswer } from "../types"
 import {
   skulptMinJsSource,
   skulptStdlibJsSource,
   workerJsSource,
 } from "../constants"
+import FeedbackForm from "./FeedbackForm"
+
+const Alert = (props: AlertProps) => {
+  return <MuiAlert elevation={6} variant="filled" {...props} />
+}
 
 type QuizProps = {
+  submitFeedback: (
+    testResults: TestResultObject,
+    feedback: Array<FeedBackAnswer>,
+  ) => void
   submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   onSubmissionResults?: (submissionResults: TestResultObject) => void
@@ -43,6 +53,7 @@ const defaultFile: FileEntry = {
 }
 
 const Quiz: React.FunctionComponent<QuizProps> = ({
+  submitFeedback,
   submitQuiz,
   submitToPaste,
   onSubmissionResults,
@@ -67,6 +78,8 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }>({ submitting: false })
   const [testing, setTesting] = useState(false)
   const [pasteUrl, setPasteUrl] = useState("")
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
+  const [openNotification, setOpenNotification] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -245,12 +258,13 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         setSubmitStatus(() => ({ submitting: false }))
       } else {
         submitQuiz(files).then((data) => {
-          console.log(data)
+          // console.log(data)
           clearOutput()
           setTestResults(data)
           setOutput([])
           setTesting(true)
           setSubmitStatus(() => ({ submitting: false }))
+          setShowFeedbackForm(data.allTestsPassed || false)
           onSubmissionResults?.(data)
         })
       }
@@ -273,6 +287,16 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setOutput([])
   }
 
+  const handleCloseNotification = (
+    event?: React.SyntheticEvent,
+    reason?: string,
+  ) => {
+    if (reason === "clickaway") {
+      return
+    }
+    setOpenNotification(false)
+  }
+
   /*
   const runTests = () => {
     console.log("Running tests")
@@ -290,6 +314,22 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         width: "inherit",
       }}
     >
+      {showFeedbackForm && (
+        <FeedbackForm
+          awardedPoints={testResults?.points}
+          onSubmitFeedback={(feedback) => {
+            setShowFeedbackForm(false)
+            if (testResults) {
+              submitFeedback(testResults, feedback)
+              feedback.length > 0 && setOpenNotification(true)
+            }
+          }}
+          editorHeight={editorHeight}
+          onClose={() => setShowFeedbackForm(false)}
+          solutionUrl={testResults?.solutionUrl}
+          feedbackQuestions={testResults?.feedbackQuestions}
+        />
+      )}
       {files.length > 1 && (
         <>
           <InputLabel id="label">{t("selectFile")}</InputLabel>
@@ -342,6 +382,15 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         signedIn={signedIn}
         outputHeight={outputHeight}
       />
+      <Snackbar
+        open={openNotification}
+        autoHideDuration={5000}
+        onClose={handleCloseNotification}
+      >
+        <Alert onClose={handleCloseNotification} severity="success">
+          Thank you for your feedback!
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
@@ -384,7 +433,7 @@ Quiz.defaultProps = {
   submitQuiz: () => Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
   onSubmissionResults: (result) => {
-    console.log(result)
+    // console.log(result)
   },
   initialFiles: [
     {

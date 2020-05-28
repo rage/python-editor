@@ -74,7 +74,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
 
   useEffect(() => {
     if (isSubmitting) {
-      setProgress(35)
+      setProgress(10 + 30 * Math.random())
     }
   }, [isSubmitting])
 

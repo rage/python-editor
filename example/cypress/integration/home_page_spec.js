@@ -168,7 +168,7 @@ describe("The Playground", () => {
 
     it("displays input field with label", () => {
       cy.get("[data-cy=user-input-field]").contains(
-        "Enter input and press 'Enter'",
+        'Enter input and press "Enter"',
       )
     })
 
@@ -315,17 +315,8 @@ describe("The Playground", () => {
       cy.get("[data-cy=load-btn]").click()
     })
 
-    it("fail to solve quiz", () => {
+    it("fail to solve quiz, shows correct information", () => {
       const testString = "print('Romanes eunt domus')"
-      cy.get(".monaco-editor")
-        .first()
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(testString)
-      cy.contains(testString)
-      cy.get("[data-cy=run-btn]").click()
       cy.route({
         method: "POST",
         url: "/api/v8/core/exercises/90703/submissions",
@@ -336,13 +327,22 @@ describe("The Playground", () => {
         url: "/api/v8/core/submissions/123123",
         response: "@resultSubmissionFail",
       })
+      cy.get(".monaco-editor")
+        .first()
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(testString)
+      cy.contains(testString)
+      cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=submit-btn]").click()
       cy.contains("Submitting to server")
       cy.contains("0%")
       cy.contains("FAIL: test.test_hymio.HymioTest.test_print_hymio")
     })
 
-    it("asks for help works", () => {
+    it("ask for help works with failed tests", () => {
       const testString = "print('Jellou world!')"
       cy.get(".monaco-editor")
         .first()
@@ -372,7 +372,7 @@ describe("The Playground", () => {
       cy.contains("Copied!")
     })
 
-    it("solve quiz correctly", () => {
+    it("solve quiz correctly gives points, congratulates, feedback form, model solution", () => {
       const testString = "print(':-)')"
       cy.get(".monaco-editor")
         .first()
@@ -399,6 +399,11 @@ describe("The Playground", () => {
       cy.contains("Tests passed")
       cy.contains("100%")
       cy.contains("Points gained: 1.1")
+      cy.contains("Question A")
+      cy.contains("Question B")
+      cy.contains("congratulations")
+      cy.contains("View model solution")
+      cy.get("[data-cy=no-feedback]").click()
       cy.get("[data-cy=show-all-results-checkbox]").click()
       cy.get("[data-cy=test-result]").should("have.length", 1)
     })

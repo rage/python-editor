@@ -5,6 +5,7 @@ import {
   getZippedQuiz,
   submitQuiz,
   fetchSubmissionResult,
+  submitFeedback,
 } from "../services/quiz"
 import { TestResultObject, Language } from "../types"
 
@@ -109,6 +110,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       token,
       t,
     )
+    // console.log(serverResult)
     if (serverResult.err) {
       return wrapError(serverResult.val.status, serverResult.val.message)
     }
@@ -149,6 +151,11 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
     <>
       <Quiz
         initialFiles={srcFiles}
+        submitFeedback={(testResults, feedback) => {
+          if (testResults.feedbackAnswerUrl) {
+            submitFeedback(testResults.feedbackAnswerUrl, token, feedback)
+          }
+        }}
         submitQuiz={submitAndWaitResult}
         submitToPaste={submitToPaste}
         onSubmissionResults={onSubmissionResults}

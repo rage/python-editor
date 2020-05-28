@@ -56,10 +56,10 @@ const hide = (animateHeight: string | undefined) => keyframes`
 
 const AnimatedOutputBox = styled(Paper)<{
   open: boolean
-  animateFrom: string | undefined
+  animatefrom: string | undefined
 }>`
   animation: ${(props) =>
-      props.open ? show(props.animateFrom) : hide(props.animateFrom)}
+      props.open ? show(props.animatefrom) : hide(props.animatefrom)}
     0.2s ease-in-out;
   border: 4px 4px 0px 0px;
   position: relative;
@@ -130,7 +130,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
   return (
     <ContainerBox data-cy="output-container">
       <AnimatedOutputBox
-        animateFrom={outputHeight}
+        animatefrom={outputHeight}
         open={open}
         onAnimationEnd={onAnimationEnd}
       >
