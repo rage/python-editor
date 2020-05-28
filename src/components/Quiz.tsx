@@ -245,7 +245,21 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setOutput([])
   }
 
-  // Modifies given test file content with Skulpt compatible imports
+  /* 
+    Modifies given test file content with Skulpt compatible imports
+    Implementation status of usable modules can be checked in e.g. 
+    https://github.com/skulpt/skulpt/tree/master/src/lib
+
+    Unittest is only partially supported and imports TMC needs should be
+    switched out for something that Skulpt can use. Encapsulating any TMC
+    specific usage to helper functions should be done at the beginning 
+    of the file and swapped with Skulpt counterparts before running the test file. 
+
+    When capturing output with Skulpt, any errors encountered during it stops 
+    the test from running and all tests after it silently; solved for now by running the
+    same code before capturing output to get error without failing.
+  */
+
   const modifyTestSkulptCompatible = (content: string, shortName: string) => {
     const usedModule = shortName.slice(0, -3)
     let testContent = content
@@ -278,7 +292,7 @@ def get_stdout_from(fn):
     return output
 
 `
-    // Find the first test class replace the contents before it
+    // Find the first test class and replace the contents before it
     const firstPointsIdx = testContent.indexOf("@points")
     const firstTestClassIdx = testContent.indexOf("class")
     if (firstPointsIdx !== -1 && firstPointsIdx < firstTestClassIdx) {
@@ -287,7 +301,13 @@ def get_stdout_from(fn):
       testContent = testContent.slice(firstTestClassIdx)
     }
 
-    // Add a test setup method at the beginning of every test class
+    /*
+      Add a test setup method at the beginning of every test class
+
+      A workaround for setting the module wihtout using
+      @classmethod, setUpClass or/and tmc module's loaders, since they 
+      are not usable with Skulpt. 
+    */
     const setUp = `
 
     def setUp(self):
@@ -401,7 +421,15 @@ print(syote)
 print(syote)
 `
 
-// Test file in the format that's used with TMC
+/*
+  Test file in the format that's used with TMC
+ 
+  The tmc module is not usable with Skulpt because of missing dependencies,
+  same with the io module.
+
+  Running the unittest with verbosity > 1 is not necessary with TMC, but
+  right now needed with Skulpt to get info about failing/passing tests.
+*/
 
 const defaultTests = `
 import unittest
