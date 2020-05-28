@@ -1,4 +1,5 @@
 import React, { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import { Grid, TextField } from "@material-ui/core"
 import TestResults from "./TestResults"
@@ -38,7 +39,7 @@ const StyledUserInput = styled.span`
   padding: 3px;
 `
 
-const OutputContent: React.FunctionComponent<OutputContentProps> = props => {
+const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   const {
     inputRequested,
     outputContent,
@@ -49,6 +50,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = props => {
     testResults,
     outputHeight,
   } = props
+  const [t] = useTranslation()
   const outputRef: React.RefObject<HTMLInputElement> = React.createRef()
   const userInputFieldRef: React.RefObject<HTMLInputElement> = React.createRef()
 
@@ -77,7 +79,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = props => {
 
   const showOutput = () => {
     if (outputContent && outputContent.length > 0) {
-      return outputContent.map(output =>
+      return outputContent.map((output) =>
         output.type === "input" ? (
           <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
         ) : (
@@ -99,7 +101,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = props => {
       {inputRequested && (
         <TextField
           inputRef={userInputFieldRef}
-          label={`Enter input and press "Enter"`}
+          label={t("enterInputAndPressEnter")}
           margin="dense"
           variant="outlined"
           InputLabelProps={{ shrink: true }}

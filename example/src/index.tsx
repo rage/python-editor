@@ -1,7 +1,7 @@
-import React from "react"
+import React, { useState } from "../../node_modules/react"
+import { ProgrammingExercise as QuizLoader } from "../.."
 import { Quiz } from "../../src/components/Quiz"
-import { QuizLoader } from "../../src/components/QuizLoader"
-import { Button, TextField } from "@material-ui/core"
+import { Button, TextField, MenuItem } from "@material-ui/core"
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
 import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
@@ -23,6 +23,9 @@ const App = () => {
   const course = useInput("course", "")
   const exercise = useInput("exercise", "")
   const token = useInput("token", "")
+  const [language, setLanguage] = useState("en")
+  const [height, setHeight] = useState("400px")
+  const [outputHeight, setOutputHeight] = useState("250px")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
   const handleLoad = () => {
     event.preventDefault()
@@ -42,7 +45,9 @@ const App = () => {
         course={course}
         exercise={exercise}
         token={token}
-        height={"420px"}
+        height={height}
+        outputHeight={outputHeight}
+        language={language}
       />
     )
   }
@@ -62,6 +67,29 @@ const App = () => {
           data-cy="exercise-input"
         />
         <StyledTextField {...token} label="User token" data-cy="token-input" />
+        <StyledTextField
+          value={language}
+          onChange={(event) => setLanguage(event.target.value)}
+          label="Language"
+          data-cy="language-input"
+          select
+        >
+          {["en", "fi"].map((item) => (
+            <MenuItem key={item} value={item}>
+              {item}
+            </MenuItem>
+          ))}
+        </StyledTextField>
+        <StyledTextField
+          value={height}
+          onChange={(event) => setHeight(event.target.value)}
+          label="Height"
+        />
+        <StyledTextField
+          value={outputHeight}
+          onChange={(event) => setOutputHeight(event.target.value)}
+          label="Output Height"
+        />
         <StyledButton onClick={handleLoad} data-cy="load-btn">
           Load Quiz
         </StyledButton>
@@ -71,7 +99,7 @@ const App = () => {
       </div>
       {fetch &&
         loadQuiz(organization.value, course.value, exercise.value, token.value)}
-      {!fetch && <Quiz editorHeight={"400px"} outputHeight={"250px"} />}
+      {!fetch && <Quiz editorHeight={height} outputHeight={outputHeight} />}
     </>
   )
 }

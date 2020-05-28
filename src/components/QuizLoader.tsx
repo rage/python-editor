@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { I18nextProvider, useTranslation } from "react-i18next"
 import { Quiz, defaultFile } from "./Quiz"
 import {
   getZippedQuiz,
@@ -6,7 +7,7 @@ import {
   fetchSubmissionResult,
   submitFeedback,
 } from "../services/quiz"
-import { TestResultObject, FeedBackAnswer } from "../types"
+import { TestResultObject, Language } from "../types"
 
 type QuizLoaderProps = {
   onSubmissionResults?: (submissionResults: TestResultObject) => void
@@ -16,6 +17,7 @@ type QuizLoaderProps = {
   token: string
   height?: string
   outputHeight?: string
+  language: Language
 }
 
 type FileEntry = {
@@ -37,12 +39,18 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   token,
   height,
   outputHeight,
+  language = "en",
 }) => {
+  const [t, i18n] = useTranslation()
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
   const [signedIn, setSignedIn] = useState(token !== "" && token !== null)
   const [submissionUrl, setSubmissionUrl] = useState("")
   const mainSourceFile = "__main__.py"
+
+  useEffect(() => {
+    i18n.changeLanguage(language)
+  }, [language])
 
   const getFileEntries = (
     zip: any,
@@ -93,13 +101,14 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         },
       ],
     })
-    const submitResult = await submitQuiz(submissionUrl, token, files)
+    const submitResult = await submitQuiz(submissionUrl, token, t, files)
     if (submitResult.err) {
       return wrapError(submitResult.val.status, submitResult.val.message)
     }
     const serverResult = await fetchSubmissionResult(
       submitResult.val.submissionUrl,
       token,
+      t,
     )
     // console.log(serverResult)
     if (serverResult.err) {
@@ -109,7 +118,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }
 
   const submitToPaste = async (files: FileEntry[]) => {
-    const submitResult = await submitQuiz(submissionUrl, token, files, {
+    const submitResult = await submitQuiz(submissionUrl, token, t, files, {
       paste: true,
     })
     return submitResult.ok
@@ -119,7 +128,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
 
   useEffect(() => {
     const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
-    getZippedQuiz(url, token)
+    getZippedQuiz(url, token, t)
       .then((result) => {
         if (result.err) {
           return Promise.resolve([
@@ -158,4 +167,4 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   )
 }
 
-export { QuizLoader, FileEntry }
+export { QuizLoader, QuizLoaderProps, FileEntry }

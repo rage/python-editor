@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import { Typography, Button, Grid, CircularProgress } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -69,6 +70,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
     handleSubmit,
     signedIn,
   } = props
+  const [t] = useTranslation()
 
   useEffect(() => {
     if (isSubmitting) {
@@ -84,13 +86,13 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
     }
   }, [progress])
 
-  const titleText = testing ? "Test Results" : "Output"
+  const titleText = testing ? t("testResults") : t("outputTitle")
 
   const getStatusText = () => {
     if (isRunning) {
-      return inputRequested ? "Waiting for input" : "Running"
+      return inputRequested ? t("waitingForInput") : t("running")
     } else if (isSubmitting) {
-      return "Submitting"
+      return t("submitting")
     }
     return null
   }
@@ -143,7 +145,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
         <Grid item xs={5}>
           <TestProgressBar
             percentage={fakePercentage()}
-            title={"Submitting to server"}
+            title={t("submittingToServer")}
           />
         </Grid>
       ) : null}
@@ -151,7 +153,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
         <Grid item xs={5}>
           <TestProgressBar
             percentage={passedTestsPercentage()}
-            title={"Tests passed"}
+            title={t("testsPassed")}
           />
         </Grid>
       ) : null}
@@ -172,7 +174,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             disabled={!isRunning}
             data-cy="output-title-stop-btn"
           >
-            Stop
+            {t("button.stop")}
           </MarginedButton>
         )}
         {testResults ? (
@@ -183,7 +185,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
               disabled={isSubmitting || isRunning || help}
               data-cy="need-help-btn"
             >
-              Need help?
+              {t("needHelp")}
             </MarginedButton>
           ) : null
         ) : null}
@@ -196,7 +198,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             }
             data-cy="submit-btn"
           >
-            Submit
+            {t("button.submit")}
           </MarginedButton>
         )}
         <MarginedButton
@@ -205,7 +207,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
           disabled={isSubmitting}
           data-cy="close-btn"
         >
-          Close
+          {t("button.close")}
         </MarginedButton>
       </Grid>
     </OutputTitleBox>

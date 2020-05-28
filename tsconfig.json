@@ -12,6 +12,7 @@
     "strictNullChecks": true,
     "strict": true,
     "removeComments": true,
+    "resolveJsonModule": true,
     "declaration": false,
     "sourceMap": true,
     "jsx": "react",

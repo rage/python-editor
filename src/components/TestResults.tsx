@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import {
   Paper,
@@ -59,10 +60,11 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
 }
 
 const Points: React.FunctionComponent<PointsProps> = ({ points }) => {
+  const [t] = useTranslation()
   return (
     <StyledPointsPaper points data-cy="submission-points">
       <Typography>
-        {"Points gained: "} {points}
+        {t("pointsAwarded")}: {points}
       </Typography>
     </StyledPointsPaper>
   )
@@ -71,6 +73,7 @@ const Points: React.FunctionComponent<PointsProps> = ({ points }) => {
 const TestResults: React.FunctionComponent<TestResultsProps> = ({
   results,
 }) => {
+  const [t] = useTranslation()
   const [showAll, setShowAll] = useState(false)
 
   const showResults = () => {
@@ -116,7 +119,7 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
       <Grid item>
         <Paper style={{ paddingLeft: "10px" }}>
           <FormControlLabel
-            label="Show all"
+            label={t("showAll")}
             control={
               <Checkbox
                 checked={showAll}

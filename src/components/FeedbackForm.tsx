@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 
 import { TestResultObject, FeedBackAnswer } from "../types"
@@ -130,6 +131,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   solutionUrl,
   editorHeight,
 }) => {
+  const [t] = useTranslation()
   const [formState, setFormState] = useState<Array<FormQuestion>>(
     feedbackQuestions?.map((question) => {
       if (question.kind === "text") {
@@ -228,9 +230,11 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
     <Overlay>
       <Background>
         <HeaderWrapper>
-          <FeedbackTitle>Exercise completed, congratulations! </FeedbackTitle>
+          <FeedbackTitle>{t("feedbackTitle")}</FeedbackTitle>
           {awardedPoints?.length && (
-            <FeedbackText>Points awarded: {mapPoints()}</FeedbackText>
+            <FeedbackText>
+              {t("pointsAwarded")}: {mapPoints()}
+            </FeedbackText>
           )}
         </HeaderWrapper>
 
@@ -247,13 +251,13 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
         <FooterWrapper>
           {feedbackQuestions && feedbackQuestions.length > 0 && (
             <StyledButton form="feedback-form" type="submit">
-              Submit
+              {t("button.submit")}
             </StyledButton>
           )}
           <StyledButton onClick={onClose} data-cy="no-feedback">
             {feedbackQuestions && feedbackQuestions.length > 0
-              ? "Don't send"
-              : "Close"}
+              ? t("dontSend")
+              : t("button.close")}
           </StyledButton>
           {solutionUrl && (
             <StyledButton
@@ -262,7 +266,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
               }}
               style={{ float: "right" }}
             >
-              View model solution
+              {t("viewModelSolution")}
             </StyledButton>
           )}
         </FooterWrapper>

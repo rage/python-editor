@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { InputLabel, Select, Snackbar } from "@material-ui/core"
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert"
 import PyEditor from "./PyEditor"
@@ -61,6 +62,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   editorHeight,
   outputHeight,
 }) => {
+  const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
   const [workerAvailable, setWorkerAvailable] = useState(true)
@@ -330,7 +332,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       )}
       {files.length > 1 && (
         <>
-          <InputLabel id="label">Select File</InputLabel>
+          <InputLabel id="label">{t("selectFile")}</InputLabel>
           <Select
             labelId="label"
             native
