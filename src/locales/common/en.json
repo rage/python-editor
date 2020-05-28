@@ -8,10 +8,13 @@
   },
   "authenticationRequired": "Authentication required",
   "copiedConfirmation": "Copied!",
+  "dontSend": "Don't send",
   "enterInputAndPressEnter": "Enter input and press \"Enter\"",
   "failedToDownloadExercise": "Failed to download exercise.",
+  "feedbackTitle": "Exercise completed, congratulations!",
   "needHelp": "Need help?",
   "outputTitle": "Output",
+  "pointsAwarded": "Points awarded",
   "running": "Running",
   "sendToTmcPaste": "Send to TMC Paste",
   "selectFile": "Select File",
@@ -24,5 +27,6 @@
   "testResults": "Test Results",
   "testsPassed": "Tests passed",
   "tmcPasteDescription": "You can submit your code to TMC Paste and share the link to the course discussion channel and ask for help.",
+  "viewModelSolution": "View model solution",
   "waitingForInput": "Waiting for input"
 }

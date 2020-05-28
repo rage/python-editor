@@ -8,11 +8,14 @@
   },
   "authenticationRequired": "Sisään kirjautuminen vaaditaan",
   "copiedConfirmation": "Kopioitu!",
+  "dontSend": "Ei kiitos",
   "enterInputAndPressEnter": "Anna syöte ja paina \"Enter\"",
   "failedToDownloadExercise": "Tehtävän lataaminen epäonnistui.",
+  "feedbackTitle": "Tehtävä suoritettu, onneksi olkoon!",
   "needHelp": "Tarvitsetko apua?",
   "outputTitle": "Tuloste",
   "running": "Suoritetaan",
+  "pointsAwarded": "Saadut pisteet",
   "sendToTmcPaste": "Lähetä TMC Pasteen",
   "selectFile": "Valitse tiedosto",
   "showAll": "Näytä kaikki",
@@ -24,5 +27,6 @@
   "testResults": "Testien tulokset",
   "testsPassed": "Testejä läpi",
   "tmcPasteDescription": "Voit lähettää koodisi TMC Pasteen ja jakaa linkin kurssin keskustelukanavilla pyytääksesi apua.",
+  "viewModelSolution": "Näytä mallivastaus",
   "waitingForInput": "Odotetaan syötettä"
 }

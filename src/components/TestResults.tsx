@@ -60,10 +60,11 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
 }
 
 const Points: React.FunctionComponent<PointsProps> = ({ points }) => {
+  const [t] = useTranslation()
   return (
     <StyledPointsPaper points data-cy="submission-points">
       <Typography>
-        {"Points gained: "} {points}
+        {t("pointsAwarded")}: {points}
       </Typography>
     </StyledPointsPaper>
   )
