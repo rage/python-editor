@@ -52,7 +52,7 @@ const OutputTitleText = styled(Typography)`
   }
 `
 
-const OutputTitle: React.FunctionComponent<OutputTitleProps> = props => {
+const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
   const [progress, setProgress] = useState(100)
   const {
     inputRequested,
@@ -72,14 +72,14 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = props => {
 
   useEffect(() => {
     if (isSubmitting) {
-      setProgress(35)
+      setProgress(10 + 30 * Math.random())
     }
   }, [isSubmitting])
 
   useEffect(() => {
     if (isSubmitting) {
       setTimeout(() => {
-        setProgress(prev => Math.min(prev + 10, 100))
+        setProgress((prev) => Math.min(prev + 10, 100))
       }, 2000)
     }
   }, [progress])
@@ -176,7 +176,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = props => {
           </MarginedButton>
         )}
         {testResults ? (
-          testResults.testCases.some(test => !test.passed) ? (
+          testResults.testCases.some((test) => !test.passed) ? (
             <MarginedButton
               onClick={showHelp}
               variant="contained"

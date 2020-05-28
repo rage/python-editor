@@ -386,7 +386,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         onClose={handleCloseNotification}
       >
         <Alert onClose={handleCloseNotification} severity="success">
-          Thank you for the feedback!
+          Thank you for your feedback!
         </Alert>
       </Snackbar>
     </div>

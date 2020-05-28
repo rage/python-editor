@@ -168,7 +168,7 @@ describe("The Playground", () => {
 
     it("displays input field with label", () => {
       cy.get("[data-cy=user-input-field]").contains(
-        "Enter input and press 'Enter'",
+        'Enter input and press "Enter"',
       )
     })
 
@@ -317,15 +317,6 @@ describe("The Playground", () => {
 
     it("fail to solve quiz, shows correct information", () => {
       const testString = "print('Romanes eunt domus')"
-      cy.get(".monaco-editor")
-        .first()
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(testString)
-      cy.contains(testString)
-      cy.get("[data-cy=run-btn]").click()
       cy.route({
         method: "POST",
         url: "/api/v8/core/exercises/90703/submissions",
@@ -336,6 +327,15 @@ describe("The Playground", () => {
         url: "/api/v8/core/submissions/123123",
         response: "@resultSubmissionFail",
       })
+      cy.get(".monaco-editor")
+        .first()
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(testString)
+      cy.contains(testString)
+      cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=submit-btn]").click()
       cy.contains("Submitting to server")
       cy.contains("0%")
@@ -401,7 +401,7 @@ describe("The Playground", () => {
       cy.contains("Points gained: 1.1")
       cy.contains("Question A")
       cy.contains("Question B")
-      cy.contains("Congratulations")
+      cy.contains("congratulations")
       cy.contains("View model solution")
       cy.get("[data-cy=no-feedback]").click()
       cy.get("[data-cy=show-all-results-checkbox]").click()

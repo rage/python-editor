@@ -2,7 +2,6 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": false,
     "target": "es5",
-    "downlevelIteration": true,
     "module": "commonjs",
     "jsx": "react",
     "moduleResolution": "node",

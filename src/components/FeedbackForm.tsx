@@ -9,12 +9,13 @@ import {
   Typography,
   Grid,
   TextareaAutosize,
+  Chip,
 } from "@material-ui/core"
 
 const Background = styled(Paper)`
   width: 80%;
   margin: 3% 10% 3% 10%;
-  border-radius: 5px;
+  border-radius: 10px;
 `
 // For scrollbar and responsiveness, height 100%
 const Overlay = styled.div`
@@ -44,6 +45,47 @@ const StyledOutput = styled(Grid)`
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
+`
+
+const HeaderWrapper = styled.div`
+  padding: 1px 25px;
+  border-radius: 10px 10px 0px 0px;
+  background: rgb(39, 139, 82);
+  background: linear-gradient(
+    180deg,
+    rgba(39, 139, 82, 1) 0%,
+    rgba(19, 181, 89, 1) 50%,
+    rgba(15, 201, 96, 1) 100%
+  );
+  font-family: Roboto Slab, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  color: white;
+`
+
+const FooterWrapper = styled.div`
+  border-top: 1px dashed black;
+`
+
+const FeedbackTitle = styled(Typography)`
+  && {
+    font-size: 1.5rem;
+    padding: 9px 5px;
+    font-weight: 500;
+  }
+`
+
+const FeedbackText = styled.div`
+  && {
+    font-size: 1rem;
+    padding: 9px 5px;
+  }
+`
+
+const StyledChip = styled(Chip)`
+  && {
+    color: white;
+  }
 `
 
 const StyledButton = styled((props) => (
@@ -133,6 +175,12 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
     )
   }
 
+  const mapPoints = () => {
+    return awardedPoints?.map((point) => (
+      <StyledChip key={point} label={point} variant="outlined" />
+    ))
+  }
+
   const mapQuestions = () => {
     return formState.map((question) => {
       switch (question.kind) {
@@ -145,10 +193,18 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
                 valueLabelFormat={(x) => (x < question.min ? null : x)}
                 aria-labelledby="discrete-slider-custom"
                 step={1}
-                marks={Array.from([...Array(question.max + 1).keys()], (x) =>
-                  x !== 0
-                    ? Object({ value: x, label: x })
-                    : Object({ value: x, label: "-" }),
+                marks={Array.from(
+                  Array(
+                    question.min <= 0 && question.max > 0
+                      ? question.max - question.min + 2
+                      : question.max + 1,
+                  )
+                    .fill(0)
+                    .map((_, idx) => question.min + idx - 1),
+                  (x, i) =>
+                    i !== 0
+                      ? Object({ value: x, label: x })
+                      : Object({ value: x, label: "-" }),
                 )}
                 min={question.min - 1}
                 max={question.max}
@@ -179,19 +235,13 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   return (
     <Overlay>
       <Background>
-        <div
-          style={{
-            padding: "1px 25px",
-            borderRadius: "5px 5px 0px 0px",
-            borderBottom: "1px solid black",
-            background: "#13B559",
-          }}
-        >
-          <h2>Congratulations! Exercise completed!</h2>
+        <HeaderWrapper>
+          <FeedbackTitle>Exercise completed, congratulations! </FeedbackTitle>
           {awardedPoints?.length && (
-            <p>Points awarded: {awardedPoints?.join(", ")}</p>
+            <FeedbackText>Points awarded: {mapPoints()}</FeedbackText>
           )}
-        </div>
+        </HeaderWrapper>
+
         {feedbackQuestions && feedbackQuestions.length > 0 && (
           <Grid container direction="column">
             <StyledOutput /*height={editorHeight}*/>
@@ -201,7 +251,8 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
             </StyledOutput>
           </Grid>
         )}
-        <div style={{ borderTop: "1px dashed black" }}>
+
+        <FooterWrapper>
           {feedbackQuestions && feedbackQuestions.length > 0 && (
             <StyledButton form="feedback-form" type="submit">
               Submit
@@ -222,7 +273,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
               View model solution
             </StyledButton>
           )}
-        </div>
+        </FooterWrapper>
       </Background>
     </Overlay>
   )
