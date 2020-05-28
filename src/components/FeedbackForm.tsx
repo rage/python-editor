@@ -13,18 +13,17 @@ import {
 
 const Background = styled(Paper)`
   width: 80%;
-  margin-left: 10%;
-  margin-top: 5px;
+  margin: 3% 10% 3% 10%;
   border-radius: 5px;
 `
-
+// For scrollbar and responsiveness, height 100%
 const Overlay = styled.div`
   position: absolute;
   overflow: hidden;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: auto;
   z-index: 9001;
   background-color: rgba(127, 127, 127, 0.7);
 `
@@ -32,14 +31,16 @@ interface StyledOutputProps {
   height?: string
 }
 
-const StyledOutput = styled(Grid)`
-  padding: 5px;
-  display: table-cell;
-  max-height: ${(props: StyledOutputProps) =>
+/* StyledOutput "responsiveness"
+max-height: ${(props: StyledOutputProps) =>
     props.height
       ? Math.min(Number(props.height.split("px")[0]) * 0.6, 775).toString() +
         "px"
       : "250px"};
+      */
+const StyledOutput = styled(Grid)`
+  padding: 5px;
+  display: table-cell;
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
@@ -193,7 +194,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
         </div>
         {feedbackQuestions && feedbackQuestions.length > 0 && (
           <Grid container direction="column">
-            <StyledOutput height={editorHeight}>
+            <StyledOutput /*height={editorHeight}*/>
               <form id="feedback-form" onSubmit={onSubmit}>
                 {mapQuestions()}
               </form>
