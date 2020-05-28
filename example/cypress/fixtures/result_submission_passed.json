@@ -6,7 +6,7 @@
   "course": "test-python-test",
   "exercise_name": "osa01-01_hymio",
   "status": "ok",
-  "points": ["1.1"],
+  "points": ["1.1", "1.2"],
   "validations": null,
   "valgrind": "",
   "submission_url": "https://tmc.mooc.fi/submissions/123123",
@@ -32,6 +32,21 @@
       "id": 393,
       "question": "Question A",
       "kind": "intrange[-10..10]"
+    },
+    {
+      "id": 391,
+      "question": "Question aa",
+      "kind": "intrange[0..10]"
+    },
+    {
+      "id": 391,
+      "question": "Question cc",
+      "kind": "intrange[0..0]"
+    },
+    {
+      "id": 392,
+      "question": "Question BB",
+      "kind": "intrange[1..10]"
     },
     {
       "id": 394,
