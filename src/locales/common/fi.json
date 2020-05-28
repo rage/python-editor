@@ -1,0 +1,28 @@
+{
+  "button": {
+    "close": "Sulje",
+    "copy": "Kopioi",
+    "run": "Suorita",
+    "stop": "Pysäytä",
+    "submit": "Lähetä"
+  },
+  "authenticationRequired": "Sisään kirjautuminen vaaditaan",
+  "copiedConfirmation": "Kopioitu!",
+  "enterInputAndPressEnter": "Anna syöte ja paina \"Enter\"",
+  "failedToDownloadExercise": "Tehtävän lataaminen epäonnistui.",
+  "needHelp": "Tarvitsetko apua?",
+  "outputTitle": "Tuloste",
+  "running": "Suoritetaan",
+  "sendToTmcPaste": "Lähetä TMC Pasteen",
+  "selectFile": "Valitse tiedosto",
+  "showAll": "Näytä kaikki",
+  "signInToSubmitExercise": "Kirjaudu sisään palauttaaksesi tehtävän",
+  "submissionProcessFailed": "Tehtävän lähettäminen epäonnistui",
+  "submissionTookTooLong": "Tehtävän lähettäminen kesti liian kauan.",
+  "submitting": "Lähetetään",
+  "submittingToServer": "Lähetetään palvelimelle",
+  "testResults": "Testien tulokset",
+  "testsPassed": "Testejä läpi",
+  "tmcPasteDescription": "Voit lähettää koodisi TMC Pasteen ja jakaa linkin kurssin keskustelukanavilla pyytääksesi apua.",
+  "waitingForInput": "Odotetaan syötettä"
+}

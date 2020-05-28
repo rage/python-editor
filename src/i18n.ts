@@ -1,10 +1,14 @@
 import i18n from "i18next"
 
 import commonEN from "./locales/common/en.json"
+import commonFI from "./locales/common/fi.json"
 
 const resources = {
   en: {
     common: commonEN,
+  },
+  fi: {
+    common: commonFI,
   },
 }
 

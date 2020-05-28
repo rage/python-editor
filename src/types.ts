@@ -4,7 +4,7 @@ export type OutputObject = {
   text: string
 }
 
-export type Language = "en"
+export type Language = "en" | "fi"
 
 export type SubmissionResponse = {
   pasteUrl?: string

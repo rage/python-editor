@@ -92,7 +92,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
     if (isRunning) {
       return inputRequested ? t("waitingForInput") : t("running")
     } else if (isSubmitting) {
-      return "Submitting"
+      return t("submitting")
     }
     return null
   }
@@ -185,7 +185,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
               disabled={isSubmitting || isRunning || help}
               data-cy="need-help-btn"
             >
-              {t("needHelp")}?
+              {t("needHelp")}
             </MarginedButton>
           ) : null
         ) : null}

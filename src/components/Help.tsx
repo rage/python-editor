@@ -34,7 +34,7 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
     const element = document.getElementById("textField") as HTMLInputElement
     element.select()
     document.execCommand("copy")
-    setCopySuccess("Copied!")
+    setCopySuccess(t("copiedConfirmation"))
   }
 
   return (
