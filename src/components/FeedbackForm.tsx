@@ -185,6 +185,10 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
     return formState.map((question) => {
       switch (question.kind) {
         case "intrange":
+          const marks = [{ value: question.min - 1, label: "-" }]
+          for (let i = question.min; i <= question.max; i++) {
+            marks.push({ value: i, label: i.toString() })
+          }
           return (
             <Question key={question.id}>
               <Typography gutterBottom>{question.question}</Typography>
@@ -193,19 +197,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
                 valueLabelFormat={(x) => (x < question.min ? null : x)}
                 aria-labelledby="discrete-slider-custom"
                 step={1}
-                marks={Array.from(
-                  Array(
-                    question.min <= 0 && question.max > 0
-                      ? question.max - question.min + 2
-                      : question.max + 1,
-                  )
-                    .fill(0)
-                    .map((_, idx) => question.min + idx - 1),
-                  (x, i) =>
-                    i !== 0
-                      ? Object({ value: x, label: x })
-                      : Object({ value: x, label: "-" }),
-                )}
+                marks={marks}
                 min={question.min - 1}
                 max={question.max}
                 valueLabelDisplay="auto"
