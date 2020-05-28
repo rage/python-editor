@@ -1,0 +1,26 @@
+{
+  "button": {
+    "close": "Close",
+    "copy": "Copy",
+    "run": "Run",
+    "stop": "Stop",
+    "submit": "Submit"
+  },
+  "authenticationRequired": "Authentication required",
+  "enterInputAndPressEnter": "Enter input and press \"Enter\"",
+  "failedToDownloadExercise": "Failed to download exercise.",
+  "needHelp": "Need help",
+  "outputTitle": "Output",
+  "running": "Running",
+  "sendToTmcPaste": "Send to TMC Paste",
+  "selectFile": "Select File",
+  "signInToSubmitExercise": "Sign in to submit exercise",
+  "submissionProcessFailed": "Submission process failed",
+  "submissionTookTooLong": "Submission was taking a really long time.",
+  "submitting": "Submitting",
+  "submittingToServer": "Submitting to server",
+  "testResults": "Test Results",
+  "testsPassed": "Tests passed",
+  "tmcPasteDescription": "You can submit your code to TMC Paste and share the link to the course discussion channel and ask for help.",
+  "waitingForInput": "Waiting for input"
+}

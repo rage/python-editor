@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import { Button, Input } from "@material-ui/core"
 
@@ -20,7 +21,7 @@ const StyledInput = styled((props) => <Input {...props} />)`
 
 const Help: React.FunctionComponent<HelpProps> = (props) => {
   const { handlePasteSubmit, pasteUrl } = props
-
+  const [t] = useTranslation()
   const [pasteTriggered, setPasteTriggered] = useState(false)
   const [copySuccess, setCopySuccess] = useState("")
 
@@ -38,10 +39,7 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
 
   return (
     <div>
-      <p>
-        You can submit your code to TMC Paste and share the link to the course
-        discussion channel and ask for help.
-      </p>
+      <p>{t("tmcPasteDescription")}</p>
       {pasteTriggered && document.queryCommandSupported("copy") ? (
         <div>
           <StyledInput
@@ -51,7 +49,7 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
             readOnly
           />
           <StyledButton data-cy="copy-text-btn" onClick={copyToClipboard}>
-            Copy text
+            {t("button.copy")}
           </StyledButton>
           {copySuccess}
         </div>
@@ -61,7 +59,7 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
         disabled={pasteTriggered}
         data-cy="send-to-paste-btn"
       >
-        Send to TMC Paste
+        {t("sendToTmcPaste")}
       </StyledButton>
     </div>
   )

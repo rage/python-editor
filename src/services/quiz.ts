@@ -1,3 +1,4 @@
+import { TFunction } from "i18next"
 import axios from "axios"
 import JSZip from "jszip"
 import { Result, Err, Ok } from "ts-results"
@@ -23,6 +24,7 @@ const getHeaders = (token: string) => ({
 const getZippedQuiz = async (
   url: string,
   token: string,
+  t: TFunction,
 ): Promise<Result<[JSZip, string], Error>> => {
   const headers = getHeaders(token)
   const zip = axios
@@ -40,7 +42,7 @@ const getZippedQuiz = async (
       console.error(error)
       throw {
         status: error.response.status,
-        message: "Failed to download exercise.",
+        message: t("failedToDownloadExercise"),
       }
     })
   const submissionUrl = axios
@@ -54,7 +56,7 @@ const getZippedQuiz = async (
     .catch((error) => {
       throw {
         status: error.response.status,
-        message: "Failed to download exercise.",
+        message: t("failedToDownloadExercise"),
       }
     })
   try {
@@ -67,6 +69,7 @@ const getZippedQuiz = async (
 const submitQuiz = async (
   url: string,
   token: string,
+  t: TFunction,
   files: Array<FileEntry>,
   submitOptions?: SubmitOptions,
 ): Promise<Result<SubmissionResponse, Error>> => {
@@ -102,7 +105,9 @@ const submitQuiz = async (
     .catch((error) => {
       const status = error.response.status
       let message =
-        status === 403 ? "Authentication required" : "Submission process failed"
+        status === 403
+          ? t("authenticationRequired")
+          : t("submissionProcessFailed")
       console.error(error.response)
       return new Err({ status, message })
     })
@@ -111,6 +116,7 @@ const submitQuiz = async (
 const fetchSubmissionResult = async (
   url: string,
   token: string,
+  t: TFunction,
 ): Promise<Result<TestResultObject, Error>> => {
   const headers = getHeaders(token)
   const times = [2000, 2000, 1000, 1000, 1000, 2000, 2000, 4000, 8000, 16000]
@@ -135,7 +141,7 @@ const fetchSubmissionResult = async (
     if (submissionStatus.status === "error") {
       return new Err({
         status: submissionStatus.statusCode,
-        message: "Submission process failed",
+        message: t("submissionProcessFailed"),
       })
     } else if (submissionStatus.status !== "processing") {
       const tests = submissionStatus.test_cases as any[]
@@ -151,7 +157,7 @@ const fetchSubmissionResult = async (
   }
   return new Err({
     status: 418,
-    message: "Submission was taking a really long time.",
+    message: t("submissionTookTooLong"),
   })
 }
 

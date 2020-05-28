@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import styled, { keyframes } from "styled-components"
 import { Paper, Grid } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -75,6 +76,7 @@ const WarningBox = styled(Grid)`
 `
 
 const Output: React.FunctionComponent<OutputProps> = (props) => {
+  const [t] = useTranslation()
   const [render, setRender] = useState(false)
   const [open, setOpen] = useState(true)
   const [help, setShowHelp] = useState(false)
@@ -136,7 +138,9 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
           {!signedIn && (
             <WarningBox>
               <FontAwesomeIcon icon={faExclamationTriangle} />
-              Sign in to submit exercise
+              <span style={{ marginLeft: 10 }}>
+                {t("signInToSubmitExercise")}
+              </span>
             </WarningBox>
           )}
           <OutputTitle
