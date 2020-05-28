@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
-import { InputLabel, Select } from "@material-ui/core"
+import { InputLabel, Select, Snackbar } from "@material-ui/core"
+import MuiAlert, { AlertProps } from "@material-ui/lab/Alert"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -17,6 +18,10 @@ import {
   workerJsSource,
 } from "../constants"
 import FeedbackForm from "./FeedbackForm"
+
+const Alert = (props: AlertProps) => {
+  return <MuiAlert elevation={6} variant="filled" {...props} />
+}
 
 type QuizProps = {
   submitFeedback: (
@@ -72,6 +77,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const [testing, setTesting] = useState(false)
   const [pasteUrl, setPasteUrl] = useState("")
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
+  const [openNotification, setOpenNotification] = useState(false)
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -279,6 +285,16 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     setOutput([])
   }
 
+  const handleCloseNotification = (
+    event?: React.SyntheticEvent,
+    reason?: string,
+  ) => {
+    if (reason === "clickaway") {
+      return
+    }
+    setOpenNotification(false)
+  }
+
   /*
   const runTests = () => {
     console.log("Running tests")
@@ -303,6 +319,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
             setShowFeedbackForm(false)
             if (testResults) {
               submitFeedback(testResults, feedback)
+              feedback.length > 0 && setOpenNotification(true)
             }
           }}
           editorHeight={editorHeight}
@@ -363,6 +380,15 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         signedIn={signedIn}
         outputHeight={outputHeight}
       />
+      <Snackbar
+        open={openNotification}
+        autoHideDuration={5000}
+        onClose={handleCloseNotification}
+      >
+        <Alert onClose={handleCloseNotification} severity="success">
+          Thank you for the feedback!
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
