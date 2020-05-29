@@ -14,16 +14,23 @@ import {
 } from "@material-ui/core"
 
 const Background = styled(Paper)`
+  position: absolute;
+  overflow: hidden;
+  z-index: 9001;
   width: 80%;
+  box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
   margin: 3% 10% 3% 10%;
   border-radius: 10px !important;
 `
 // For scrollbar and responsiveness, height 100%
 const Overlay = styled.div`
-  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: auto;
-  z-index: 9001;
+  height: 100%;
+  z-index: 9000;
   background-color: rgba(127, 127, 127, 0.7);
 `
 interface StyledOutputProps {
@@ -225,7 +232,8 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   }
 
   return (
-    <Overlay>
+    <>
+      <Overlay />
       <Background>
         <HeaderWrapper>
           <FeedbackTitle>{t("feedbackTitle")}</FeedbackTitle>
@@ -269,7 +277,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
           )}
         </FooterWrapper>
       </Background>
-    </Overlay>
+    </>
   )
 }
 
