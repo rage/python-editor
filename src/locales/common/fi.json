@@ -8,6 +8,7 @@
   },
   "authenticationRequired": "Sisään kirjautuminen vaaditaan",
   "copiedConfirmation": "Kopioitu!",
+  "couldNotFindExerciseDetails": "Tehtävän tietojen hakeminen epäonnistui.",
   "dontSend": "Ei kiitos",
   "enterInputAndPressEnter": "Anna syöte ja paina \"Enter\"",
   "failedToDownloadExercise": "Tehtävän lataaminen epäonnistui.",
