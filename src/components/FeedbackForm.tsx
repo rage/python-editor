@@ -16,14 +16,11 @@ import {
 const Background = styled(Paper)`
   width: 80%;
   margin: 3% 10% 3% 10%;
-  border-radius: 10px;
+  border-radius: 10px !important;
 `
 // For scrollbar and responsiveness, height 100%
 const Overlay = styled.div`
-  position: absolute;
   overflow: hidden;
-  top: 0;
-  left: 0;
   width: 100%;
   height: auto;
   z-index: 9001;
@@ -61,7 +58,7 @@ const HeaderWrapper = styled.div`
   font-family: Roboto Slab, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
     Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
     Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
-  color: white;
+  color: white !important;
 `
 
 const FooterWrapper = styled.div`
@@ -73,6 +70,7 @@ const FeedbackTitle = styled(Typography)`
     font-size: 1.5rem;
     padding: 9px 5px;
     font-weight: 500;
+    color: white !important;
   }
 `
 
@@ -92,7 +90,7 @@ const StyledChip = styled(Chip)`
 const StyledButton = styled((props) => (
   <Button variant="contained" {...props} />
 ))`
-  margin: 5px;
+  margin: 5px !important;
 `
 
 const Question = styled.div`
