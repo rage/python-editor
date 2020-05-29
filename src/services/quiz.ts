@@ -85,6 +85,40 @@ const getExerciseZip = async (
   )
 }
 
+const getLatestSubmissionZip = async (
+  exerciseId: number,
+  configuration: Configuration,
+): Promise<Result<JSZip | undefined, Error>> => {
+  const { t, token } = configuration
+  const url = `${baseURL}/core/exercises/${exerciseId}`
+  const headers = getHeaders(token)
+  let submissions: any[]
+  try {
+    const response = await axios.get(url, { headers, responseType: "json" })
+    submissions = response.data.submissions as any[]
+  } catch (error) {
+    return new Err({
+      status: error.response.status,
+      message: t("failedToDownloadExercise"),
+    })
+  }
+  if (submissions.length <= 0) {
+    return new Ok(undefined)
+  }
+  const latest = submissions
+    .map((submission) => ({
+      ...submission,
+      createdAtMillis: Date.parse(submission.created_at),
+    }))
+    .reduce((latest, current) => {
+      return current.createdAtMillis > latest.createdAtMillis ? current : latest
+    }, submissions[0])
+  return getZipFromUrl(
+    `${baseURL}/core/submissions/${latest.id}/download`,
+    configuration,
+  )
+}
+
 const getSubmissionResults = async (
   submissionResponse: SubmissionResponse,
   configuration: Configuration,
@@ -209,6 +243,7 @@ const postExerciseFeedback = async (
 export {
   getExerciseDetails,
   getExerciseZip,
+  getLatestSubmissionZip,
   getSubmissionResults,
   postExerciseFeedback,
   postExerciseSubmission,

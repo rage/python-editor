@@ -8,6 +8,7 @@
   },
   "authenticationRequired": "Authentication required",
   "copiedConfirmation": "Copied!",
+  "couldNotFindExerciseDetails": "Could not find exercise details.",
   "dontSend": "Don't send",
   "enterInputAndPressEnter": "Enter input and press \"Enter\"",
   "failedToDownloadExercise": "Failed to download exercise.",

@@ -7,6 +7,7 @@ import {
   getSubmissionResults,
   postExerciseFeedback,
   postExerciseSubmission,
+  getLatestSubmissionZip,
 } from "../services/quiz"
 import { TestResultObject, Language, ExerciseDetails } from "../types"
 import { Results } from "ts-results"
@@ -53,15 +54,9 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   const apiConfig = { t, token }
   const mainSourceFile = "__main__.py"
 
-  useEffect(() => {
-    i18n.changeLanguage(language)
-  }, [language])
-
   const getFileEntries = (
     zip: any,
     directory: string,
-    stateObject: object,
-    setter: (newState: any, callback?: any) => void,
     main: string | null,
   ): Promise<Array<FileEntry>> => {
     const fileSelector: RegExp = RegExp(`${directory}/\\w*\\.py$`)
@@ -79,6 +74,48 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       }
     }
     return files
+  }
+
+  const loadExercises = async () => {
+    const results = Results(
+      ...(await Promise.all([
+        getExerciseDetails(organization, course, exercise, apiConfig),
+        getExerciseZip(organization, course, exercise, apiConfig),
+      ])),
+    )
+    if (results.err) {
+      setSrcFiles([
+        {
+          ...defaultFile,
+          content: `# ${results.val.status}: ${results.val.message}`,
+        },
+      ])
+      return
+    }
+    const [details, zip] = results.val
+    setExerciseDetails(details)
+    const exerciseFilesPromise = getFileEntries(zip, "src", mainSourceFile)
+    if (!signedIn) {
+      return setSrcFiles(await exerciseFilesPromise)
+    }
+    const submissionResult = await getLatestSubmissionZip(details.id, apiConfig)
+    if (submissionResult.ok && submissionResult.val) {
+      const submissionFiles = await getFileEntries(
+        submissionResult.val,
+        "src",
+        mainSourceFile,
+      )
+      const exerciseFiles = await exerciseFilesPromise
+      const files = submissionFiles.map((sf) => {
+        const originalContent =
+          exerciseFiles.find((ef) => ef.fullName === sf.fullName)
+            ?.originalContent || sf.originalContent
+        return { ...sf, originalContent }
+      })
+      setSrcFiles(files)
+    } else {
+      return setSrcFiles(await exerciseFilesPromise)
+    }
   }
 
   const createEntry = async (zip: any, f: any): Promise<FileEntry> => {
@@ -142,25 +179,11 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }
 
   useEffect(() => {
-    Promise.all([
-      getExerciseDetails(organization, course, exercise, apiConfig),
-      getExerciseZip(organization, course, exercise, apiConfig),
-    ])
-      .then((res) => {
-        const results = Results(...res)
-        if (results.err) {
-          return Promise.resolve([
-            {
-              ...defaultFile,
-              content: `# ${results.val.status}: ${results.val.message}`,
-            },
-          ])
-        }
-        const [exerciseDetails, zip] = results.val
-        setExerciseDetails(() => exerciseDetails)
-        return getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile)
-      })
-      .then((fileEntries) => setSrcFiles(fileEntries))
+    i18n.changeLanguage(language)
+  }, [language])
+
+  useEffect(() => {
+    loadExercises()
   }, [])
 
   return (
