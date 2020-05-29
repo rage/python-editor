@@ -7,7 +7,7 @@ The editor is work in progress. There is not much to see here yet.
 To install the project, follow these steps:
 
 1. Clone the project on GitHub
-2. Go to the project root directory and run `npm ci`
+2. Go to the project root directory and run `npm ci` & `npm run encode:worker`
 3. Go to the `example` directory and run `npm ci`
 
 ## Running the project
