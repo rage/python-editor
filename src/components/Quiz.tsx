@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { InputLabel, Select, Snackbar } from "@material-ui/core"
-import MuiAlert, { AlertProps } from "@material-ui/lab/Alert"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -19,10 +18,6 @@ import {
   workerJsSource,
 } from "../constants"
 import FeedbackForm from "./FeedbackForm"
-
-const Alert = (props: AlertProps) => {
-  return <MuiAlert elevation={6} variant="filled" {...props} />
-}
 
 type QuizProps = {
   submitFeedback: (
@@ -386,11 +381,10 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         open={openNotification}
         autoHideDuration={5000}
         onClose={handleCloseNotification}
-      >
-        <Alert onClose={handleCloseNotification} severity="success">
-          Thank you for your feedback!
-        </Alert>
-      </Snackbar>
+        message="Thank you for your feedback!"
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        key="bottom-center"
+      />
     </div>
   )
 }
