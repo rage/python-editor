@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react"
 import { I18nextProvider, useTranslation } from "react-i18next"
 import { Quiz, defaultFile } from "./Quiz"
 import {
-  getZippedQuiz,
-  submitQuiz,
-  fetchSubmissionResult,
-  submitFeedback,
+  getExerciseDetails,
+  getExerciseZip,
+  getSubmissionResults,
+  postExerciseFeedback,
+  postExerciseSubmission,
 } from "../services/quiz"
-import { TestResultObject, Language } from "../types"
+import { TestResultObject, Language, ExerciseDetails } from "../types"
+import { Results } from "ts-results"
 
 type QuizLoaderProps = {
   onSubmissionResults?: (submissionResults: TestResultObject) => void
@@ -45,7 +47,10 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
   const [signedIn, setSignedIn] = useState(token !== "" && token !== null)
-  const [submissionUrl, setSubmissionUrl] = useState("")
+  const [exerciseDetails, setExerciseDetails] = useState<
+    ExerciseDetails | undefined
+  >()
+  const apiConfig = { t, token }
   const mainSourceFile = "__main__.py"
 
   useEffect(() => {
@@ -90,7 +95,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }
 
   const submitAndWaitResult = async (files: Array<FileEntry>) => {
-    const wrapError = (status: number, message: string) => ({
+    const wrapError = (status: number, message: string): TestResultObject => ({
       points: [],
       testCases: [
         {
@@ -101,50 +106,61 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         },
       ],
     })
-    const submitResult = await submitQuiz(submissionUrl, token, t, files)
-    if (submitResult.err) {
-      return wrapError(submitResult.val.status, submitResult.val.message)
+    if (!exerciseDetails) {
+      return wrapError(418, "Exercise details missing")
     }
-    const serverResult = await fetchSubmissionResult(
-      submitResult.val.submissionUrl,
-      token,
-      t,
+    const postResult = await postExerciseSubmission(
+      exerciseDetails.id,
+      files,
+      apiConfig,
     )
-    // console.log(serverResult)
-    if (serverResult.err) {
-      return wrapError(serverResult.val.status, serverResult.val.message)
+    if (postResult.err) {
+      return wrapError(postResult.val.status, postResult.val.message)
     }
-    return serverResult.val
+    const submissionResult = await getSubmissionResults(
+      postResult.val,
+      apiConfig,
+    )
+    return submissionResult.mapErr((error) =>
+      wrapError(error.status, error.message),
+    ).val
   }
 
   const submitToPaste = async (files: FileEntry[]) => {
-    const submitResult = await submitQuiz(submissionUrl, token, t, files, {
-      paste: true,
-    })
+    if (!exerciseDetails) {
+      return ""
+    }
+    const submitResult = await postExerciseSubmission(
+      exerciseDetails.id,
+      files,
+      apiConfig,
+      { paste: true },
+    )
     return submitResult.ok
       ? submitResult.val.pasteUrl || ""
       : submitResult.val.message
   }
 
   useEffect(() => {
-    const url = `https://tmc.mooc.fi/api/v8/org/${organization}/courses/${course}/exercises/${exercise}`
-    getZippedQuiz(url, token, t)
-      .then((result) => {
-        if (result.err) {
+    Promise.all([
+      getExerciseDetails(organization, course, exercise, apiConfig),
+      getExerciseZip(organization, course, exercise, apiConfig),
+    ])
+      .then((res) => {
+        const results = Results(...res)
+        if (results.err) {
           return Promise.resolve([
             {
               ...defaultFile,
-              content: `# ${result.val.status}: ${result.val.message}`,
+              content: `# ${results.val.status}: ${results.val.message}`,
             },
           ])
         }
-        const [zip, subm] = result.val
-        setSubmissionUrl(() => subm)
+        const [exerciseDetails, zip] = results.val
+        setExerciseDetails(() => exerciseDetails)
         return getFileEntries(zip, "src", srcFiles, setSrcFiles, mainSourceFile)
       })
-      .then((fileEntries) => {
-        setSrcFiles(() => fileEntries)
-      })
+      .then((fileEntries) => setSrcFiles(fileEntries))
   }, [])
 
   return (
@@ -152,8 +168,8 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
       <Quiz
         initialFiles={srcFiles}
         submitFeedback={(testResults, feedback) => {
-          if (testResults.feedbackAnswerUrl) {
-            submitFeedback(testResults.feedbackAnswerUrl, token, feedback)
+          if (testResults.feedbackAnswerUrl && feedback.length > 0) {
+            postExerciseFeedback(testResults, feedback, apiConfig)
           }
         }}
         submitQuiz={submitAndWaitResult}

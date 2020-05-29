@@ -1,3 +1,9 @@
+export type ExerciseDetails = {
+  id: number
+  expired: boolean
+  completed: boolean
+}
+
 export type FeedBackAnswer = {
   questionId: number
   answer: string | number
