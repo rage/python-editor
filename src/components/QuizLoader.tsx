@@ -20,6 +20,7 @@ type QuizLoaderProps = {
   token: string
   height?: string
   outputHeight?: string
+  outputPosition?: string
   language: Language
 }
 
@@ -42,6 +43,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   token,
   height,
   outputHeight,
+  outputPosition,
   language = "en",
 }) => {
   const [t, i18n] = useTranslation()
@@ -201,6 +203,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         signedIn={signedIn}
         editorHeight={height}
         outputHeight={outputHeight}
+        outputPosition={outputPosition}
       />
     </>
   )

@@ -24,11 +24,12 @@ type OutputProps = {
   testing: boolean
   signedIn: boolean
   outputHeight: string | undefined
+  outputPosition: string
 }
 
-const ContainerBox = styled.div`
+const ContainerBox = styled.div<{ position: string }>`
   overflow: hidden;
-  position: absolute;
+  position: ${(props) => props.position};
   width: 100%;
   bottom: 0;
   min-height: 100px;
@@ -96,6 +97,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
     testing,
     signedIn,
     outputHeight,
+    outputPosition,
   } = props
 
   useEffect(() => {
@@ -128,7 +130,7 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
   )
 
   return (
-    <ContainerBox data-cy="output-container">
+    <ContainerBox position={outputPosition} data-cy="output-container">
       <AnimatedOutputBox
         animatefrom={outputHeight}
         open={open}

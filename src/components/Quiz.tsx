@@ -31,6 +31,7 @@ type QuizProps = {
   signedIn: boolean
   editorHeight?: string
   outputHeight?: string
+  outputPosition?: string
 }
 
 const blobObject = URL.createObjectURL(
@@ -56,6 +57,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   signedIn,
   editorHeight,
   outputHeight,
+  outputPosition = "absolute",
 }) => {
   const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
@@ -376,6 +378,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         testing={testing}
         signedIn={signedIn}
         outputHeight={outputHeight}
+        outputPosition={outputPosition}
       />
       <Snackbar
         open={openNotification}
