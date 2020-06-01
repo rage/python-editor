@@ -44,12 +44,16 @@ const StyledOutput = styled(Grid)`
   white-space: pre-wrap;
 `
 
-const blobObject = URL.createObjectURL(
-  new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
-    type: "application/javascript",
-  }),
-)
-let worker = new Worker(blobObject)
+const createWorker = () => {
+  const blobObject = URL.createObjectURL(
+    new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
+      type: "application/javascript",
+    }),
+  )
+  const worker = new Worker(blobObject)
+  URL.revokeObjectURL(blobObject)
+  return worker
+}
 
 const defaultFile: FileEntry = {
   fullName: "",
@@ -87,6 +91,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const [pasteUrl, setPasteUrl] = useState("")
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [openNotification, setOpenNotification] = useState(false)
+  const [worker, setWorker] = useState(createWorker())
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -281,7 +286,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const stopWorker = () => {
     if (!workerAvailable) {
       worker.terminate()
-      worker = new Worker(blobObject)
+      setWorker(() => createWorker())
     }
     worker.postMessage({ type: "stop" })
     setRunning(false)
