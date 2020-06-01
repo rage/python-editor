@@ -56,7 +56,7 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
       <TestResultHeader passed={passed}>
         {passStatus}: {displayName}
       </TestResultHeader>
-      <Typography>{feedback}</Typography>
+      <pre style={{ whiteSpace: "pre-line" }}>{feedback}</pre>
     </StyledPaper>
   )
 }
@@ -65,9 +65,9 @@ const Points: React.FunctionComponent<PointsProps> = ({ points }) => {
   const [t] = useTranslation()
   return (
     <StyledPointsPaper points data-cy="submission-points">
-      <Typography>
+      <pre style={{ whiteSpace: "pre-line" }}>
         {t("pointsAwarded")}: {points}
-      </Typography>
+      </pre>
     </StyledPointsPaper>
   )
 }
@@ -106,7 +106,8 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
     ))
     return (
       <>
-        {results.points.length > 0 ? points : null} {testResults}
+        {results.points.length > 0 && points}
+        {testResults}
       </>
     )
   }
@@ -114,14 +115,14 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
   if (!results.testCases || results.testCases.length === 0) return null
 
   return (
-    <Grid container direction="row" justify="space-between">
+    <Grid container direction="row">
       <Grid item xs={10}>
         {showResults()}
       </Grid>
-      <Grid item>
-        <Paper style={{ paddingLeft: "10px" }}>
+      <Grid item xs={2}>
+        <Paper style={{ paddingLeft: "10px", maxWidth: "150px" }}>
           <FormControlLabel
-            label={t("showAll")}
+            label=""
             control={
               <Checkbox
                 checked={showAll}
@@ -131,6 +132,9 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
               />
             }
           />
+          <Typography style={{ display: "inline-block" }}>
+            {t("showAll")}
+          </Typography>
         </Paper>
       </Grid>
     </Grid>

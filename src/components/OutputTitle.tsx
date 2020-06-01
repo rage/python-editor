@@ -31,7 +31,7 @@ const StatusText = styled(Typography)`
 `
 
 const MarginedButton = styled(Button)`
-  margin: 0 3px !important;
+  margin: 3px !important;
 `
 
 const OutputTitleBox = styled(({ inputRequested, ...props }) => (

@@ -60,9 +60,15 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
     }
   }
 
+  const scrollToTop = () => {
+    if (outputRef && outputRef.current) {
+      outputRef.current.scrollTop = 0
+    }
+  }
+
   const focusOnInputField = () => {
     if (userInputFieldRef && userInputFieldRef.current) {
-      userInputFieldRef.current.focus({ preventScroll: true })
+      userInputFieldRef.current.focus()
     }
   }
 
@@ -70,6 +76,10 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
     scrollToBottom()
     if (inputRequested) focusOnInputField()
   }, [inputRequested, outputContent])
+
+  useEffect(() => {
+    scrollToTop()
+  }, [testResults, outputContent])
 
   const keyPressOnInput = (e: any) => {
     if (e.key === "Enter" && inputRequested) {
@@ -96,7 +106,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   }
 
   return (
-    <StyledOutput height={outputHeight} item ref={outputRef}>
+    <StyledOutput height={outputHeight} ref={outputRef}>
       {showOutput()}
       {inputRequested && (
         <TextField
