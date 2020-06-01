@@ -23,7 +23,6 @@ const StyledOutput = styled(Grid)`
 
 const HeaderWrapper = styled.div`
   padding: 1px 25px;
-  border-radius: 10px 10px 0px 0px;
   background: rgb(39, 139, 82);
   background: linear-gradient(
     180deg,
@@ -52,6 +51,12 @@ const FeedbackTitle = styled(Typography)`
   }
 `
 
+const CloseButton = styled.span`
+  cursor: pointer;
+  font-size: 2rem;
+  float: right;
+`
+
 const FeedbackText = styled.div`
   && {
     font-size: 1rem;
@@ -73,6 +78,13 @@ const StyledButton = styled((props) => (
 
 const Question = styled.div`
   margin: 20px;
+`
+
+const StyledSpan = styled(Typography)`
+  && {
+    margin: 20px 20px 5px 20px;
+    font-weight: bold;
+  }
 `
 
 type FeedbackFormProps = {
@@ -132,13 +144,10 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   const onSubmit = (event: React.FormEvent) => {
     event.preventDefault()
     onSubmitFeedback(
-      formState
-        .filter(
-          (item) =>
-            (item.kind === "intrange" && item.value >= item.min) ||
-            (item.kind === "text" && item.value.toString().trim() !== ""),
-        )
-        .map((item) => ({ questionId: item.id, answer: item.value })),
+      filterFields().map((item) => ({
+        questionId: item.id,
+        answer: item.value,
+      })),
     )
     setFormState([])
   }
@@ -155,6 +164,18 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
     return awardedPoints?.map((point) => (
       <StyledChip key={point} label={point} variant="outlined" />
     ))
+  }
+
+  const filterFields = () => {
+    return formState.filter(
+      (item) =>
+        (item.kind === "intrange" && item.value >= item.min) ||
+        (item.kind === "text" && item.value.toString().trim() !== ""),
+    )
+  }
+
+  const isFeedbackQuestions = () => {
+    return feedbackQuestions && feedbackQuestions.length > 0
   }
 
   const mapQuestions = () => {
@@ -203,16 +224,20 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   return (
     <OverlayBox>
       <HeaderWrapper>
-        <FeedbackTitle>{t("feedbackTitle")}</FeedbackTitle>
-        {awardedPoints?.length && (
+        <FeedbackTitle>
+          {t("feedbackTitle")}
+          <CloseButton onClick={onClose}>&times;</CloseButton>
+        </FeedbackTitle>
+        {awardedPoints?.length && awardedPoints.length > 0 && (
           <FeedbackText>
             {t("pointsAwarded")}: {mapPoints()}
           </FeedbackText>
         )}
       </HeaderWrapper>
 
-      {feedbackQuestions && feedbackQuestions.length > 0 && (
+      {isFeedbackQuestions() && (
         <Grid container direction="column">
+          <StyledSpan>{t("pleaseGiveFeedback")}</StyledSpan>
           <StyledOutput>
             <form id="feedback-form" onSubmit={onSubmit}>
               {mapQuestions()}
@@ -222,15 +247,17 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
       )}
 
       <FooterWrapper>
-        {feedbackQuestions && feedbackQuestions.length > 0 && (
-          <StyledButton form="feedback-form" type="submit">
+        {isFeedbackQuestions() && (
+          <StyledButton
+            form="feedback-form"
+            disabled={filterFields().length <= 0}
+            type="submit"
+          >
             {t("button.submit")}
           </StyledButton>
         )}
         <StyledButton onClick={onClose} data-cy="no-feedback">
-          {feedbackQuestions && feedbackQuestions.length > 0
-            ? t("dontSend")
-            : t("button.close")}
+          {isFeedbackQuestions() ? t("dontSend") : t("button.close")}
         </StyledButton>
         {solutionUrl && (
           <StyledButton
