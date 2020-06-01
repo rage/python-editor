@@ -7,6 +7,7 @@
     "submit": "Submit"
   },
   "authenticationRequired": "Authentication required",
+  "browserNotSupported": "Programming exercises do not support Microsoft Edge browser.\nYou can use one of the following browsers to complete the exercises:",
   "copiedConfirmation": "Copied!",
   "couldNotFindExerciseDetails": "Could not find exercise details.",
   "dontSend": "Don't send",

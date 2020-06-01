@@ -5,45 +5,14 @@ import styled from "styled-components"
 import { TestResultObject, FeedBackAnswer } from "../types"
 import {
   Button,
-  Paper,
   Slider,
   Typography,
   Grid,
   TextareaAutosize,
   Chip,
 } from "@material-ui/core"
+import OverlayBox from "./OverlayBox"
 
-const Background = styled(Paper)`
-  position: absolute;
-  overflow: hidden;
-  z-index: 9001;
-  width: 80%;
-  box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2),
-    0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
-  margin: 3% 10% 3% 10%;
-  border-radius: 10px !important;
-`
-// For scrollbar and responsiveness, height 100%
-const Overlay = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9000;
-  background-color: rgba(127, 127, 127, 0.7);
-`
-interface StyledOutputProps {
-  height?: string
-}
-
-/* StyledOutput "responsiveness"
-max-height: ${(props: StyledOutputProps) =>
-    props.height
-      ? Math.min(Number(props.height.split("px")[0]) * 0.6, 775).toString() +
-        "px"
-      : "250px"};
-      */
 const StyledOutput = styled(Grid)`
   padding: 5px;
   display: table-cell;
@@ -66,10 +35,12 @@ const HeaderWrapper = styled.div`
     Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
     Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   color: white !important;
+  width: 100%;
 `
 
 const FooterWrapper = styled.div`
   border-top: 1px dashed black;
+  width: 100%;
 `
 
 const FeedbackTitle = styled(Typography)`
@@ -110,7 +81,6 @@ type FeedbackFormProps = {
   awardedPoints?: Array<string>
   feedbackQuestions: TestResultObject["feedbackQuestions"]
   solutionUrl?: string
-  editorHeight?: string | undefined
 }
 
 type FormQuestion = {
@@ -134,7 +104,6 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   onClose,
   feedbackQuestions,
   solutionUrl,
-  editorHeight,
 }) => {
   const [t] = useTranslation()
   const [formState, setFormState] = useState<Array<FormQuestion>>(
@@ -232,52 +201,49 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   }
 
   return (
-    <>
-      <Overlay />
-      <Background>
-        <HeaderWrapper>
-          <FeedbackTitle>{t("feedbackTitle")}</FeedbackTitle>
-          {awardedPoints?.length && (
-            <FeedbackText>
-              {t("pointsAwarded")}: {mapPoints()}
-            </FeedbackText>
-          )}
-        </HeaderWrapper>
-
-        {feedbackQuestions && feedbackQuestions.length > 0 && (
-          <Grid container direction="column">
-            <StyledOutput /*height={editorHeight}*/>
-              <form id="feedback-form" onSubmit={onSubmit}>
-                {mapQuestions()}
-              </form>
-            </StyledOutput>
-          </Grid>
+    <OverlayBox>
+      <HeaderWrapper>
+        <FeedbackTitle>{t("feedbackTitle")}</FeedbackTitle>
+        {awardedPoints?.length && (
+          <FeedbackText>
+            {t("pointsAwarded")}: {mapPoints()}
+          </FeedbackText>
         )}
+      </HeaderWrapper>
 
-        <FooterWrapper>
-          {feedbackQuestions && feedbackQuestions.length > 0 && (
-            <StyledButton form="feedback-form" type="submit">
-              {t("button.submit")}
-            </StyledButton>
-          )}
-          <StyledButton onClick={onClose} data-cy="no-feedback">
-            {feedbackQuestions && feedbackQuestions.length > 0
-              ? t("dontSend")
-              : t("button.close")}
+      {feedbackQuestions && feedbackQuestions.length > 0 && (
+        <Grid container direction="column">
+          <StyledOutput>
+            <form id="feedback-form" onSubmit={onSubmit}>
+              {mapQuestions()}
+            </form>
+          </StyledOutput>
+        </Grid>
+      )}
+
+      <FooterWrapper>
+        {feedbackQuestions && feedbackQuestions.length > 0 && (
+          <StyledButton form="feedback-form" type="submit">
+            {t("button.submit")}
           </StyledButton>
-          {solutionUrl && (
-            <StyledButton
-              onClick={() => {
-                window.open(solutionUrl, "_blank")
-              }}
-              style={{ float: "right" }}
-            >
-              {t("viewModelSolution")}
-            </StyledButton>
-          )}
-        </FooterWrapper>
-      </Background>
-    </>
+        )}
+        <StyledButton onClick={onClose} data-cy="no-feedback">
+          {feedbackQuestions && feedbackQuestions.length > 0
+            ? t("dontSend")
+            : t("button.close")}
+        </StyledButton>
+        {solutionUrl && (
+          <StyledButton
+            onClick={() => {
+              window.open(solutionUrl, "_blank")
+            }}
+            style={{ float: "right" }}
+          >
+            {t("viewModelSolution")}
+          </StyledButton>
+        )}
+      </FooterWrapper>
+    </OverlayBox>
   )
 }
 

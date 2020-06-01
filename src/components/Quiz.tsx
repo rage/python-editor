@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { InputLabel, Select, Snackbar } from "@material-ui/core"
+import { InputLabel, Select, Snackbar, Paper, Grid } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -18,6 +18,8 @@ import {
   workerJsSource,
 } from "../constants"
 import FeedbackForm from "./FeedbackForm"
+import styled from "styled-components"
+import OverlayBox from "./OverlayBox"
 
 type QuizProps = {
   submitFeedback: (
@@ -33,6 +35,14 @@ type QuizProps = {
   outputHeight?: string
   outputPosition?: string
 }
+
+const StyledOutput = styled(Grid)`
+  padding: 5px;
+  display: table-cell;
+  min-height: 100px;
+  overflow: auto;
+  white-space: pre-wrap;
+`
 
 const blobObject = URL.createObjectURL(
   new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
@@ -304,6 +314,9 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   }
   */
 
+  const ieOrEdge =
+    window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
+
   return (
     <div
       style={{
@@ -311,6 +324,18 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         width: "inherit",
       }}
     >
+      {ieOrEdge && (
+        <OverlayBox>
+          <StyledOutput>
+            {t("browserNotSupported")}
+            <ul>
+              <li>Google Chrome</li>
+              <li>Firefox</li>
+              <li>Safari</li>
+            </ul>
+          </StyledOutput>
+        </OverlayBox>
+      )}
       {showFeedbackForm && (
         <FeedbackForm
           awardedPoints={testResults?.points}
@@ -321,7 +346,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
               feedback.length > 0 && setOpenNotification(true)
             }
           }}
-          editorHeight={editorHeight}
           onClose={() => setShowFeedbackForm(false)}
           solutionUrl={testResults?.solutionUrl}
           feedbackQuestions={testResults?.feedbackQuestions}
