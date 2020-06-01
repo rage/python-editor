@@ -3,7 +3,7 @@ postMessage({ type: "ready" })
 
 let printBuffer = []
 let intervalId = null
-const batchSize = 200
+const batchSize = 50
 let running = false
 let testing = false
 
@@ -16,7 +16,7 @@ const checkForMsg = () => {
   return msgObject
 }
 
-const intervalManager = runInterval => {
+const intervalManager = (runInterval) => {
   if (intervalId) {
     clearInterval(intervalId)
   }
@@ -43,12 +43,12 @@ let testResults = []
 let testPoints = []
 // Running tests requires verbosity > 1 from unittest
 // Make sure to run with command unittest.main(2) or equal
-const handleTestOutput = text => {
+const handleTestOutput = (text) => {
   console.log(text)
   if (text.startsWith("Running")) {
     const testName = text.split(" ")[2]
     const matchingPoint = testPoints.find(
-      t =>
+      (t) =>
         t.name === testName.split(".")[0] || t.name === testName.split(".")[1],
     )
     testResults.push({
@@ -98,11 +98,11 @@ function builtinRead(x) {
 
 function run(code) {
   if (!code || code.length === 0) return
-  self.Sk.execLimit = 10000
-  self.Sk.inputfun = function() {
+  self.Sk.execLimit = 7500
+  self.Sk.inputfun = function () {
     printBuffer.push({ type: "input_required" })
     return new Promise((resolve, reject) => {
-      self.addEventListener("message", function(e) {
+      self.addEventListener("message", function (e) {
         if (e.data.type === "input") {
           resolve(e.data.msg)
           self.Sk.execStart = new Date()
@@ -117,10 +117,10 @@ function run(code) {
   })
 
   self.Sk.misceval
-    .asyncToPromise(function() {
+    .asyncToPromise(function () {
       return self.Sk.importMainWithBody("<stdin>", false, code, true)
     })
-    .then(e => {
+    .then((e) => {
       console.log("running skulpt completed")
       if (testing) {
         postMessage({ type: "testResults", msg: testResults })
@@ -129,8 +129,9 @@ function run(code) {
       }
       postMessage({ type: "ready" })
     })
-    .catch(e => {
+    .catch((e) => {
       console.log(e)
+      printBuffer = []
       printBuffer.push({ type: "error", msg: e.toString() })
     })
     .finally(() => {
@@ -197,7 +198,7 @@ if __name__ == '__main__':
     unittest.main(2)
 `
 
-self.onmessage = function(e) {
+self.onmessage = function (e) {
   const { type, msg } = e.data
   if (type === "run") {
     intervalManager(true)
