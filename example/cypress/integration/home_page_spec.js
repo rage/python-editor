@@ -105,6 +105,7 @@ describe("The Playground", () => {
     */
 
     it("has a run code button", () => {
+      cy.visit("/")
       cy.get("[data-cy=run-btn]").click()
     })
 
@@ -391,6 +392,15 @@ describe("The Playground", () => {
       cy.contains("Question B")
       cy.contains("congratulations")
       cy.contains("View model solution")
+      cy.get("[data-cy=yes-feedback]").should("be.disabled")
+      cy.get("[data-cy=feedback-text]")
+        .first()
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(testString)
+      cy.get("[data-cy=yes-feedback]").should("not.be.disabled")
       cy.get("[data-cy=no-feedback]").click()
       cy.get("[data-cy=show-all-results-checkbox]").click()
       cy.get("[data-cy=test-result]").should("have.length", 1)

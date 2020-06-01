@@ -208,6 +208,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
             <Question key={question.id}>
               <Typography gutterBottom>{question.question}</Typography>
               <TextareaAutosize
+                data-cy="feedback-text"
                 rowsMin={5}
                 rowsMax={10}
                 style={{ width: "100%" }}
@@ -251,6 +252,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
           <StyledButton
             form="feedback-form"
             disabled={filterFields().length <= 0}
+            data-cy="yes-feedback"
             type="submit"
           >
             {t("button.submit")}
