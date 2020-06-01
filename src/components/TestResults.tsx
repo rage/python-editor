@@ -48,11 +48,13 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
   passed,
   feedback,
 }) => {
+  const nameMatch = testName.match(/(\w+)\.(\w+)$/)
+  const displayName = nameMatch ? `${nameMatch[1]}: ${nameMatch[2]}` : testName
   const passStatus = passed ? "PASS" : "FAIL"
   return (
     <StyledPaper passed={passed} data-cy="test-result">
       <TestResultHeader passed={passed}>
-        {passStatus}: {testName}
+        {passStatus}: {displayName}
       </TestResultHeader>
       <Typography>{feedback}</Typography>
     </StyledPaper>
