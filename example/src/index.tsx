@@ -5,6 +5,8 @@ import { Button, TextField, MenuItem } from "@material-ui/core"
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
 import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
+import { I18nextProvider } from "../../node_modules/react-i18next"
+import i18n from "../../src/i18n"
 
 const StyledTextField = styled((props) => (
   <TextField variant="outlined" fullWidth {...props} />
@@ -99,7 +101,11 @@ const App = () => {
       </div>
       {fetch &&
         loadQuiz(organization.value, course.value, exercise.value, token.value)}
-      {!fetch && <Quiz editorHeight={height} outputHeight={outputHeight} />}
+      {!fetch && (
+        <I18nextProvider i18n={i18n}>
+          <Quiz editorHeight={height} outputHeight={outputHeight} />
+        </I18nextProvider>
+      )}
     </>
   )
 }

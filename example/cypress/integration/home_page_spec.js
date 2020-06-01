@@ -124,18 +124,6 @@ describe("The Playground", () => {
         .type(program)
     })
 
-    /*
-    it("editor contents can be displayed as an alert", () => {
-      const stub = cy.stub()
-      cy.on("window:alert", stub)
-      cy.get("[data-cy=print-btn]")
-        .click()
-        .then(() => {
-          expect(stub.getCall(0)).to.be.calledWith(program)
-        })
-    })
-    */
-
     it("Running python code produces output", () => {
       cy.get("[data-cy=run-btn]").click()
       cy.contains("hello from python")
@@ -195,8 +183,8 @@ describe("The Playground", () => {
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
       cy.get("[data-cy=run-btn]").click()
-      cy.get("[data-cy=output-title-stop-btn]").click()
-      cy.get("[data-cy=output-title-stop-btn]").should("be.disabled")
+      cy.get("[data-cy=stop-btn]").click()
+      cy.get("[data-cy=stop-btn]").should("not.exist")
       cy.get("[data-cy=user-input-field]").should("not.exist")
     })
 
@@ -224,8 +212,8 @@ describe("The Playground", () => {
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
       cy.get("[data-cy=run-btn]").click()
-      cy.get("[data-cy=output-title-stop-btn").click()
-      cy.get("[data-cy=output-title-stop-btn]").should("be.disabled")
+      cy.get("[data-cy=stop-btn").click()
+      cy.get("[data-cy=stop-btn]").should("not.exist")
       cy.get("[data-cy=user-input-field]").should("not.exist")
     })
   })
@@ -398,7 +386,7 @@ describe("The Playground", () => {
       cy.wait(250)
       cy.contains("Tests passed")
       cy.contains("100%")
-      cy.contains("Points gained: 1.1")
+      cy.contains("Points awarded: 1.1")
       cy.contains("Question A")
       cy.contains("Question B")
       cy.contains("congratulations")

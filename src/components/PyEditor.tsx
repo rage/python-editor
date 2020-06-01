@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { ControlledEditor } from "@monaco-editor/react"
 import styled from "styled-components"
 import { Button } from "@material-ui/core"
-import { faPlay } from "@fortawesome/free-solid-svg-icons"
+import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 interface EditorWrapperProps {
@@ -56,26 +56,25 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
     return ""
   }
 
-  function handleShowValue() {
-    alert(editorValue)
-  }
-
   return (
     <>
-      {/* <StyledButton
-        onClick={handleShowValue}
-        disabled={!isEditorReady}
-        data-cy="print-btn"
-      >
-        Print editor content
-      </StyledButton> */}
-      <StyledButton
-        onClick={() => handleRun(editorValue)}
-        disabled={!(isEditorReady && allowRun)}
-        data-cy="run-btn"
-      >
-        <FontAwesomeIcon color="#32CD32" icon={faPlay} />
-      </StyledButton>
+      {!isRunning ? (
+        <StyledButton
+          onClick={() => handleRun(editorValue)}
+          disabled={!(isEditorReady && allowRun)}
+          data-cy="run-btn"
+        >
+          <FontAwesomeIcon color="#32CD32" icon={faPlay} />
+        </StyledButton>
+      ) : (
+        <StyledButton
+          onClick={() => handleStop()}
+          disabled={!(isEditorReady && isRunning)}
+          data-cy="stop-btn"
+        >
+          <FontAwesomeIcon color="#B40A0A" icon={faStop} />
+        </StyledButton>
+      )}
       {/* <StyledButton
         onClick={() => handleRunWrapped(editorValue)}
         disabled={!(isEditorReady && allowRun)}
@@ -83,13 +82,6 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
       >
         Run with wrapped imports
       </StyledButton> */}
-      {/*<StyledButton
-        onClick={() => handleStop()}
-        disabled={!isRunning}
-        data-cy="stop-btn"
-      >
-        Stop
-      </StyledButton>*/}
       <EditorWrapper height={editorHeight}>
         <ControlledEditor
           value={editorValue}
