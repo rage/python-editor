@@ -80,45 +80,51 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }
 
   const loadExercises = async () => {
-    const results = Results(
-      ...(await Promise.all([
-        getExerciseDetails(organization, course, exercise, apiConfig),
-        getExerciseZip(organization, course, exercise, apiConfig),
-      ])),
-    )
-    if (results.err) {
-      setSrcFiles([
-        {
-          ...defaultFile,
-          content: `# ${results.val.status}: ${results.val.message}`,
-        },
-      ])
+    const wrapError = (status: number, message: string) => [
+      {
+        ...defaultFile,
+        content: `# ${status}: ${message}`,
+      },
+    ]
+
+    const downloadExercise = () =>
+      getExerciseZip(organization, course, exercise, apiConfig).then((result) =>
+        result.ok
+          ? getFileEntries(result.val, "src", mainSourceFile)
+          : wrapError(result.val.status, result.val.message),
+      )
+
+    if (!signedIn) {
+      setSrcFiles(await downloadExercise())
       return
     }
-    const [details, zip] = results.val
-    setExerciseDetails(details)
-    const exerciseFilesPromise = getFileEntries(zip, "src", mainSourceFile)
-    if (!signedIn) {
-      return setSrcFiles(await exerciseFilesPromise)
+    const detailsResult = await getExerciseDetails(
+      organization,
+      course,
+      exercise,
+      apiConfig,
+    )
+    if (detailsResult.err) {
+      setSrcFiles(
+        wrapError(detailsResult.val.status, detailsResult.val.message),
+      )
+      return
     }
-    const submissionResult = await getLatestSubmissionZip(details.id, apiConfig)
+    setExerciseDetails(detailsResult.val)
+    const submissionResult = await getLatestSubmissionZip(
+      detailsResult.val.id,
+      apiConfig,
+    )
     if (submissionResult.ok && submissionResult.val) {
       const submissionFiles = await getFileEntries(
         submissionResult.val,
         "src",
         mainSourceFile,
       )
-      const exerciseFiles = await exerciseFilesPromise
-      const files = submissionFiles.map((sf) => {
-        const originalContent =
-          exerciseFiles.find((ef) => ef.fullName === sf.fullName)
-            ?.originalContent || sf.originalContent
-        return { ...sf, originalContent }
-      })
-      setSrcFiles(files)
-    } else {
-      return setSrcFiles(await exerciseFilesPromise)
+      setSrcFiles(submissionFiles)
+      return
     }
+    setSrcFiles(await downloadExercise())
   }
 
   const createEntry = async (zip: any, f: any): Promise<FileEntry> => {
