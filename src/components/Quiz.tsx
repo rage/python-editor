@@ -18,15 +18,11 @@ import {
   parseImportSome,
 } from "../services/import_parsing"
 import { OutputObject, TestResultObject, FeedBackAnswer } from "../types"
-import {
-  skulptMinJsSource,
-  skulptStdlibJsSource,
-  workerJsSource,
-} from "../constants"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./OverlayBox"
 import { remove_fstrings } from "../services/polyfill_python"
+import { useWorker } from "../hooks/getWorker"
 
 type QuizProps = {
   submitFeedback: (
@@ -51,12 +47,6 @@ const StyledOutput = styled(Grid)`
   overflow: auto;
   white-space: pre-wrap;
 `
-
-const blobObject = URL.createObjectURL(
-  new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
-    type: "application/javascript",
-  }),
-)
 
 const defaultFile: FileEntry = {
   fullName: "",
@@ -95,7 +85,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const [pasteUrl, setPasteUrl] = useState("")
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [openNotification, setOpenNotification] = useState(false)
-  const [worker, setWorker] = useState(new Worker(blobObject))
+  const [worker] = useWorker()
 
   function handleRun(code: string) {
     if (workerAvailable) {
@@ -181,7 +171,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
     return head + body + ret + tail
   }
 
-  worker.onmessage = function (e) {
+  worker.setMessageListener((e: any) => {
     const { type, msg } = e.data
     if (type === "print") {
       setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
@@ -216,7 +206,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       }))
       setTestResults(results)
     }
-  }
+  })
 
   const sendInput = (input: string) => {
     if (inputRequested) {
@@ -290,7 +280,6 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   const stopWorker = () => {
     if (!workerAvailable) {
       worker.terminate()
-      setWorker(() => new Worker(blobObject))
     }
     worker.postMessage({ type: "stop" })
     setRunning(false)
