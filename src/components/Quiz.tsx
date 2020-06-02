@@ -26,6 +26,7 @@ import {
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./OverlayBox"
+import { remove_fstrings } from "../services/polyfill_python"
 
 type QuizProps = {
   submitFeedback: (
@@ -104,7 +105,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       setRunning(true)
       setAborted(false)
       setTesting(false)
-      worker.postMessage({ type: "run", msg: code })
+      worker.postMessage({ type: "run", msg: remove_fstrings(code) })
     } else {
       console.log("Worker is busy")
     }
