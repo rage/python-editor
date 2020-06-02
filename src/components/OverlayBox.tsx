@@ -22,6 +22,13 @@ const Background = styled(Paper)`
   border-radius: 10px !important;
 `
 
+const CenterWrapper = styled.div`
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+`
+
 const OverlayBox: React.FunctionComponent = (props) => {
   return (
     <Overlay>
@@ -34,4 +41,12 @@ const OverlayBox: React.FunctionComponent = (props) => {
   )
 }
 
-export default OverlayBox
+const OverlayCenterWrapper: React.FunctionComponent = (props) => {
+  return (
+    <Overlay>
+      <CenterWrapper>{props.children}</CenterWrapper>
+    </Overlay>
+  )
+}
+
+export { OverlayBox, OverlayCenterWrapper }

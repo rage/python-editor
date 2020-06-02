@@ -11,7 +11,7 @@ import {
   TextareaAutosize,
   Chip,
 } from "@material-ui/core"
-import OverlayBox from "./OverlayBox"
+import { OverlayBox } from "./OverlayBox"
 
 const StyledOutput = styled(Grid)`
   padding: 5px;

@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { InputLabel, Select, Snackbar, Paper, Grid } from "@material-ui/core"
+import {
+  CircularProgress,
+  InputLabel,
+  Select,
+  Snackbar,
+  Grid,
+} from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
@@ -19,7 +25,7 @@ import {
 } from "../constants"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
-import OverlayBox from "./OverlayBox"
+import { OverlayBox, OverlayCenterWrapper } from "./OverlayBox"
 
 type QuizProps = {
   submitFeedback: (
@@ -383,18 +389,21 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       {/* <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
         Run tests
       </Button> */}
-      {ready && (
-        <PyEditor
-          handleRun={handleRun}
-          handleRunWrapped={handleRunWrapped}
-          allowRun={workerAvailable}
-          handleStop={stopWorker}
-          isRunning={running}
-          editorValue={editorValue}
-          setEditorValue={setEditorValue}
-          editorHeight={editorHeight}
-        />
+      {!ready && (
+        <OverlayCenterWrapper>
+          <CircularProgress thickness={5} color="inherit" />
+        </OverlayCenterWrapper>
       )}
+      <PyEditor
+        handleRun={handleRun}
+        handleRunWrapped={handleRunWrapped}
+        allowRun={workerAvailable}
+        handleStop={stopWorker}
+        isRunning={running}
+        editorValue={editorValue}
+        setEditorValue={setEditorValue}
+        editorHeight={editorHeight}
+      />
       <Output
         outputContent={output}
         testResults={testResults}
