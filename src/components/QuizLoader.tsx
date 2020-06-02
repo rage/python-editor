@@ -47,6 +47,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   language = "en",
 }) => {
   const [t, i18n] = useTranslation()
+  const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
   const [signedIn, setSignedIn] = useState(token !== "" && token !== null)
@@ -185,7 +186,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   }, [language])
 
   useEffect(() => {
-    loadExercises()
+    loadExercises().then(() => setReady(true))
   }, [])
 
   return (
@@ -204,6 +205,7 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
         editorHeight={height}
         outputHeight={outputHeight}
         outputPosition={outputPosition}
+        ready={ready}
       />
     </>
   )

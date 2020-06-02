@@ -34,6 +34,7 @@ type QuizProps = {
   editorHeight?: string
   outputHeight?: string
   outputPosition?: string
+  ready?: boolean
 }
 
 const StyledOutput = styled(Grid)`
@@ -72,6 +73,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   editorHeight,
   outputHeight,
   outputPosition = "absolute",
+  ready = true,
 }) => {
   const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
@@ -381,16 +383,18 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
       {/* <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
         Run tests
       </Button> */}
-      <PyEditor
-        handleRun={handleRun}
-        handleRunWrapped={handleRunWrapped}
-        allowRun={workerAvailable}
-        handleStop={stopWorker}
-        isRunning={running}
-        editorValue={editorValue}
-        setEditorValue={setEditorValue}
-        editorHeight={editorHeight}
-      />
+      {ready && (
+        <PyEditor
+          handleRun={handleRun}
+          handleRunWrapped={handleRunWrapped}
+          allowRun={workerAvailable}
+          handleStop={stopWorker}
+          isRunning={running}
+          editorValue={editorValue}
+          setEditorValue={setEditorValue}
+          editorHeight={editorHeight}
+        />
+      )}
       <Output
         outputContent={output}
         testResults={testResults}

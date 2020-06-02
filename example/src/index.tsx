@@ -99,8 +99,16 @@ const App = () => {
           Unload Quiz
         </StyledButton>
       </div>
-      {fetch &&
-        loadQuiz(organization.value, course.value, exercise.value, token.value)}
+      {fetch && (
+        <>
+          {loadQuiz(
+            organization.value,
+            course.value,
+            exercise.value,
+            token.value,
+          )}
+        </>
+      )}
       {!fetch && (
         <I18nextProvider i18n={i18n}>
           <Quiz editorHeight={height} outputHeight={outputHeight} />
