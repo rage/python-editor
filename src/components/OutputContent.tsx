@@ -18,15 +18,15 @@ type OutputContentProps = {
 }
 
 interface StyledOutputProps {
-  outputHeight?: string
+  outputheight?: string
 }
 
 const StyledOutput = styled(Grid)<StyledOutputProps>`
   padding: 10px;
   display: table-cell;
   max-height: ${(props) =>
-    props.outputHeight && props.outputHeight !== "auto"
-      ? props.outputHeight
+    props.outputheight && props.outputheight !== "auto"
+      ? props.outputheight
       : "500px"};
   min-height: 100px;
   overflow: auto;
@@ -108,7 +108,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   }
 
   return (
-    <StyledOutput outputHeight={outputHeight} ref={outputRef}>
+    <StyledOutput outputheight={outputHeight} ref={outputRef}>
       {showOutput()}
       {inputRequested && (
         <TextField
