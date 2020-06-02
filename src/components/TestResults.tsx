@@ -115,14 +115,14 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
   if (!results.testCases || results.testCases.length === 0) return null
 
   return (
-    <Grid container direction="row">
+    <Grid container direction="row" justify="space-between">
       <Grid item xs={10}>
         {showResults()}
       </Grid>
-      <Grid item xs={2}>
-        <Paper style={{ paddingLeft: "10px", maxWidth: "150px" }}>
+      <Grid item>
+        <Paper style={{ paddingLeft: "10px" }}>
           <FormControlLabel
-            label=""
+            label={t("showAll")}
             control={
               <Checkbox
                 checked={showAll}
@@ -132,9 +132,6 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
               />
             }
           />
-          <Typography style={{ display: "inline-block" }}>
-            {t("showAll")}
-          </Typography>
         </Paper>
       </Grid>
     </Grid>

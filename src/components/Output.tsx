@@ -39,7 +39,9 @@ const ContainerBox = styled.div<{ position: string }>`
 
 const show = (animateHeight: string | undefined) => keyframes`
     from {
-      transform: translateY(${animateHeight ? animateHeight : "225px"});
+      transform: translateY(${
+        animateHeight && animateHeight !== "auto" ? animateHeight : "225px"
+      });
     }
 
     to  {
@@ -53,7 +55,9 @@ const hide = (animateHeight: string | undefined) => keyframes`
   }
 
   to {
-    transform: translateY(${animateHeight ? animateHeight : "225px"});
+    transform: translateY(${
+      animateHeight && animateHeight !== "auto" ? animateHeight : "225px"
+    });
   }
 `
 

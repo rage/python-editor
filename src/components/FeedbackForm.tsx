@@ -82,7 +82,7 @@ const Question = styled.div`
 
 const StyledSpan = styled(Typography)`
   && {
-    margin: 20px 20px 5px 20px;
+    margin: 15px 10px 5px 10px;
     font-weight: bold;
   }
 `

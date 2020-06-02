@@ -18,14 +18,16 @@ type OutputContentProps = {
 }
 
 interface StyledOutputProps {
-  height?: string
+  outputHeight?: string
 }
 
-const StyledOutput = styled(Grid)`
+const StyledOutput = styled(Grid)<StyledOutputProps>`
   padding: 10px;
   display: table-cell;
-  max-height: ${(props: StyledOutputProps) =>
-    props.height ? props.height : "175px"};
+  max-height: ${(props) =>
+    props.outputHeight && props.outputHeight !== "auto"
+      ? props.outputHeight
+      : "500px"};
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
@@ -79,7 +81,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
 
   useEffect(() => {
     scrollToTop()
-  }, [testResults, outputContent])
+  }, [testResults])
 
   const keyPressOnInput = (e: any) => {
     if (e.key === "Enter" && inputRequested) {
@@ -106,7 +108,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   }
 
   return (
-    <StyledOutput height={outputHeight} ref={outputRef}>
+    <StyledOutput outputHeight={outputHeight} ref={outputRef}>
       {showOutput()}
       {inputRequested && (
         <TextField
