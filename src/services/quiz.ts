@@ -90,12 +90,12 @@ const getLatestSubmissionZip = async (
   configuration: Configuration,
 ): Promise<Result<JSZip | undefined, Error>> => {
   const { t, token } = configuration
-  const url = `${baseURL}/core/exercises/${exerciseId}`
+  const url = `${baseURL}/exercises/${exerciseId}/users/current/submissions`
   const headers = getHeaders(token)
   let submissions: any[]
   try {
     const response = await axios.get(url, { headers, responseType: "json" })
-    submissions = response.data.submissions as any[]
+    submissions = response.data as any[]
   } catch (error) {
     return new Err({
       status: error.response.status,
