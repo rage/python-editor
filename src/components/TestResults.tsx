@@ -2,6 +2,8 @@ import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import {
+  Button,
+  Chip,
   Paper,
   Typography,
   FormControlLabel,
@@ -21,6 +23,12 @@ type TestResultProps = {
 type PointsProps = {
   points: string[]
 }
+
+const StyledChip = styled(Chip)`
+  && {
+    margin-right: 10px;
+  }
+`
 
 const StyledPaper = styled(({ passed, ...props }) => <Paper {...props} />)`
   border-left: 10px solid ${({ passed }) => (passed ? "#4caf50" : "#f44336")};
@@ -63,11 +71,14 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
 
 const Points: React.FunctionComponent<PointsProps> = ({ points }) => {
   const [t] = useTranslation()
+  const mapPoints = () => {
+    return points.map((point) => (
+      <StyledChip key={point} label={point} variant="outlined" />
+    ))
+  }
   return (
     <StyledPointsPaper points data-cy="submission-points">
-      <pre style={{ whiteSpace: "pre-line" }}>
-        {t("pointsAwarded")}: {points}
-      </pre>
+      {t("pointsAwarded")}: {mapPoints()}
     </StyledPointsPaper>
   )
 }
@@ -132,6 +143,14 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
           }
         />
       </Paper>
+      {results.allTestsPassed && results.solutionUrl && (
+        <Button
+          variant="contained"
+          onClick={() => window.open(results.solutionUrl, "_blank")}
+        >
+          {t("viewModelSolution")}
+        </Button>
+      )}
     </Grid>
   )
 }
