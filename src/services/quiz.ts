@@ -119,6 +119,16 @@ const getLatestSubmissionZip = async (
   )
 }
 
+const getModelSolutionZip = (
+  exerciseId: number,
+  configuration: Configuration,
+): Promise<Result<JSZip, Error>> => {
+  return getZipFromUrl(
+    `${baseURL}/core/exercises/${exerciseId}/solution/download`,
+    configuration,
+  )
+}
+
 const getSubmissionResults = async (
   submissionResponse: SubmissionResponse,
   configuration: Configuration,
@@ -244,6 +254,7 @@ export {
   getExerciseDetails,
   getExerciseZip,
   getLatestSubmissionZip,
+  getModelSolutionZip,
   getSubmissionResults,
   postExerciseFeedback,
   postExerciseSubmission,
