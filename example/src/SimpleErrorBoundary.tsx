@@ -16,7 +16,7 @@ class SimpleErrorBoundary extends React.Component<any, any> {
     if (this.state.error) {
       return (
         <div>
-          Quiz crashed:
+          ProgrammingExercise crashed:
           <pre>{this.state.error}</pre>
         </div>
       )

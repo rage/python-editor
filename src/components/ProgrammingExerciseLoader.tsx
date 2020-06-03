@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
-import { I18nextProvider, useTranslation } from "react-i18next"
-import { Quiz, defaultFile } from "./Quiz"
+import { useTranslation } from "react-i18next"
+import { ProgrammingExercise, defaultFile } from "./ProgrammingExercise"
 import {
   getExerciseDetails,
   getExerciseZip,
@@ -8,11 +8,10 @@ import {
   postExerciseFeedback,
   postExerciseSubmission,
   getLatestSubmissionZip,
-} from "../services/quiz"
+} from "../services/programming_exercise"
 import { TestResultObject, Language, ExerciseDetails } from "../types"
-import { Results } from "ts-results"
 
-type QuizLoaderProps = {
+type ProgrammingExerciseLoaderProps = {
   onSubmissionResults?: (submissionResults: TestResultObject) => void
   organization: string
   course: string
@@ -31,11 +30,11 @@ type FileEntry = {
   content: string
 }
 
-/*  Loads the quiz from the server. Then returns a Quiz component
+/*  Loads the ProgrammingExercise from the server. Then returns a ProgrammingExercise component
     with the initial editor text set to the contents of the first
     file whose path contains "/src/__main__.py".
 */
-const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
+const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoaderProps> = ({
   onSubmissionResults,
   organization,
   course,
@@ -197,14 +196,14 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
 
   return (
     <>
-      <Quiz
+      <ProgrammingExercise
         initialFiles={srcFiles}
         submitFeedback={(testResults, feedback) => {
           if (testResults.feedbackAnswerUrl && feedback.length > 0) {
             postExerciseFeedback(testResults, feedback, apiConfig)
           }
         }}
-        submitQuiz={submitAndWaitResult}
+        submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
         onSubmissionResults={onSubmissionResults}
         signedIn={signedIn}
@@ -217,4 +216,4 @@ const QuizLoader: React.FunctionComponent<QuizLoaderProps> = ({
   )
 }
 
-export { QuizLoader, QuizLoaderProps, FileEntry }
+export { ProgrammingExerciseLoader, ProgrammingExerciseLoaderProps, FileEntry }

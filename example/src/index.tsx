@@ -1,6 +1,6 @@
 import React, { useState } from "../../node_modules/react"
-import { ProgrammingExercise as QuizLoader } from "../.."
-import { Quiz } from "../../src/components/Quiz"
+import { ProgrammingExercise as ProgrammingExerciseLoader } from "../.."
+import { ProgrammingExercise } from "../../src/components/ProgrammingExercise"
 import { Button, TextField, MenuItem } from "@material-ui/core"
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
@@ -38,12 +38,12 @@ const App = () => {
     event.preventDefault()
     setFetch(false)
   }
-  const loadQuiz = (organization, course, exercise, token) => {
+  const loadExercise = (organization, course, exercise, token) => {
     console.log(
       `Got organization=${organization}, course=${course}, exercise=${exercise}, token=${token}`,
     )
     return (
-      <QuizLoader
+      <ProgrammingExerciseLoader
         organization={organization}
         course={course}
         exercise={exercise}
@@ -108,15 +108,15 @@ const App = () => {
           label="Output Height"
         />
         <StyledButton onClick={handleLoad} data-cy="load-btn">
-          Load Quiz
+          Load Exercise
         </StyledButton>
         <StyledButton onClick={handleUnload} data-cy="unload-btn">
-          Unload Quiz
+          Unload Exercise
         </StyledButton>
       </div>
       {fetch && (
         <>
-          {loadQuiz(
+          {loadExercise(
             organization.value,
             course.value,
             exercise.value,
@@ -126,7 +126,10 @@ const App = () => {
       )}
       {!fetch && (
         <I18nextProvider i18n={i18n}>
-          <Quiz editorHeight={height} outputHeight={outputHeight} />
+          <ProgrammingExercise
+            editorHeight={height}
+            outputHeight={outputHeight}
+          />
         </I18nextProvider>
       )}
     </>

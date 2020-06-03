@@ -1,13 +1,16 @@
 import React from "react"
 import { I18nextProvider } from "react-i18next"
 import i18n from "./i18n"
-import { QuizLoader, QuizLoaderProps } from "./components/QuizLoader"
+import {
+  ProgrammingExerciseLoader,
+  ProgrammingExerciseLoaderProps,
+} from "./components/ProgrammingExerciseLoader"
 
-const ProgrammingExercise: React.FunctionComponent<QuizLoaderProps> = (
-  props: QuizLoaderProps,
+const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseLoaderProps> = (
+  props: ProgrammingExerciseLoaderProps,
 ) => (
   <I18nextProvider i18n={i18n}>
-    <QuizLoader {...props} />
+    <ProgrammingExerciseLoader {...props} />
   </I18nextProvider>
 )
 

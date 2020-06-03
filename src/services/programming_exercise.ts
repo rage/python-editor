@@ -2,7 +2,7 @@ import { TFunction } from "i18next"
 import axios from "axios"
 import JSZip from "jszip"
 import { Result, Err, Ok } from "ts-results"
-import { FileEntry } from "../components/QuizLoader"
+import { FileEntry } from "../components/ProgrammingExerciseLoader"
 import {
   SubmissionResponse,
   TestResultObject,

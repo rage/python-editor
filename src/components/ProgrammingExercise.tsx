@@ -10,7 +10,7 @@ import {
 import PyEditor from "./PyEditor"
 import Output from "./Output"
 import { v4 as uuid } from "uuid"
-import { FileEntry } from "./QuizLoader"
+import { FileEntry } from "./ProgrammingExerciseLoader"
 import {
   PythonImportAll,
   PythonImportSome,
@@ -20,16 +20,18 @@ import {
 import { OutputObject, TestResultObject, FeedBackAnswer } from "../types"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
-import { OverlayBox, OverlayCenterWrapper } from "./OverlayBox"
+import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { remove_fstrings } from "../services/polyfill_python"
 import { useWorker } from "../hooks/getWorker"
 
-type QuizProps = {
+type ProgrammingExerciseProps = {
   submitFeedback: (
     testResults: TestResultObject,
     feedback: Array<FeedBackAnswer>,
   ) => void
-  submitQuiz: (files: Array<FileEntry>) => Promise<TestResultObject>
+  submitProgrammingExercise: (
+    files: Array<FileEntry>,
+  ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   onSubmissionResults?: (submissionResults: TestResultObject) => void
   initialFiles: Array<FileEntry>
@@ -55,9 +57,9 @@ const defaultFile: FileEntry = {
   content: "",
 }
 
-const Quiz: React.FunctionComponent<QuizProps> = ({
+const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = ({
   submitFeedback,
-  submitQuiz,
+  submitProgrammingExercise,
   submitToPaste,
   onSubmissionResults,
   initialFiles,
@@ -263,7 +265,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
         submitToPaste(files).then((res) => setPasteUrl(res))
         setSubmitStatus(() => ({ submitting: false }))
       } else {
-        submitQuiz(files).then((data) => {
+        submitProgrammingExercise(files).then((data) => {
           // console.log(data)
           clearOutput()
           setTestResults(data)
@@ -419,7 +421,7 @@ const Quiz: React.FunctionComponent<QuizProps> = ({
   )
 }
 
-const defaultSrcContent = `# No quiz has been loaded.
+const defaultSrcContent = `# No ProgrammingExercise has been loaded.
 # This is the default file main.py
 
 from .utils import greeting, getLocality
@@ -431,7 +433,7 @@ def foo():
   print("foo!")
 `
 
-const defaultTestContent = `# No quiz has been loaded.
+const defaultTestContent = `# No ProgrammingExercise has been loaded.
 # This is the default file test.py
 
 from .main import greetWorld
@@ -439,7 +441,7 @@ from .main import greetWorld
 greetWorld()
 `
 
-const defaultUtilsContent = `# No quiz has been loaded.
+const defaultUtilsContent = `# No ProgrammingExercise has been loaded.
 # This is the default file utils.py
 
 # Mutually recursive imports are disallowed.
@@ -453,8 +455,9 @@ def getLocality():
   return "world"
 `
 
-Quiz.defaultProps = {
-  submitQuiz: () => Promise.resolve({ points: [], testCases: [] }),
+ProgrammingExercise.defaultProps = {
+  submitProgrammingExercise: () =>
+    Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
   onSubmissionResults: (result) => {
     // console.log(result)
@@ -481,4 +484,4 @@ Quiz.defaultProps = {
   ],
 }
 
-export { Quiz, QuizProps, defaultFile }
+export { ProgrammingExercise, ProgrammingExerciseProps, defaultFile }

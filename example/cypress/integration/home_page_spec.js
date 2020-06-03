@@ -78,6 +78,9 @@ describe("The Playground", () => {
 
     it("running code with token has no sign in warning", () => {
       cy.visit("/")
+      window.localStorage.setItem("organization", inputOrganization)
+      window.localStorage.setItem("course", inputCourse)
+      window.localStorage.setItem("exercise", inputExercise)
       cy.server()
       cy.route("GET", "/api/v8/org//courses//exercises//download", "")
       cy.route("GET", "/api/v8/org//courses//exercises//", "")
@@ -86,15 +89,16 @@ describe("The Playground", () => {
       cy.get("[data-cy=token-input]")
         .find("input")
         .should("have.value", inputToken)
+      cy.wait(1000)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("Sign in to submit exercise").should("not.exist")
     })
 
-    it("has a load quiz button", () => {
+    it("has a load exercise button", () => {
       cy.get("[data-cy=load-btn]")
     })
 
-    it("has an unload quiz button", () => {
+    it("has an unload exercise button", () => {
       cy.get("[data-cy=unload-btn]")
     })
 
@@ -220,14 +224,14 @@ describe("The Playground", () => {
   })
 
   describe("Using default files", () => {
-    it("Unloading quiz brings up default main.py file", () => {
+    it("Unloading exercise brings up default main.py file", () => {
       cy.visit("/")
       cy.get("[data-cy=unload-btn]").click()
       cy.contains("main.py")
     })
 
     it("main.py contents are displayed", () => {
-      cy.contains("# No quiz has been loaded")
+      cy.contains("# No ProgrammingExercise has been loaded")
     })
 
     it("test.py can be selected and displayed", () => {
@@ -304,7 +308,7 @@ describe("The Playground", () => {
       cy.get("[data-cy=load-btn]").click()
     })
 
-    it("fail to solve quiz, shows correct information", () => {
+    it("fail to solve exercise, shows correct information", () => {
       const testString = "print('Romanes eunt domus')"
       cy.route({
         method: "POST",
@@ -328,7 +332,7 @@ describe("The Playground", () => {
       cy.get("[data-cy=submit-btn]").click()
       cy.contains("Submitting to server")
       cy.contains("0%")
-      cy.contains("FAIL: test.test_hymio.HymioTest.test_print_hymio")
+      cy.contains("FAIL: HymioTest: test_print_hymio")
     })
 
     it("ask for help works with failed tests", () => {
@@ -361,7 +365,7 @@ describe("The Playground", () => {
       cy.contains("Copied!")
     })
 
-    it("solve quiz correctly gives points, congratulates, feedback form, model solution", () => {
+    it("solve exercise correctly gives points, congratulates, feedback form, model solution", () => {
       const testString = "print(':-)')"
       cy.get(".monaco-editor")
         .first()
