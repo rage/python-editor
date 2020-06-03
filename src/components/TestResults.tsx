@@ -116,24 +116,22 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
 
   return (
     <Grid container direction="row" justify="space-between">
-      <Grid item xs={10}>
+      <Grid item xs={12}>
         {showResults()}
       </Grid>
-      <Grid item>
-        <Paper style={{ paddingLeft: "10px" }}>
-          <FormControlLabel
-            label={t("showAll")}
-            control={
-              <Checkbox
-                checked={showAll}
-                onChange={() => setShowAll(!showAll)}
-                color="primary"
-                data-cy="show-all-results-checkbox"
-              />
-            }
-          />
-        </Paper>
-      </Grid>
+      <Paper style={{ paddingLeft: "10px" }}>
+        <FormControlLabel
+          label={t("showAll")}
+          control={
+            <Checkbox
+              checked={showAll}
+              onChange={() => setShowAll(!showAll)}
+              color="primary"
+              data-cy="show-all-results-checkbox"
+            />
+          }
+        />
+      </Paper>
     </Grid>
   )
 }
