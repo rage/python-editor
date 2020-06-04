@@ -174,13 +174,20 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   worker.setMessageListener((e: any) => {
-    const { type, msg } = e.data
+    let { type, msg } = e.data
     if (type === "print") {
       setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
     } else if (type === "input_required") {
       setInputRequested(true)
     } else if (type === "error") {
       console.log(msg)
+      if (msg.includes("bad token T_OP")) {
+        msg =
+          msg +
+          "\nMake sure you don't use any special or scandinavian characters as variable names."
+      } else if (msg.includes("TypeError: Cannot read property")) {
+        msg = msg + "\nMake sure all Python commands use proper syntax."
+      }
       setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
       setWorkerAvailable(true)
     } else if (type === "ready") {

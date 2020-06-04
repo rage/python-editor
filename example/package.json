@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "parcel index.html",
+    "start": "rm -rf ./dist && rm -rf ./.cache && parcel index.html",
     "build": "parcel build index.html",
     "cypress:open": "cypress open"
   },
