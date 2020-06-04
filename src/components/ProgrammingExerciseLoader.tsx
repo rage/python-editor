@@ -166,9 +166,19 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       postResult.val,
       apiConfig,
     )
-    return submissionResult.mapErr((error) =>
-      wrapError(error.status, error.message),
-    ).val
+    if (submissionResult.err) {
+      return wrapError(
+        submissionResult.val.status,
+        submissionResult.val.message,
+      )
+    }
+    if (exerciseDetails) {
+      setExerciseDetails({
+        ...exerciseDetails,
+        completed: submissionResult.val.allTestsPassed || false,
+      })
+    }
+    return submissionResult.val
   }
 
   const submitToPaste = async (files: FileEntry[]) => {
