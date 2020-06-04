@@ -211,6 +211,11 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         outputHeight={outputHeight}
         outputPosition={outputPosition}
         ready={ready}
+        solutionUrl={
+          exerciseDetails?.completed
+            ? `https://tmc.mooc.fi/exercises/${exerciseDetails.id}/solution`
+            : undefined
+        }
       />
     </>
   )

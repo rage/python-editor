@@ -40,6 +40,7 @@ type ProgrammingExerciseProps = {
   outputHeight?: string
   outputPosition?: string
   ready?: boolean
+  solutionUrl?: string
 }
 
 const StyledOutput = styled(Grid)`
@@ -68,6 +69,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   outputHeight,
   outputPosition = "absolute",
   ready = true,
+  solutionUrl,
 }) => {
   const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
@@ -397,6 +399,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         editorValue={editorValue}
         setEditorValue={setEditorValue}
         editorHeight={editorHeight}
+        solutionUrl={solutionUrl}
       />
       <Output
         outputContent={output}

@@ -14,6 +14,7 @@
   "enterInputAndPressEnter": "Anna syöte ja paina \"Enter\"",
   "failedToDownloadExercise": "Tehtävän lataaminen epäonnistui.",
   "feedbackTitle": "Tehtävä suoritettu, onneksi olkoon!",
+  "modelSolution": "Mallivastaus",
   "needHelp": "Tarvitsetko apua?",
   "outputTitle": "Tuloste",
   "running": "Suoritetaan",

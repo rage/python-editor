@@ -143,14 +143,6 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
           }
         />
       </Paper>
-      {results.allTestsPassed && results.solutionUrl && (
-        <Button
-          variant="contained"
-          onClick={() => window.open(results.solutionUrl, "_blank")}
-        >
-          {t("viewModelSolution")}
-        </Button>
-      )}
     </Grid>
   )
 }

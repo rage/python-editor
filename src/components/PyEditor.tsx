@@ -4,6 +4,7 @@ import styled from "styled-components"
 import { Button } from "@material-ui/core"
 import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { useTranslation } from "react-i18next"
 
 interface EditorWrapperProps {
   height?: string
@@ -26,6 +27,7 @@ type PyEditorProps = {
   editorValue: string
   setEditorValue: React.Dispatch<React.SetStateAction<string>>
   editorHeight: string | undefined
+  solutionUrl?: string
 }
 
 const StyledButton = styled((props) => (
@@ -41,9 +43,10 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   editorValue,
   setEditorValue,
   editorHeight,
+  solutionUrl,
 }) => {
   const [isEditorReady, setIsEditorReady] = useState(false)
-
+  const [t] = useTranslation()
   function handleEditorDidMount(_: any, editor: any) {
     setIsEditorReady(true)
   }
@@ -73,6 +76,15 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
           data-cy="stop-btn"
         >
           <FontAwesomeIcon color="#B40A0A" icon={faStop} />
+        </StyledButton>
+      )}
+      {solutionUrl && (
+        <StyledButton
+          style={{ fontSize: "9px", float: "right" }}
+          variant="contained"
+          onClick={() => window.open(solutionUrl, "_blank")}
+        >
+          {t("modelSolution")}
         </StyledButton>
       )}
       {/* <StyledButton
