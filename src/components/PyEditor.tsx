@@ -80,7 +80,13 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
       )}
       {solutionUrl && (
         <StyledButton
-          style={{ fontSize: "9px", float: "right" }}
+          style={{
+            fontSize: "12px",
+            position: "absolute",
+            right: "0",
+            top: "0",
+            padding: "2.5px 16px !important",
+          }}
           variant="contained"
           onClick={() => window.open(solutionUrl, "_blank")}
         >
