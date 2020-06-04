@@ -98,17 +98,17 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
           <React.Fragment key={output.id}>{output.text}</React.Fragment>
         ),
       )
-    } else if (help) {
-      return <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
     } else if (testResults) {
       return <TestResults results={testResults} />
     }
-
     return null
   }
 
   return (
     <StyledOutput outputheight={outputHeight} ref={outputRef}>
+      {help && (
+        <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
+      )}
       {showOutput()}
       {inputRequested && (
         <TextField

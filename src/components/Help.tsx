@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
-import { Button, Input } from "@material-ui/core"
+import { Button, Input, Paper, Typography } from "@material-ui/core"
 
 type HelpProps = {
   handlePasteSubmit: () => void
@@ -11,12 +11,17 @@ type HelpProps = {
 const StyledButton = styled((props) => (
   <Button variant="contained" {...props} />
 ))`
-  margin: 1rem;
+  margin: 0.7rem !important;
 `
 
 const StyledInput = styled((props) => <Input {...props} />)`
   margin: 1rem;
-  width: 50%;
+  width: 60%;
+`
+
+const StyledPaper = styled(({ ...props }) => <Paper {...props} />)`
+  margin: 5px;
+  padding: 10px;
 `
 
 const Help: React.FunctionComponent<HelpProps> = (props) => {
@@ -38,9 +43,9 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
   }
 
   return (
-    <div>
-      <p>{t("tmcPasteDescription")}</p>
-      {pasteTriggered && document.queryCommandSupported("copy") ? (
+    <StyledPaper>
+      <Typography>{t("tmcPasteDescription")}</Typography>
+      {pasteTriggered && (
         <div>
           <StyledInput
             id="textField"
@@ -48,12 +53,14 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
             data-cy="paste-input"
             readOnly
           />
-          <StyledButton data-cy="copy-text-btn" onClick={copyToClipboard}>
-            {t("button.copy")}
-          </StyledButton>
-          {copySuccess}
+          {document.queryCommandSupported("copy") && (
+            <StyledButton data-cy="copy-text-btn" onClick={copyToClipboard}>
+              {t("button.copy")}
+            </StyledButton>
+          )}
+          <span style={{ paddingLeft: "3px" }}>{copySuccess}</span>
         </div>
-      ) : null}
+      )}
       <StyledButton
         onClick={pasteHandler}
         disabled={pasteTriggered}
@@ -61,7 +68,7 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
       >
         {t("sendToTmcPaste")}
       </StyledButton>
-    </div>
+    </StyledPaper>
   )
 }
 

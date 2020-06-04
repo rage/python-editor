@@ -46,7 +46,7 @@ const OutputTitleBox = styled(({ inputRequested, ...props }) => (
 
 const OutputTitleText = styled(Typography)`
   && {
-    font-size: 1.1rem;
+    font-size: 1 rem;
     display: inline-block;
     padding: 5px;
     color: white;
@@ -160,7 +160,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
       <Grid
         container
         item
-        xs={isRunning ? 6 : 5}
+        xs={isRunning ? 6 : 4}
         alignItems="center"
         justify="flex-end"
       >

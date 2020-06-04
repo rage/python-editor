@@ -130,7 +130,7 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
       <Grid item xs={12}>
         {showResults()}
       </Grid>
-      <Paper style={{ paddingLeft: "10px" }}>
+      <Paper style={{ paddingLeft: "13px" }}>
         <FormControlLabel
           label={t("showAll")}
           control={
