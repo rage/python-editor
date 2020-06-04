@@ -85,7 +85,7 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
             position: "absolute",
             right: "0",
             top: "0",
-            padding: "2.5px 16px !important",
+            padding: "2px 16px !important",
           }}
           variant="contained"
           onClick={() => window.open(solutionUrl, "_blank")}
