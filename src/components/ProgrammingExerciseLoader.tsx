@@ -201,7 +201,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }, [language])
 
   useEffect(() => {
-    loadExercises().then(() => setReady(true))
+    loadExercises().finally(() => setReady(true))
   }, [])
 
   return (

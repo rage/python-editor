@@ -12,6 +12,7 @@
   "couldNotFindExerciseDetails": "Could not find exercise details.",
   "dontSend": "Don't send",
   "enterInputAndPressEnter": "Enter input and press \"Enter\"",
+  "failedToEstablishConnectionToServer": "Failed to establish a connection to TMC Server.",
   "failedToDownloadExercise": "Failed to download exercise.",
   "feedbackTitle": "Exercise completed, congratulations!",
   "modelSolution": "Model solution",

@@ -56,8 +56,9 @@ const getExerciseDetails = async (
   exercise: string,
   configuration: Configuration,
 ): Promise<Result<ExerciseDetails, Error>> => {
+  const { t, token } = configuration
   const url = `${baseURL}/org/${organization}/courses/${course}/exercises/${exercise}`
-  const headers = getHeaders(configuration.token)
+  const headers = getHeaders(token)
   try {
     const data = (await axios.get(url, { headers, responseType: "json" })).data
     return new Ok({
@@ -66,10 +67,15 @@ const getExerciseDetails = async (
       completed: data.completed,
     })
   } catch (error) {
-    return new Err({
-      status: error.response.status,
-      message: configuration.t("couldNotFindExerciseDetails"),
-    })
+    return error?.response?.status
+      ? new Err({
+          status: error.response.status,
+          message: t("couldNotFindExerciseDetails"),
+        })
+      : new Err({
+          status: 418,
+          message: t("failedToEstablishConnectionToServer"),
+        })
   }
 }
 

@@ -12,6 +12,7 @@
   "couldNotFindExerciseDetails": "Tehtävän tietojen hakeminen epäonnistui.",
   "dontSend": "Älä lähetä",
   "enterInputAndPressEnter": "Anna syöte ja paina \"Enter\"",
+  "failedToEstablishConnectionToServer": "Yhteyden muodostaminen TMC-palvelimeen epäonnistui.",
   "failedToDownloadExercise": "Tehtävän lataaminen epäonnistui.",
   "feedbackTitle": "Tehtävä suoritettu, onneksi olkoon!",
   "modelSolution": "Mallivastaus",
