@@ -67,6 +67,7 @@ const FeedbackText = styled.div`
 const StyledChip = styled(Chip)`
   && {
     color: white;
+    margin-right: 10px;
   }
 `
 
