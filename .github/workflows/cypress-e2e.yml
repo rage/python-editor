@@ -1,4 +1,4 @@
-name: Cypress End-2-End tests
+name: Cypress End-2-End Tests
 on: [push]
 jobs:
   run_tests:
@@ -6,11 +6,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
+      - name: Install deps
+        uses: cypress-io/github-action@v1
+        with:
+          runTests: false
       - name: Encode workers
         run: npm run encode:worker
       - name: Cypress tests
         uses: cypress-io/github-action@v1
         with:
+          install: false
           working-directory: example
           start: npm start
           wait-on: http://localhost:1234
