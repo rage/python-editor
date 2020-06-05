@@ -17,5 +17,5 @@ jobs:
         with:
           install: false
           working-directory: example
-          run: npm start
+          start: npm start
           wait-on: http://localhost:1234
