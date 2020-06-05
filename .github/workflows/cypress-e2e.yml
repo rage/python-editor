@@ -1,5 +1,5 @@
 name: Cypress E2E tests
-on: [push, pull_request]
+on: [push]
 jobs:
   end2end_tests:
     runs-on: ubuntu-latest
@@ -12,11 +12,10 @@ jobs:
           runTests: false
       - name: Encode workers
         run: npm run encode:worker
-      - name: Start server
-        working-directory: ./example
-        run: npm start & wait-on http://localhost:1234
       - name: Cypress tests
         uses: cypress-io/github-action@v1
         with:
           install: false
           working-directory: example
+          run: npm start
+          wait-on: http://localhost:1234
