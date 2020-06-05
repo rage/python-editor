@@ -13,6 +13,7 @@ jobs:
       - name: Encode workers
         run: npm run encode:worker
       - name: Cypress tests
+        if: success()
         uses: cypress-io/github-action@v1
         with:
           install: false
