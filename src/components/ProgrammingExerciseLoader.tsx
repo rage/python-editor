@@ -175,7 +175,10 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     if (exerciseDetails) {
       setExerciseDetails({
         ...exerciseDetails,
-        completed: submissionResult.val.allTestsPassed || false,
+        completed:
+          exerciseDetails.completed ||
+          submissionResult.val.allTestsPassed ||
+          false,
       })
     }
     return submissionResult.val
