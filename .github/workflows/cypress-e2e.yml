@@ -1,0 +1,28 @@
+name: Cypress End-2-End Tests
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+      - name: Install deps
+        uses: cypress-io/github-action@v1
+        with:
+          runTests: false
+      - name: Encode workers
+        run: npm run encode:worker
+      - name: Cypress tests
+        if: success()
+        uses: cypress-io/github-action@v1
+        with:
+          install: false
+          working-directory: example
+          start: npm start
+          wait-on: http://localhost:1234
