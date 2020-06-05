@@ -10,6 +10,9 @@ jobs:
         uses: cypress-io/github-action@v1
         with:
           runTests: false
+      - name: Start server
+        working-directory: ./example
+        run: npm start 
       - name: Cypress tests
         uses: cypress-io/github-action@v1
         with:
