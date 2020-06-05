@@ -1,0 +1,17 @@
+name: Cypress E2E tests
+on: [push, pull_request]
+jobs:
+  end2end_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+      - name: Install deps
+        uses: cypress-io/github-action@v1
+        with:
+          runTests: false
+      - name: Cypress tests
+        uses: cypress-io/github-action@v1
+        with:
+          install: false
+          working-directory: example
