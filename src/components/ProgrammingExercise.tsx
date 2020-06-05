@@ -23,6 +23,11 @@ import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { remove_fstrings } from "../services/polyfill_python"
 import { useWorker } from "../hooks/getWorker"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
+import PyEditorButtons from "./PyEditorButtons"
+import OutputTitle from "./OutputTitle"
+import OutputContent from "./OutputContent"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -49,6 +54,14 @@ const StyledOutput = styled(Grid)`
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
+`
+
+const WarningBox = styled(Grid)`
+  background-color: #ff9800;
+  color: white;
+  border-radius: 3px 3px 0 0;
+  padding: 8px;
+  font-size: 1.25rem;
 `
 
 const defaultFile: FileEntry = {
@@ -89,9 +102,10 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [pasteUrl, setPasteUrl] = useState("")
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [openNotification, setOpenNotification] = useState(false)
+  const [isEditorReady, setIsEditorReady] = useState(false)
   const [worker] = useWorker()
 
-  function handleRun(code: string) {
+  function handleRun(code?: string) {
     if (workerAvailable) {
       setOutput([])
       setTestResults(undefined)
@@ -99,15 +113,18 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       setRunning(true)
       setAborted(false)
       setTesting(false)
-      worker.postMessage({ type: "run", msg: remove_fstrings(code) })
+      worker.postMessage({
+        type: "run",
+        msg: remove_fstrings(code ? code : editorValue),
+      })
     } else {
       console.log("Worker is busy")
     }
   }
 
-  const handleRunWrapped = (code: string) => {
+  const handleRunWrapped = () => {
     try {
-      const wrapped = wrap(code, [selectedFile.shortName])
+      const wrapped = wrap(editorValue, [selectedFile.shortName])
       return handleRun(wrapped)
     } catch (error) {
       return handleRun(`print("${error}")`)
@@ -186,7 +203,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       if (msg.includes("bad token T_OP")) {
         msg =
           msg +
-          "\nMake sure you don't use any special or scandinavian characters as variable names."
+          "\nMake sure you don't use any special characters as variable names, such as å, ä, ö."
       } else if (msg.includes("TypeError: Cannot read property")) {
         msg = msg + "\nMake sure all Python commands use proper syntax."
       }
@@ -390,16 +407,26 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
-      <PyEditor
+      <PyEditorButtons
         handleRun={handleRun}
         handleRunWrapped={handleRunWrapped}
         allowRun={workerAvailable}
         handleStop={stopWorker}
         isRunning={running}
+        solutionUrl={solutionUrl}
+        isEditorReady={isEditorReady}
+      />
+      {!signedIn && (
+        <WarningBox>
+          <FontAwesomeIcon icon={faExclamationTriangle} />
+          <span style={{ marginLeft: 10 }}>{t("signInToSubmitExercise")}</span>
+        </WarningBox>
+      )}
+      <PyEditor
         editorValue={editorValue}
         setEditorValue={setEditorValue}
         editorHeight={editorHeight}
-        solutionUrl={solutionUrl}
+        setIsEditorReady={setIsEditorReady}
       />
       <Output
         outputContent={output}

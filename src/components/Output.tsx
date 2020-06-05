@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import styled, { keyframes } from "styled-components"
 import { Paper, Grid } from "@material-ui/core"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
 import OutputTitle from "./OutputTitle"
 import OutputContent from "./OutputContent"
 import { OutputObject, TestResultObject } from "../types"
@@ -73,14 +71,6 @@ const AnimatedOutputBox = styled(Paper)<{
   width: 100%;
 `
 
-const WarningBox = styled(Grid)`
-  background-color: #ff9800;
-  color: white;
-  border-radius: 3px 3px 0 0;
-  padding: 8px;
-  font-size: 1.25rem;
-`
-
 const Output: React.FunctionComponent<OutputProps> = (props) => {
   const [t] = useTranslation()
   const [render, setRender] = useState(false)
@@ -142,14 +132,6 @@ const Output: React.FunctionComponent<OutputProps> = (props) => {
         onAnimationEnd={onAnimationEnd}
       >
         <Grid container direction="column">
-          {!signedIn && (
-            <WarningBox>
-              <FontAwesomeIcon icon={faExclamationTriangle} />
-              <span style={{ marginLeft: 10 }}>
-                {t("signInToSubmitExercise")}
-              </span>
-            </WarningBox>
-          )}
           <OutputTitle
             testResults={testResults}
             inputRequested={inputRequested}
