@@ -64,7 +64,9 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
       <TestResultHeader passed={passed}>
         {passStatus}: {displayName}
       </TestResultHeader>
-      <pre style={{ whiteSpace: "pre-line" }}>{feedback}</pre>
+      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {feedback}
+      </pre>
     </StyledPaper>
   )
 }

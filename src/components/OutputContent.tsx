@@ -109,7 +109,9 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
       {help && (
         <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
       )}
-      {showOutput()}
+      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {showOutput()}
+      </pre>
       {inputRequested && (
         <TextField
           inputRef={userInputFieldRef}
