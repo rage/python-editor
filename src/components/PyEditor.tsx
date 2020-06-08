@@ -7,7 +7,7 @@ interface EditorWrapperProps {
 }
 
 const EditorWrapper = styled.div`
-  min-height: 300px;
+  min-height: 200px;
   max-height: 950px;
   border: 1px inset;
   height: ${(props: EditorWrapperProps) =>
@@ -16,9 +16,9 @@ const EditorWrapper = styled.div`
 
 type PyEditorProps = {
   editorValue: string
-  setEditorValue: React.Dispatch<React.SetStateAction<string>>
   editorHeight: string | undefined
-  setIsEditorReady: React.Dispatch<React.SetStateAction<boolean>>
+  setEditorValue(editorValue: string): void
+  setIsEditorReady(isReady: boolean): void
 }
 
 const PyEditor: React.FunctionComponent<PyEditorProps> = ({
