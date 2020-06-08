@@ -5,23 +5,15 @@ const inputExercise = "osa01-01_hymio"
 const inputToken = "3213hddf"
 
 describe("The Playground", () => {
-  describe("The main page", () => {
-    it("successfully loads", () => {
-      cy.visit("/")
-    })
+  it("successfully loads", () => {
+    cy.visit("/")
+  })
 
+  describe("Has elements", () => {
     it("has a organization input field", () => {
       cy.get("[data-cy=organization-input]")
         .find("input")
         .type(inputOrganization)
-        .should("have.value", inputOrganization)
-    })
-
-    it("can get organization from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("organization", inputOrganization)
-      cy.get("[data-cy=organization-input]")
-        .find("input")
         .should("have.value", inputOrganization)
     })
 
@@ -32,26 +24,10 @@ describe("The Playground", () => {
         .should("have.value", inputCourse)
     })
 
-    it("can get course from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("course", inputCourse)
-      cy.get("[data-cy=course-input]")
-        .find("input")
-        .should("have.value", inputCourse)
-    })
-
     it("has an exercise input field", () => {
       cy.get("[data-cy=exercise-input]")
         .find("input")
         .type(inputExercise)
-        .should("have.value", inputExercise)
-    })
-
-    it("can get exercise from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("exercise", inputExercise)
-      cy.get("[data-cy=exercise-input]")
-        .find("input")
         .should("have.value", inputExercise)
     })
 
@@ -62,38 +38,6 @@ describe("The Playground", () => {
         .should("have.value", inputToken)
     })
 
-    it("can get token from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("token", inputToken)
-      cy.get("[data-cy=token-input]")
-        .find("input")
-        .should("have.value", inputToken)
-    })
-
-    it("running code without token gives sign in warning", () => {
-      cy.visit("/")
-      cy.get("[data-cy=run-btn]").click()
-      cy.contains("Sign in to submit exercise")
-    })
-
-    it("running code with token has no sign in warning", () => {
-      cy.visit("/")
-      window.localStorage.setItem("organization", inputOrganization)
-      window.localStorage.setItem("course", inputCourse)
-      window.localStorage.setItem("exercise", inputExercise)
-      cy.server()
-      cy.route("GET", "/api/v8/org//courses//exercises//download", "")
-      cy.route("GET", "/api/v8/org//courses//exercises//", "")
-      window.localStorage.setItem("token", inputToken)
-      cy.get("[data-cy=load-btn]").click()
-      cy.get("[data-cy=token-input]")
-        .find("input")
-        .should("have.value", inputToken)
-      cy.wait(1000)
-      cy.get("[data-cy=run-btn]").click()
-      cy.contains("Sign in to submit exercise").should("not.exist")
-    })
-
     it("has a load exercise button", () => {
       cy.get("[data-cy=load-btn]")
     })
@@ -102,24 +46,58 @@ describe("The Playground", () => {
       cy.get("[data-cy=unload-btn]")
     })
 
-    /*
-    it("has a print editor content button", () => {
-      cy.get("[data-cy=print-btn]").click()
-    })
-    */
-
     it("has a run code button", () => {
       cy.visit("/")
       cy.get("[data-cy=run-btn]").click()
     })
 
-    /*
-    it("has a run code with wrapped imports button", () => {
-      cy.get("[data-cy=run-wrapped-btn]").click()
+    it("has an editor field", () => {
+      cy.visit("/")
+      cy.get(".monaco-editor")
     })
-    */
+  })
 
-    it("has an editor input field", () => {
+  describe("Local storage", () => {
+    it("can get organization from local storage", () => {
+      cy.visit("/")
+      window.localStorage.setItem("organization", inputOrganization)
+      cy.get("[data-cy=organization-input]")
+        .find("input")
+        .should("have.value", inputOrganization)
+    })
+
+    it("can get course from local storage", () => {
+      cy.visit("/")
+      window.localStorage.setItem("course", inputCourse)
+      cy.get("[data-cy=course-input]")
+        .find("input")
+        .should("have.value", inputCourse)
+    })
+
+    it("can get exercise from local storage", () => {
+      cy.visit("/")
+      window.localStorage.setItem("exercise", inputExercise)
+      cy.get("[data-cy=exercise-input]")
+        .find("input")
+        .should("have.value", inputExercise)
+    })
+
+    it("can get token from local storage", () => {
+      cy.visit("/")
+      window.localStorage.setItem("token", inputToken)
+      cy.get("[data-cy=token-input]")
+        .find("input")
+        .should("have.value", inputToken)
+    })
+  })
+
+  describe("Running code", () => {
+    it("without token gives sign in warning", () => {
+      cy.visit("/")
+      cy.contains("Sign in to submit exercise")
+    })
+
+    it("code produces output", () => {
       cy.visit("/")
       cy.get(".monaco-editor")
         .click()
@@ -127,23 +105,41 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(program)
-    })
-
-    it("Running python code produces output", () => {
       cy.get("[data-cy=run-btn]").click()
       cy.contains("hello from python")
     })
 
     it("close button hides output", () => {
+      cy.visit("/")
+      cy.get(".monaco-editor")
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(program)
+      cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=close-btn").click()
       cy.contains("hello from python").should("not.exist")
     })
+
+    it("displays running status when program is running", () => {
+      const infiniteProgram = "while True:\n  x = 0"
+      cy.visit("/")
+      cy.get(".monaco-editor")
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(infiniteProgram)
+      cy.get("[data-cy=run-btn]").click()
+      cy.contains("Running")
+      cy.get("[data-cy=ouput-title-stop-btn]").should("not.be.disabled")
+    })
   })
 
-  describe("Running python code that includes input command", () => {
+  describe("Input tests", () => {
     const inputProgram = 'input("Enter a word:")'
-
-    it("displays input prompt", () => {
+    beforeEach(() => {
       cy.visit("/")
       cy.get(".monaco-editor")
         .click()
@@ -152,6 +148,9 @@ describe("The Playground", () => {
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
       cy.get("[data-cy=run-btn]").click()
+    })
+
+    it("displays input prompt", () => {
       cy.get("[data-cy=output-container]").contains("Enter a word:")
     })
 
@@ -174,27 +173,19 @@ describe("The Playground", () => {
     })
 
     it("hides input field and changes title after entering input", () => {
+      cy.get("[data-cy=user-input-field]")
+        .find("input")
+        .type("cat")
+        .type("{enter}")
+      cy.contains("cat")
       cy.get("[data-cy=user-input-field]").should("not.exist")
       cy.contains("Waiting for input").should("not.exist")
     })
+  })
 
+  describe("Halting program", () => {
+    const infiniteProgram = "while True:\n  x = 0"
     it("stops program if stop button is clicked", () => {
-      const inputProgram = 'input("Enter a word:")'
-      cy.visit("/")
-      cy.get(".monaco-editor")
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(inputProgram)
-      cy.get("[data-cy=run-btn]").click()
-      cy.get("[data-cy=stop-btn]").click()
-      cy.get("[data-cy=stop-btn]").should("not.exist")
-      cy.get("[data-cy=user-input-field]").should("not.exist")
-    })
-
-    it("displays running status when program is running", () => {
-      const infiniteProgram = "while True:\n  x = 0"
       cy.visit("/")
       cy.get(".monaco-editor")
         .click()
@@ -203,21 +194,7 @@ describe("The Playground", () => {
         .type("{shift}{ctrl}{home}{backspace}")
         .type(infiniteProgram)
       cy.get("[data-cy=run-btn]").click()
-      cy.contains("Running")
-      cy.get("[data-cy=ouput-title-stop-btn]").should("not.be.disabled")
-    })
-
-    it("clicking stop button in output title stops program", () => {
-      const inputProgram = 'input("Enter a word:")'
-      cy.visit("/")
-      cy.get(".monaco-editor")
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(inputProgram)
-      cy.get("[data-cy=run-btn]").click()
-      cy.get("[data-cy=stop-btn").click()
+      cy.get("[data-cy=stop-btn]").click()
       cy.get("[data-cy=stop-btn]").should("not.exist")
       cy.get("[data-cy=user-input-field]").should("not.exist")
     })
@@ -280,134 +257,4 @@ describe("The Playground", () => {
     })
   })
   */
-  describe("Submitting to server tests", () => {
-    beforeEach(() => {
-      cy.visit("/")
-      window.localStorage.setItem("organization", inputOrganization)
-      window.localStorage.setItem("course", inputCourse)
-      window.localStorage.setItem("exercise", inputExercise)
-      window.localStorage.setItem("token", inputToken)
-      cy.server()
-      cy.fixture("get_exercise.json").as("exercise")
-      cy.fixture("post_submission_content.json").as("sendSubmission")
-      cy.fixture("result_submission_fail.json").as("resultSubmissionFail")
-      cy.fixture("result_submission_passed.json").as("resultSubmissionPass")
-      cy.route({
-        method: "GET",
-        url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
-        response: "@exercise",
-      })
-      // TODO: Download fake zip.
-      // cy.fixture('osa01-01_hymio.zip').as('zip')
-      // cy.route({
-      //   method: 'GET',
-      //   url: '/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio/download',
-      //   response: '@zip',
-      //   headers: { 'cache-control': "private", 'content-type': "application/zip"}
-      // })
-      cy.get("[data-cy=load-btn]").click()
-    })
-
-    it("fail to solve exercise, shows correct information", () => {
-      const testString = "print('Romanes eunt domus')"
-      cy.route({
-        method: "POST",
-        url: "/api/v8/core/exercises/90703/submissions",
-        response: "@sendSubmission",
-      })
-      cy.route({
-        method: "GET",
-        url: "/api/v8/core/submissions/123123",
-        response: "@resultSubmissionFail",
-      })
-      cy.get(".monaco-editor")
-        .first()
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(testString)
-      cy.contains(testString)
-      cy.get("[data-cy=run-btn]").click()
-      cy.get("[data-cy=submit-btn]").click()
-      cy.contains("Submitting to server")
-      cy.contains("0%")
-      cy.contains("FAIL: HymioTest: test_print_hymio")
-    })
-
-    it("ask for help works with failed tests", () => {
-      const testString = "print('Jellou world!')"
-      cy.get(".monaco-editor")
-        .first()
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(testString)
-      cy.contains(testString)
-      cy.get("[data-cy=run-btn]").click()
-      cy.route({
-        method: "POST",
-        url: "/api/v8/core/exercises/90703/submissions",
-        response: "@sendSubmission",
-      })
-      cy.route({
-        method: "GET",
-        url: "/api/v8/core/submissions/123123",
-        response: "@resultSubmissionFail",
-      })
-      cy.get("[data-cy=submit-btn]").click()
-      cy.contains("Need help?")
-      cy.get("[data-cy=need-help-btn]").click()
-      cy.contains("TMC Paste")
-      cy.get("[data-cy=send-to-paste-btn]").click()
-      cy.get("[data-cy=copy-text-btn]").click()
-      cy.contains("Copied!")
-    })
-
-    it("solve exercise correctly gives points, congratulates, feedback form, model solution", () => {
-      const testString = "print(':-)')"
-      cy.get(".monaco-editor")
-        .first()
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(testString)
-      cy.contains(testString)
-      cy.get("[data-cy=run-btn]").click()
-      cy.route({
-        method: "POST",
-        url: "/api/v8/core/exercises/90703/submissions",
-        response: "@sendSubmission",
-      })
-      cy.route({
-        method: "GET",
-        url: "/api/v8/core/submissions/123123",
-        response: "@resultSubmissionPass",
-      })
-      cy.get("[data-cy=submit-btn]").click()
-      cy.contains("Submitting to server")
-      cy.wait(250)
-      cy.contains("Tests passed")
-      cy.contains("100%")
-      cy.contains("Points awarded: 1.1")
-      cy.contains("Question A")
-      cy.contains("Question B")
-      cy.contains("congratulations")
-      cy.contains("View model solution")
-      cy.get("[data-cy=yes-feedback]").should("be.disabled")
-      cy.get("[data-cy=feedback-text]")
-        .first()
-        .click()
-        .focused()
-        .type("{ctrl}{end}")
-        .type("{shift}{ctrl}{home}{backspace}")
-        .type(testString)
-      cy.get("[data-cy=yes-feedback]").should("not.be.disabled")
-      cy.get("[data-cy=no-feedback]").click()
-      cy.get("[data-cy=show-all-results-checkbox]").click()
-      cy.get("[data-cy=test-result]").should("have.length", 1)
-    })
-  })
 })

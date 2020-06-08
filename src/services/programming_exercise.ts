@@ -43,10 +43,15 @@ const getZipFromUrl = async (
     })
     return new Ok(await zip.loadAsync(response.data))
   } catch (error) {
-    return new Err({
-      status: error.response.status,
-      message: t("failedToDownloadExercise"),
-    })
+    return error?.response?.status
+      ? new Err({
+          status: error.response.status,
+          message: t("failedToDownloadExercise"),
+        })
+      : new Err({
+          status: 418,
+          message: t("failedToEstablishConnectionToServer"),
+        })
   }
 }
 
