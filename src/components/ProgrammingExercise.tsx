@@ -8,7 +8,7 @@ import {
   Grid,
 } from "@material-ui/core"
 import PyEditor from "./PyEditor"
-import Output from "./Output"
+import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
 import { v4 as uuid } from "uuid"
 import { FileEntry } from "./ProgrammingExerciseLoader"
 import {
@@ -103,13 +103,16 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [openNotification, setOpenNotification] = useState(false)
   const [isEditorReady, setIsEditorReady] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [worker] = useWorker()
+  const outputBoxRef = React.createRef<AnimatedOutputBoxRef>()
 
   function handleRun(code?: string) {
     if (workerAvailable) {
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
+      setShowHelp(false)
       setRunning(true)
       setAborted(false)
       setTesting(false)
@@ -428,24 +431,40 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         editorHeight={editorHeight}
         setIsEditorReady={setIsEditorReady}
       />
-      <Output
-        outputContent={output}
-        testResults={testResults}
-        clearOutput={clearOutput}
-        inputRequested={inputRequested}
-        sendInput={sendInput}
+      <AnimatedOutputBox
         isRunning={running}
-        isAborted={aborted}
-        handleSubmit={() => handleSubmit(false)}
-        handlePasteSubmit={() => handleSubmit(true)}
-        pasteUrl={pasteUrl}
-        isSubmitting={submitStatus.submitting}
-        handleStop={stopWorker}
-        testing={testing}
-        signedIn={signedIn}
         outputHeight={outputHeight}
         outputPosition={outputPosition}
-      />
+        ref={outputBoxRef}
+      >
+        <Grid container direction="column">
+          <OutputTitle
+            testResults={testResults}
+            inputRequested={inputRequested}
+            isRunning={running}
+            isAborted={aborted}
+            isSubmitting={submitStatus.submitting}
+            testing={testing}
+            help={false}
+            signedIn={signedIn}
+            hasErrors={output.some((item: any) => item.type === "error")}
+            handleSubmit={() => handleSubmit(false)}
+            handleStop={() => handleSubmit(true)}
+            closeOutput={() => outputBoxRef.current?.close()}
+            showHelp={() => setShowHelp(true)}
+          />
+          <OutputContent
+            inputRequested={inputRequested}
+            outputContent={output}
+            help={showHelp}
+            handlePasteSubmit={() => handleSubmit(true)}
+            pasteUrl={pasteUrl}
+            sendInput={sendInput}
+            testResults={testResults}
+            outputHeight={outputHeight}
+          />
+        </Grid>
+      </AnimatedOutputBox>
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}

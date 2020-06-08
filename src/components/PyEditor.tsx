@@ -7,7 +7,7 @@ interface EditorWrapperProps {
 }
 
 const EditorWrapper = styled.div`
-  min-height: 300px;
+  min-height: 200px;
   max-height: 950px;
   border: 1px inset;
   height: ${(props: EditorWrapperProps) =>
