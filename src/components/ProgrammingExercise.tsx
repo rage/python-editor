@@ -296,7 +296,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       } else {
         submitProgrammingExercise(files).then((data) => {
           // console.log(data)
-          clearOutput()
+          closeOutput()
           setTestResults(data)
           setOutput([])
           setTesting(true)
@@ -318,8 +318,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     setInputRequested(false)
   }
 
-  const clearOutput = () => {
+  const closeOutput = () => {
     stopWorker()
+    outputBoxRef.current?.close()
     setOutput([])
   }
 
@@ -449,8 +450,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
             signedIn={signedIn}
             hasErrors={output.some((item: any) => item.type === "error")}
             handleSubmit={() => handleSubmit(false)}
-            handleStop={() => handleSubmit(true)}
-            closeOutput={() => outputBoxRef.current?.close()}
+            closeOutput={closeOutput}
             showHelp={() => setShowHelp(true)}
           />
           <OutputContent

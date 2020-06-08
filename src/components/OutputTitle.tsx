@@ -18,7 +18,6 @@ type OutputTitleProps = {
   signedIn: boolean
   hasErrors: boolean
   handleSubmit: () => void
-  handleStop: () => void
   closeOutput: () => void
   showHelp: () => void
 }
@@ -63,7 +62,6 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
     testing,
     testResults,
     closeOutput,
-    handleStop,
     showHelp,
     help,
     hasErrors,
