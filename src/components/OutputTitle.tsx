@@ -180,7 +180,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             <MarginedButton
               onClick={showHelp}
               variant="contained"
-              disabled={isSubmitting || isRunning || help}
+              disabled={isSubmitting || isRunning || help || !signedIn}
               data-cy="need-help-btn"
             >
               {t("needHelp")}
