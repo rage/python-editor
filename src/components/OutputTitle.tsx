@@ -177,8 +177,8 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             {t("button.stop")}
           </MarginedButton>
         )} */}
-        {testResults ? (
-          testResults.testCases.some((test) => !test.passed) ? (
+        {testResults || hasErrors ? (
+          hasErrors || testResults?.testCases?.some((test) => !test.passed) ? (
             <MarginedButton
               onClick={showHelp}
               variant="contained"
@@ -189,7 +189,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             </MarginedButton>
           ) : null
         ) : null}
-        {testing || isSubmitting || inputRequested ? null : (
+        {testing || isSubmitting || inputRequested || hasErrors ? null : (
           <MarginedButton
             onClick={handleSubmit}
             variant="contained"
