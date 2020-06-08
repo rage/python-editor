@@ -427,9 +427,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       )}
       <PyEditor
         editorValue={editorValue}
-        setEditorValue={setEditorValue}
+        setEditorValue={(value) => setEditorValue(value)}
         editorHeight={editorHeight}
-        setIsEditorReady={setIsEditorReady}
+        setIsEditorReady={(isReady) => setIsEditorReady(isReady)}
       />
       <AnimatedOutputBox
         isRunning={running}
