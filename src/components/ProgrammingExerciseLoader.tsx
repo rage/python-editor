@@ -86,12 +86,22 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       },
     ]
 
-    const downloadExercise = () =>
-      getExerciseZip(organization, course, exercise, apiConfig).then((result) =>
-        result.ok
-          ? getFileEntries(result.val, "src", mainSourceFile)
-          : wrapError(result.val.status, result.val.message),
+    const downloadExercise = async () => {
+      const result = await getExerciseZip(
+        organization,
+        course,
+        exercise,
+        apiConfig,
       )
+      if (result.ok) {
+        try {
+          return getFileEntries(result.val, "src", mainSourceFile)
+        } catch (e) {
+          return wrapError(418, t("malformedExerciseTemplate"))
+        }
+      }
+      return wrapError(result.val.status, result.val.message)
+    }
 
     if (!hasToken) {
       setSrcFiles(await downloadExercise())
@@ -115,13 +125,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       apiConfig,
     )
     if (submissionResult.ok && submissionResult.val) {
-      const submissionFiles = await getFileEntries(
-        submissionResult.val,
-        "src",
-        mainSourceFile,
-      )
-      setSrcFiles(submissionFiles)
-      return
+      try {
+        setSrcFiles(
+          await getFileEntries(submissionResult.val, "src", mainSourceFile),
+        )
+        return
+      } catch (e) {}
     }
     setSrcFiles(await downloadExercise())
   }

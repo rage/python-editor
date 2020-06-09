@@ -15,6 +15,7 @@
   "failedToEstablishConnectionToServer": "Failed to establish a connection to TMC Server.",
   "failedToDownloadExercise": "Failed to download exercise.",
   "feedbackTitle": "Exercise completed, congratulations!",
+  "malformedExerciseTemplate": "Malformed exercise template",
   "modelSolution": "Model solution",
   "needHelp": "Need help?",
   "outputTitle": "Output",
