@@ -49,7 +49,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
-  const [signedIn, setSignedIn] = useState(token !== "" && token !== null)
+  const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
   >()
@@ -78,7 +78,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     return files
   }
 
-  const loadExercises = async () => {
+  const loadExercises = async (hasToken: boolean) => {
     const wrapError = (status: number, message: string) => [
       {
         ...defaultFile,
@@ -86,14 +86,24 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       },
     ]
 
-    const downloadExercise = () =>
-      getExerciseZip(organization, course, exercise, apiConfig).then((result) =>
-        result.ok
-          ? getFileEntries(result.val, "src", mainSourceFile)
-          : wrapError(result.val.status, result.val.message),
+    const downloadExercise = async () => {
+      const result = await getExerciseZip(
+        organization,
+        course,
+        exercise,
+        apiConfig,
       )
+      if (result.ok) {
+        try {
+          return getFileEntries(result.val, "src", mainSourceFile)
+        } catch (e) {
+          return wrapError(418, t("malformedExerciseTemplate"))
+        }
+      }
+      return wrapError(result.val.status, result.val.message)
+    }
 
-    if (!signedIn) {
+    if (!hasToken) {
       setSrcFiles(await downloadExercise())
       return
     }
@@ -115,13 +125,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       apiConfig,
     )
     if (submissionResult.ok && submissionResult.val) {
-      const submissionFiles = await getFileEntries(
-        submissionResult.val,
-        "src",
-        mainSourceFile,
-      )
-      setSrcFiles(submissionFiles)
-      return
+      try {
+        setSrcFiles(
+          await getFileEntries(submissionResult.val, "src", mainSourceFile),
+        )
+        return
+      } catch (e) {}
     }
     setSrcFiles(await downloadExercise())
   }
@@ -204,8 +213,10 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }, [language])
 
   useEffect(() => {
-    loadExercises().finally(() => setReady(true))
-  }, [])
+    const hasToken = token !== "" && token !== null
+    setSignedIn(hasToken)
+    loadExercises(hasToken).finally(() => setReady(true))
+  }, [token])
 
   return (
     <>
