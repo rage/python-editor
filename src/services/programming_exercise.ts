@@ -66,10 +66,15 @@ const getExerciseDetails = async (
   const headers = getHeaders(token)
   try {
     const data = (await axios.get(url, { headers, responseType: "json" })).data
+    console.log(data)
     return new Ok({
       id: data.id,
-      expired: data.expired,
+      availablePoints: data.available_points?.length,
+      awardedPoints: data.awarded_points?.length,
       completed: data.completed,
+      deadline: data.deadline,
+      expired: data.expired,
+      softDeadline: data.soft_deadline,
     })
   } catch (error) {
     return error?.response?.status

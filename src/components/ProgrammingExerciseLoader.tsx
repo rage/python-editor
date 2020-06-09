@@ -12,7 +12,7 @@ import {
 import { TestResultObject, Language, ExerciseDetails } from "../types"
 
 type ProgrammingExerciseLoaderProps = {
-  onSubmissionResults?: (submissionResults: TestResultObject) => void
+  onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
   organization: string
   course: string
   exercise: string
@@ -35,7 +35,7 @@ type FileEntry = {
     file whose path contains "/src/__main__.py".
 */
 const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoaderProps> = ({
-  onSubmissionResults,
+  onExerciseDetailsChange,
   organization,
   course,
   exercise,
@@ -103,6 +103,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       return wrapError(result.val.status, result.val.message)
     }
 
+    setExerciseDetails(undefined)
     if (!hasToken) {
       setSrcFiles(await downloadExercise())
       return
@@ -181,15 +182,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         submissionResult.val.message,
       )
     }
-    if (exerciseDetails) {
-      setExerciseDetails({
-        ...exerciseDetails,
-        completed:
-          exerciseDetails.completed ||
-          submissionResult.val.allTestsPassed ||
-          false,
-      })
-    }
+    getExerciseDetails(
+      organization,
+      course,
+      exercise,
+      apiConfig,
+    ).then((result) => setExerciseDetails(result.ok ? result.val : undefined))
     return submissionResult.val
   }
 
@@ -209,10 +207,15 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }
 
   useEffect(() => {
+    onExerciseDetailsChange?.(exerciseDetails)
+  }, [exerciseDetails])
+
+  useEffect(() => {
     i18n.changeLanguage(language)
   }, [language])
 
   useEffect(() => {
+    setReady(false)
     const hasToken = token !== "" && token !== null
     setSignedIn(hasToken)
     loadExercises(hasToken).finally(() => setReady(true))
@@ -229,7 +232,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         }}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
-        onSubmissionResults={onSubmissionResults}
         signedIn={signedIn}
         editorHeight={height}
         outputHeight={outputHeight}

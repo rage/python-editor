@@ -30,6 +30,7 @@ const App = () => {
   const [height, setHeight] = useState("400px")
   const [outputHeight, setOutputHeight] = useState("250px")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
+  const [details, setDetails] = useState<{}>()
   const handleLoad = () => {
     event.preventDefault()
     setFetch(true)
@@ -44,6 +45,9 @@ const App = () => {
     )
     return (
       <ProgrammingExerciseLoader
+        onExerciseDetailsChange={(d) => {
+          setDetails(d)
+        }}
         organization={organization}
         course={course}
         exercise={exercise}
@@ -156,6 +160,8 @@ const App = () => {
           />
         </I18nextProvider>
       )}
+      <h2>Debug</h2>
+      {fetch && details && JSON.stringify(details)}
     </>
   )
 }
