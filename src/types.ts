@@ -1,7 +1,11 @@
 export type ExerciseDetails = {
   id: number
-  expired: boolean
+  availablePoints?: number
+  awardedPoints?: number
   completed: boolean
+  deadline?: string
+  expired: boolean
+  softDeadline?: string
 }
 
 export type FeedBackAnswer = {

@@ -38,7 +38,6 @@ type ProgrammingExerciseProps = {
     files: Array<FileEntry>,
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
-  onSubmissionResults?: (submissionResults: TestResultObject) => void
   initialFiles: Array<FileEntry>
   signedIn: boolean
   editorHeight?: string
@@ -75,7 +74,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitFeedback,
   submitProgrammingExercise,
   submitToPaste,
-  onSubmissionResults,
   initialFiles,
   signedIn,
   editorHeight,
@@ -302,7 +300,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           setTesting(true)
           setSubmitStatus(() => ({ submitting: false }))
           setShowFeedbackForm(data.allTestsPassed || false)
-          onSubmissionResults?.(data)
         })
       }
     }
@@ -515,9 +512,6 @@ ProgrammingExercise.defaultProps = {
   submitProgrammingExercise: () =>
     Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
-  onSubmissionResults: (result) => {
-    // console.log(result)
-  },
   initialFiles: [
     {
       fullName: "main.py",
