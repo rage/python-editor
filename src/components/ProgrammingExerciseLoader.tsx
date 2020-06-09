@@ -49,7 +49,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
-  const [signedIn, setSignedIn] = useState(token !== "" && token !== null)
+  const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
   >()
@@ -78,7 +78,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     return files
   }
 
-  const loadExercises = async () => {
+  const loadExercises = async (hasToken: boolean) => {
     const wrapError = (status: number, message: string) => [
       {
         ...defaultFile,
@@ -93,7 +93,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
           : wrapError(result.val.status, result.val.message),
       )
 
-    if (!signedIn) {
+    if (!hasToken) {
       setSrcFiles(await downloadExercise())
       return
     }
@@ -204,8 +204,10 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }, [language])
 
   useEffect(() => {
-    loadExercises().finally(() => setReady(true))
-  }, [])
+    const hasToken = token !== "" && token !== null
+    setSignedIn(hasToken)
+    loadExercises(hasToken).finally(() => setReady(true))
+  }, [token])
 
   return (
     <>
