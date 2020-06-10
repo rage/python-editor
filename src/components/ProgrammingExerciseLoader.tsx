@@ -121,18 +121,21 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       return
     }
     setExerciseDetails(detailsResult.val)
-    const submissionResult = await getLatestSubmissionZip(
-      detailsResult.val.id,
-      apiConfig,
-    )
-    if (submissionResult.ok && submissionResult.val) {
-      try {
-        setSrcFiles(
-          await getFileEntries(submissionResult.val, "src", mainSourceFile),
+    try {
+      const submissionResult = await getLatestSubmissionZip(
+        detailsResult.val.id,
+        apiConfig,
+      )
+      if (submissionResult.ok && submissionResult.val) {
+        const fileEntries = await getFileEntries(
+          submissionResult.val, "src", mainSourceFile
         )
-        return
-      } catch (e) {}
-    }
+        if (fileEntries.length > 0) {
+          setSrcFiles(fileEntries)
+          return
+        }
+      }
+    } catch (e) {}
     setSrcFiles(await downloadExercise())
   }
 
