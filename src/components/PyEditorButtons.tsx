@@ -15,6 +15,7 @@ type PyEditorButtonsProps = {
   allowRun?: boolean
   handleStop: () => void
   isRunning: boolean
+  isSubmitting: boolean
   solutionUrl?: string
   isEditorReady: boolean
 }
@@ -25,6 +26,7 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
   allowRun = true,
   handleStop,
   isRunning,
+  isSubmitting,
   solutionUrl,
   isEditorReady,
 }) => {
@@ -34,7 +36,7 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
       {!isRunning ? (
         <StyledButton
           onClick={() => handleRun()}
-          disabled={!(isEditorReady && allowRun)}
+          disabled={!(isEditorReady && allowRun && !isSubmitting)}
           data-cy="run-btn"
         >
           <FontAwesomeIcon color="#32CD32" icon={faPlay} />

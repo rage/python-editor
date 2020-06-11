@@ -414,6 +414,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         allowRun={workerAvailable}
         handleStop={stopWorker}
         isRunning={running}
+        isSubmitting={submitStatus.submitting}
         solutionUrl={solutionUrl}
         isEditorReady={isEditorReady}
       />
