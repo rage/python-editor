@@ -29,7 +29,7 @@ const parseImportSome = (line: string): PythonImportSome => {
   )
   if (importMatches) {
     pkg = importMatches[1]
-    names = importMatches[2].split(",").map(s => s.trim())
+    names = importMatches[2].split(",").map((s) => s.trim())
     return { pkg, names }
   }
   throw "Malformed import statement"

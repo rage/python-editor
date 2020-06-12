@@ -128,7 +128,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       )
       if (submissionResult.ok && submissionResult.val) {
         const fileEntries = await getFileEntries(
-          submissionResult.val, "src", mainSourceFile
+          submissionResult.val,
+          "src",
+          mainSourceFile,
         )
         if (fileEntries.length > 0) {
           setSrcFiles(fileEntries)

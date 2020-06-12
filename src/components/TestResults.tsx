@@ -11,6 +11,7 @@ import {
   Grid,
 } from "@material-ui/core"
 import { TestResultObject } from "../types"
+import { removeFalseIsNotTrue } from "../services/test_parsing"
 
 type TestResultsProps = {
   results: TestResultObject
@@ -65,7 +66,7 @@ const TestResult: React.FunctionComponent<TestResultProps> = ({
         {passStatus}: {displayName}
       </TestResultHeader>
       <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-        {feedback}
+        {removeFalseIsNotTrue(feedback)}
       </pre>
     </StyledPaper>
   )

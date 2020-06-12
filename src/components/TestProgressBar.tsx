@@ -23,7 +23,7 @@ interface ProgressBarProps {
 
 const ProgressBar = styled.div<ProgressBarProps>`
   background-color: #3f51b5;
-  width: ${props => (props.value ? props.value : 0)}%;
+  width: ${(props) => (props.value ? props.value : 0)}%;
   height: 25px;
 `
 
