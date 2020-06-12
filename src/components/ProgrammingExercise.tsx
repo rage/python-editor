@@ -315,6 +315,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     setRunning(false)
     setAborted(true)
     setInputRequested(false)
+    setWorkerAvailable(true)
   }
 
   const closeOutput = () => {
