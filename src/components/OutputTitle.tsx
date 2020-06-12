@@ -182,7 +182,9 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             <MarginedButton
               onClick={showHelp}
               variant="contained"
-              disabled={isSubmitting || isRunning || help || !signedIn || expired}
+              disabled={
+                isSubmitting || isRunning || help || !signedIn || expired
+              }
               data-cy="need-help-btn"
             >
               {t("needHelp")}
@@ -194,7 +196,12 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             onClick={handleSubmit}
             variant="contained"
             disabled={
-              isSubmitting || isRunning || isAborted || !signedIn || hasErrors || expired
+              isSubmitting ||
+              isRunning ||
+              isAborted ||
+              !signedIn ||
+              hasErrors ||
+              expired
             }
             data-cy="submit-btn"
           >

@@ -215,16 +215,15 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }
 
   useEffect(() => {
-    if (exerciseDetails &&
+    if (
+      exerciseDetails &&
       exerciseDetails.deadline &&
       !exerciseDetails.expired &&
-      time >= DateTime.fromISO(exerciseDetails.deadline)) {
-      getExerciseDetails(
-        organization,
-        course,
-        exercise,
-        apiConfig,
-      ).then((result) => result.ok && setExerciseDetails(result.val))
+      time >= DateTime.fromISO(exerciseDetails.deadline)
+    ) {
+      getExerciseDetails(organization, course, exercise, apiConfig).then(
+        (result) => result.ok && setExerciseDetails(result.val),
+      )
     }
   }, [time])
 

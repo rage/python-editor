@@ -191,5 +191,4 @@ describe("API Endpoint tests #2", () => {
     cy.contains("Model solution")
     cy.contains("Exercise deadline exceeded.")
   })
-
 })
