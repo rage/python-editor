@@ -5,7 +5,7 @@ const inputCourse = "python-test"
 const inputExercise = "osa01-01_hymio"
 const inputToken = "49a491a3fc7"
 
-describe("API Endpoint tests", () => {
+describe("API Endpoint tests #1", () => {
   beforeEach(() => {
     cy.visit("/")
     window.localStorage.setItem("organization", inputOrganization)
@@ -144,4 +144,52 @@ describe("API Endpoint tests", () => {
     cy.get("[data-cy=show-all-results-checkbox]").click()
     cy.get("[data-cy=test-result]").should("have.length", 1)
   })
+
+  it("non-expired deadline has no warning", () => {
+    cy.contains("Exercise deadline exceeded.").should("not.exist")
+  })
+})
+
+describe("API Endpoint tests #2", () => {
+  beforeEach(() => {
+    cy.visit("/")
+    window.localStorage.setItem("organization", inputOrganization)
+    window.localStorage.setItem("course", inputCourse)
+    window.localStorage.setItem("exercise", inputExercise)
+    window.localStorage.setItem("token", inputToken)
+    cy.server()
+    cy.fixture("get_expired_exercise.json").as("exerciseExpired")
+    cy.fixture("get_exercise.json").as("exercise")
+    cy.fixture("post_submission_content.json").as("sendSubmission")
+    cy.fixture("result_submission_fail.json").as("resultSubmissionFail")
+    cy.fixture("result_submission_passed.json").as("resultSubmissionPass")
+    cy.fixture("old_submissions.json").as("oldSubmissions")
+    cy.route({
+      method: "GET",
+      url: "/api/v8/exercises/90703/users/current/submissions",
+      response: "@oldSubmissions",
+    })
+    cy.route({
+      method: "GET",
+      url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
+      response: "@exerciseExpired",
+    }).as("exerciseExpired")
+    cy.route({
+      method: "GET",
+      url: "/api/v8/core/submissions/7313248/download",
+      response: { errors: ["Authentication required"] },
+    })
+    cy.route(
+      "GET",
+      `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      "",
+    )
+    cy.get("[data-cy=load-btn]").click()
+  })
+
+  it("expired exercise has model solution and deadline warning", () => {
+    cy.contains("Model solution")
+    cy.contains("Exercise deadline exceeded.")
+  })
+
 })
