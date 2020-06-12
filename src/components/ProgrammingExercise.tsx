@@ -44,6 +44,7 @@ type ProgrammingExerciseProps = {
   outputHeight?: string
   outputPosition?: string
   ready?: boolean
+  expired?: boolean
   solutionUrl?: string
 }
 
@@ -80,6 +81,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   outputHeight,
   outputPosition = "absolute",
   ready = true,
+  expired,
   solutionUrl,
 }) => {
   const [t] = useTranslation()
@@ -424,6 +426,12 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           <span style={{ marginLeft: 10 }}>{t("signInToSubmitExercise")}</span>
         </WarningBox>
       )}
+      {expired && (
+        <WarningBox>
+          <FontAwesomeIcon icon={faExclamationTriangle} />
+          <span style={{ marginLeft: 10 }}>{t("deadlineExpired")}</span>
+        </WarningBox>
+      )}
       <PyEditor
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
@@ -443,6 +451,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
             isRunning={running}
             isAborted={aborted}
             isSubmitting={submitStatus.submitting}
+            expired={expired}
             testing={testing}
             help={false}
             signedIn={signedIn}
