@@ -10,6 +10,8 @@ import {
   getLatestSubmissionZip,
 } from "../services/programming_exercise"
 import { TestResultObject, Language, ExerciseDetails } from "../types"
+import { useTime } from "../hooks/customHooks"
+import { DateTime } from "luxon"
 
 type ProgrammingExerciseLoaderProps = {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
@@ -45,6 +47,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   outputPosition,
   language = "en",
 }) => {
+  const time = useTime(10000)
   const [t, i18n] = useTranslation()
   const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
@@ -212,6 +215,20 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }
 
   useEffect(() => {
+    if (exerciseDetails &&
+      exerciseDetails.deadline &&
+      !exerciseDetails.expired &&
+      time >= DateTime.fromISO(exerciseDetails.deadline)) {
+      getExerciseDetails(
+        organization,
+        course,
+        exercise,
+        apiConfig,
+      ).then((result) => result.ok && setExerciseDetails(result.val))
+    }
+  }, [time])
+
+  useEffect(() => {
     onExerciseDetailsChange?.(exerciseDetails)
   }, [exerciseDetails])
 
@@ -242,8 +259,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         outputHeight={outputHeight}
         outputPosition={outputPosition}
         ready={ready}
+        expired={exerciseDetails?.expired}
         solutionUrl={
-          exerciseDetails?.completed
+          exerciseDetails?.completed || exerciseDetails?.expired
             ? `https://tmc.mooc.fi/exercises/${exerciseDetails.id}/solution`
             : undefined
         }

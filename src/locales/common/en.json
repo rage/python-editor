@@ -10,6 +10,7 @@
   "browserNotSupported": "Programming exercises do not support Microsoft Edge browser.\nYou can use one of the following browsers to complete the exercises:",
   "copiedConfirmation": "Copied!",
   "couldNotFindExerciseDetails": "Could not find exercise details.",
+  "deadlineExpired": "Exercise deadline exceeded.",
   "dontSend": "Don't send",
   "enterInputAndPressEnter": "Enter input and press \"Enter\"",
   "failedToEstablishConnectionToServer": "Failed to establish a connection to TMC Server.",
