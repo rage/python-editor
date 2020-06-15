@@ -44,7 +44,7 @@ const useWorker = () => {
   const terminate = () => {
     if (worker) {
       worker.terminate()
-      createWorker()
+      setWorker(undefined)
     }
   }
 
