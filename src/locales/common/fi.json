@@ -28,7 +28,7 @@
   "showAll": "Näytä kaikki",
   "signInToSubmitExercise": "Kirjaudu sisään palauttaaksesi tehtävän",
   "submissionProcessFailed": "Tehtävän lähettäminen epäonnistui",
-  "submissionTookTooLong": "Tehtävän lähettäminen kesti liian kauan.",
+  "submissionTookTooLong": "Tehtävän lähettäminen kesti liian kauan.\nVarmistathan, että koodissasi ei ole ikuista silmukkaa.",
   "submitting": "Lähetetään",
   "submittingToServer": "Lähetetään palvelimelle",
   "testResults": "Testien tulokset",

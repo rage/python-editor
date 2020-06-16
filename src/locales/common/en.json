@@ -28,7 +28,7 @@
   "showAll": "Show all",
   "signInToSubmitExercise": "Sign in to submit exercise",
   "submissionProcessFailed": "Submission process failed",
-  "submissionTookTooLong": "Submission was taking a really long time.",
+  "submissionTookTooLong": "Submission was taking a really long time.\nPlease make sure your code doesn't have an infinite loop.",
   "submitting": "Submitting",
   "submittingToServer": "Submitting to server",
   "testResults": "Test Results",
