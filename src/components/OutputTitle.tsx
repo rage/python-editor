@@ -8,13 +8,12 @@ import TestProgressBar from "./TestProgressBar"
 import { TestResultObject, EditorState } from "../types"
 
 type OutputTitleProps = {
+  allowSubmitting: boolean
   closeOutput: () => void
   editorState: EditorState
-  expired?: boolean
   handleSubmit: () => void
   hasErrors: boolean
   showHelp: () => void
-  signedIn: boolean
   testResults: TestResultObject | undefined
 }
 
@@ -50,13 +49,12 @@ const OutputTitleText = styled(Typography)`
 
 const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
   const {
+    allowSubmitting,
     closeOutput,
     editorState,
-    expired,
     handleSubmit,
     hasErrors,
     showHelp,
-    signedIn,
     testResults,
   } = props
   const [t] = useTranslation()
@@ -179,6 +177,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             onClick={showHelp}
             variant="contained"
             disabled={
+              !allowSubmitting ||
               editorState === EditorState.ShowHelp ||
               editorState === EditorState.SubmittingToPaste ||
               editorState === EditorState.ShowPasteResults
@@ -188,17 +187,15 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             {t("needHelp")}
           </MarginedButton>
         ) : null}
-        {testResults || running || hasErrors ? null : (
+        {running || testResults || hasErrors ? null : (
           <MarginedButton
             onClick={handleSubmit}
             variant="contained"
             disabled={
+              !allowSubmitting ||
               editorState === EditorState.Running ||
               editorState === EditorState.RunAborted ||
-              editorState === EditorState.Submitting ||
-              !signedIn ||
-              hasErrors ||
-              expired
+              editorState === EditorState.Submitting
             }
             data-cy="submit-btn"
           >

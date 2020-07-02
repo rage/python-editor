@@ -246,6 +246,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   const handleSubmit = (paste: boolean) => {
+    setPasteUrl("")
     setStateForSelectedFile()
     setEditorState(
       paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
@@ -453,23 +454,17 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       >
         <Grid container direction="column">
           <OutputTitle
+            allowSubmitting={signedIn && !expired}
             closeOutput={closeOutput}
             editorState={editorState}
-            expired={expired}
             handleSubmit={() => handleSubmit(false)}
             hasErrors={output.some((item: any) => item.type === "error")}
             showHelp={() => setEditorState(EditorState.ShowHelp)}
-            signedIn={signedIn}
             testResults={testResults}
           />
           <OutputContent
-            inputRequested={editorState === EditorState.RunningWaitingInput}
+            editorState={editorState}
             outputContent={output}
-            help={
-              editorState === EditorState.ShowHelp ||
-              editorState === EditorState.SubmittingToPaste ||
-              editorState === EditorState.ShowPasteResults
-            }
             handlePasteSubmit={() => handleSubmit(true)}
             pasteUrl={pasteUrl}
             sendInput={sendInput}
