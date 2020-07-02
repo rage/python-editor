@@ -4,7 +4,7 @@ export enum EditorState {
   RunAborted,
   Running,
   RunningWaitingInput,
-  ShowingHelp,
+  ShowHelp,
   ShowPassedFeedbackForm,
   ShowPasteResults,
   ShowSubmissionResults,

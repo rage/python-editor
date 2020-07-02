@@ -411,7 +411,10 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         handleRunWrapped={handleRunWrapped}
         allowRun={workerAvailable}
         handleStop={stopWorker}
-        isRunning={editorState === EditorState.Running}
+        isRunning={
+          editorState === EditorState.Running ||
+          editorState === EditorState.RunningWaitingInput
+        }
         isSubmitting={
           editorState === EditorState.Submitting ||
           editorState === EditorState.SubmittingToPaste
@@ -450,31 +453,20 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       >
         <Grid container direction="column">
           <OutputTitle
-            testResults={testResults}
-            inputRequested={editorState === EditorState.RunningWaitingInput}
-            isRunning={
-              editorState === EditorState.Running ||
-              editorState === EditorState.RunningWaitingInput
-            }
-            isAborted={editorState === EditorState.RunAborted}
-            isSubmitting={
-              editorState === EditorState.Submitting ||
-              editorState === EditorState.SubmittingToPaste
-            }
-            expired={expired}
-            testing={editorState === EditorState.ShowSubmissionResults}
-            help={false}
-            signedIn={signedIn}
-            hasErrors={output.some((item: any) => item.type === "error")}
-            handleSubmit={() => handleSubmit(false)}
             closeOutput={closeOutput}
-            showHelp={() => setEditorState(EditorState.ShowingHelp)}
+            editorState={editorState}
+            expired={expired}
+            handleSubmit={() => handleSubmit(false)}
+            hasErrors={output.some((item: any) => item.type === "error")}
+            showHelp={() => setEditorState(EditorState.ShowHelp)}
+            signedIn={signedIn}
+            testResults={testResults}
           />
           <OutputContent
             inputRequested={editorState === EditorState.RunningWaitingInput}
             outputContent={output}
             help={
-              editorState === EditorState.ShowingHelp ||
+              editorState === EditorState.ShowHelp ||
               editorState === EditorState.SubmittingToPaste ||
               editorState === EditorState.ShowPasteResults
             }
