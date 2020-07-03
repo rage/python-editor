@@ -408,20 +408,12 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         </OverlayCenterWrapper>
       )}
       <PyEditorButtons
+        allowRun={workerAvailable}
+        editorState={editorState}
         handleRun={handleRun}
         handleRunWrapped={handleRunWrapped}
-        allowRun={workerAvailable}
         handleStop={stopWorker}
-        isRunning={
-          editorState === EditorState.Running ||
-          editorState === EditorState.RunningWaitingInput
-        }
-        isSubmitting={
-          editorState === EditorState.Submitting ||
-          editorState === EditorState.SubmittingToPaste
-        }
         solutionUrl={solutionUrl}
-        isEditorReady={editorState !== EditorState.Initializing}
       />
       {!signedIn && (
         <WarningBox>
@@ -473,6 +465,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           />
         </Grid>
       </AnimatedOutputBox>
+      {/* <div>
+        {EditorState[editorState]}
+      </div> */}
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}

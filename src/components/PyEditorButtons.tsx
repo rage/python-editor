@@ -4,49 +4,49 @@ import { Button } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
 import { useTranslation } from "react-i18next"
+import { EditorState } from "../types"
 
 const StyledButton = styled((props) => (
   <Button variant="contained" {...props} />
 ))``
 
 type PyEditorButtonsProps = {
+  allowRun?: boolean
+  editorState: EditorState
   handleRun: (code?: string) => void
   handleRunWrapped: (code?: string) => void
-  allowRun?: boolean
   handleStop: () => void
-  isRunning: boolean
-  isSubmitting: boolean
   solutionUrl?: string
-  isEditorReady: boolean
 }
 
 const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
+  allowRun = true,
+  editorState,
   handleRun,
   handleRunWrapped,
-  allowRun = true,
   handleStop,
-  isRunning,
-  isSubmitting,
   solutionUrl,
-  isEditorReady,
 }) => {
   const [t] = useTranslation()
+
   return (
     <>
-      {!isRunning ? (
+      {editorState !== EditorState.Running &&
+      editorState !== EditorState.RunningWaitingInput ? (
         <StyledButton
           onClick={() => handleRun()}
-          disabled={!(isEditorReady && allowRun && !isSubmitting)}
+          disabled={
+            editorState === EditorState.Initializing ||
+            !allowRun ||
+            editorState === EditorState.Submitting ||
+            editorState === EditorState.SubmittingToPaste
+          }
           data-cy="run-btn"
         >
           <FontAwesomeIcon color="#32CD32" icon={faPlay} />
         </StyledButton>
       ) : (
-        <StyledButton
-          onClick={() => handleStop()}
-          disabled={!(isEditorReady && isRunning)}
-          data-cy="stop-btn"
-        >
+        <StyledButton onClick={() => handleStop()} data-cy="stop-btn">
           <FontAwesomeIcon color="#B40A0A" icon={faStop} />
         </StyledButton>
       )}
