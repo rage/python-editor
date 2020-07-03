@@ -4,12 +4,11 @@ import styled from "styled-components"
 import { Grid, TextField } from "@material-ui/core"
 import TestResults from "./TestResults"
 import Help from "./Help"
-import { OutputObject, TestResultObject } from "../types"
+import { OutputObject, TestResultObject, EditorState } from "../types"
 
 type OutputContentProps = {
-  inputRequested: boolean
+  editorState: EditorState
   outputContent: OutputObject[]
-  help: boolean
   handlePasteSubmit: () => void
   pasteUrl: string
   sendInput: (input: string) => void
@@ -43,9 +42,8 @@ const StyledUserInput = styled.span`
 
 const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   const {
-    inputRequested,
+    editorState,
     outputContent,
-    help,
     handlePasteSubmit,
     pasteUrl,
     sendInput,
@@ -76,15 +74,15 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
 
   useEffect(() => {
     scrollToBottom()
-    if (inputRequested) focusOnInputField()
-  }, [inputRequested, outputContent])
+    if (editorState === EditorState.RunningWaitingInput) focusOnInputField()
+  }, [editorState, outputContent])
 
   useEffect(() => {
     scrollToTop()
   }, [testResults])
 
   const keyPressOnInput = (e: any) => {
-    if (e.key === "Enter" && inputRequested) {
+    if (e.key === "Enter" && editorState === EditorState.RunningWaitingInput) {
       sendInput(e.target.value)
     }
   }
@@ -106,13 +104,15 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
 
   return (
     <StyledOutput outputheight={outputHeight} ref={outputRef}>
-      {help && (
+      {(editorState === EditorState.ShowHelp ||
+        editorState === EditorState.SubmittingToPaste ||
+        editorState === EditorState.ShowPasteResults) && (
         <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
       )}
       <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
         {showOutput()}
       </pre>
-      {inputRequested && (
+      {editorState === EditorState.RunningWaitingInput && (
         <TextField
           inputRef={userInputFieldRef}
           label={t("enterInputAndPressEnter")}

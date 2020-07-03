@@ -1,0 +1,27 @@
+describe("State integrity tests", () => {
+  beforeEach(() => {
+    cy.visit("/")
+    window.localStorage.setItem("organization", "")
+    window.localStorage.setItem("course", "")
+    window.localStorage.setItem("exercise", "")
+    window.localStorage.setItem("token", "")
+  })
+
+  it("Can handle complex state changes that involve input()", () => {
+    cy.get(".monaco-editor")
+      .first()
+      .click()
+      .focused()
+      .type("{ctrl}{end}")
+      .type("{shift}{ctrl}{home}{backspace}")
+      .type("input()\ninput()\ninput()\nprint('made it to the end')")
+    cy.get("[data-cy=run-btn]").click()
+    cy.get("[data-cy=user-input-field]")
+    cy.get("[data-cy=stop-btn]").click()
+    cy.get("[data-cy=run-btn]").click()
+    cy.get("[data-cy=user-input-field]").find("input").type("one{enter}")
+    cy.get("[data-cy=user-input-field]").find("input").type("two{enter}")
+    cy.get("[data-cy=user-input-field]").find("input").type("three{enter}")
+    cy.contains("made it to the end")
+  })
+})

@@ -5,22 +5,16 @@ import { Typography, Button, Grid, CircularProgress } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 import TestProgressBar from "./TestProgressBar"
-import { TestResultObject } from "../types"
+import { TestResultObject, EditorState } from "../types"
 
 type OutputTitleProps = {
-  testResults: TestResultObject | undefined
-  inputRequested: boolean
-  isRunning: boolean
-  isAborted: boolean
-  isSubmitting: boolean
-  testing: boolean
-  help: boolean
-  signedIn: boolean
-  hasErrors: boolean
-  expired?: boolean
-  handleSubmit: () => void
+  allowSubmitting: boolean
   closeOutput: () => void
+  editorState: EditorState
+  handleSubmit: () => void
+  hasErrors: boolean
   showHelp: () => void
+  testResults: TestResultObject | undefined
 }
 
 const StatusText = styled(Typography)`
@@ -54,56 +48,64 @@ const OutputTitleText = styled(Typography)`
 `
 
 const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
-  const [progress, setProgress] = useState(100)
   const {
-    inputRequested,
-    isRunning,
-    isSubmitting,
-    isAborted,
-    testing,
-    testResults,
+    allowSubmitting,
     closeOutput,
-    showHelp,
-    help,
-    expired,
-    hasErrors,
+    editorState,
     handleSubmit,
-    signedIn,
+    hasErrors,
+    showHelp,
+    testResults,
   } = props
   const [t] = useTranslation()
+  const [progress, setProgress] = useState(100)
 
   useEffect(() => {
-    if (isSubmitting) {
+    if (editorState === EditorState.Submitting) {
       setProgress(10 + 30 * Math.random())
     }
-  }, [isSubmitting])
+  }, [editorState])
 
   useEffect(() => {
-    if (isSubmitting) {
+    if (editorState === EditorState.Submitting) {
       setTimeout(() => {
         setProgress((prev) => Math.min(prev + 10, 100))
       }, 2000)
     }
   }, [progress])
 
-  const titleText = testing ? t("testResults") : t("outputTitle")
+  const getTitleText = () => {
+    switch (editorState) {
+      case EditorState.ShowSubmissionResults:
+        return t("testResults")
+      default:
+        return t("outputTitle")
+    }
+  }
 
   const getStatusText = () => {
-    if (isRunning) {
-      return inputRequested ? t("waitingForInput") : t("running")
-    } else if (isSubmitting) {
-      return t("submitting")
+    switch (editorState) {
+      case EditorState.Running:
+        return t("running")
+      case EditorState.RunningWaitingInput:
+        return t("waitingForInput")
+      case EditorState.Submitting:
+        return t("submitting")
+      default:
+        return null
     }
-    return null
   }
 
   const getStatusIcon = () => {
-    if (isRunning && inputRequested) {
-      return <FontAwesomeIcon icon={faExclamation} />
-    } else if (isRunning || isSubmitting) {
-      return <CircularProgress size={25} color="inherit" disableShrink />
+    switch (editorState) {
+      case EditorState.RunningWaitingInput:
+        return <FontAwesomeIcon icon={faExclamation} />
+      case EditorState.Running:
+      case EditorState.Submitting:
+        return <CircularProgress size={25} color="inherit" disableShrink />
+      default:
+        return null
     }
-    return null
   }
 
   // Do not modify, this is optimized.
@@ -129,9 +131,13 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
     return 0
   }
 
+  const running =
+    editorState === EditorState.Running ||
+    editorState === EditorState.RunningWaitingInput
+
   return (
     <OutputTitleBox
-      inputRequested={inputRequested}
+      inputRequested={editorState === EditorState.RunningWaitingInput}
       container
       item
       direction="row"
@@ -139,9 +145,9 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
       justify="space-between"
     >
       <Grid item xs={2}>
-        <OutputTitleText>{titleText}</OutputTitleText>
+        <OutputTitleText>{getTitleText()}</OutputTitleText>
       </Grid>
-      {isSubmitting ? (
+      {editorState === EditorState.Submitting ? (
         <Grid item xs={5}>
           <TestProgressBar
             percentage={fakePercentage()}
@@ -149,59 +155,47 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
           />
         </Grid>
       ) : null}
-      {testing ? (
+      {testResults && (
         <Grid item xs={5}>
           <TestProgressBar
             percentage={passedTestsPercentage()}
             title={t("testsPassed")}
           />
         </Grid>
-      ) : null}
+      )}
       <Grid
         container
         item
-        xs={isRunning ? 6 : 4}
+        xs={running ? 6 : 4}
         alignItems="center"
         justify="flex-end"
       >
         {getStatusIcon()}
         <StatusText>{getStatusText()}</StatusText>
-        {/* {testing || isSubmitting ? null : (
+        {hasErrors || testResults?.testCases?.some((test) => !test.passed) ? (
           <MarginedButton
-            onClick={handleStop}
+            onClick={showHelp}
             variant="contained"
-            color="secondary"
-            disabled={!isRunning}
-            data-cy="output-title-stop-btn"
+            disabled={
+              !allowSubmitting ||
+              editorState === EditorState.ShowHelp ||
+              editorState === EditorState.SubmittingToPaste ||
+              editorState === EditorState.ShowPasteResults
+            }
+            data-cy="need-help-btn"
           >
-            {t("button.stop")}
+            {t("needHelp")}
           </MarginedButton>
-        )} */}
-        {testResults || hasErrors ? (
-          hasErrors || testResults?.testCases?.some((test) => !test.passed) ? (
-            <MarginedButton
-              onClick={showHelp}
-              variant="contained"
-              disabled={
-                isSubmitting || isRunning || help || !signedIn || expired
-              }
-              data-cy="need-help-btn"
-            >
-              {t("needHelp")}
-            </MarginedButton>
-          ) : null
         ) : null}
-        {testing || isSubmitting || inputRequested || hasErrors ? null : (
+        {running || testResults || hasErrors ? null : (
           <MarginedButton
             onClick={handleSubmit}
             variant="contained"
             disabled={
-              isSubmitting ||
-              isRunning ||
-              isAborted ||
-              !signedIn ||
-              hasErrors ||
-              expired
+              !allowSubmitting ||
+              editorState === EditorState.Running ||
+              editorState === EditorState.RunAborted ||
+              editorState === EditorState.Submitting
             }
             data-cy="submit-btn"
           >
@@ -211,7 +205,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
         <MarginedButton
           onClick={closeOutput}
           variant="contained"
-          disabled={isSubmitting}
+          disabled={editorState === EditorState.Submitting}
           data-cy="close-btn"
         >
           {t("button.close")}

@@ -1,3 +1,18 @@
+export enum EditorState {
+  Idle,
+  Initializing,
+  RunAborted,
+  Running,
+  RunningWaitingInput,
+  ShowHelp,
+  ShowPassedFeedbackForm,
+  ShowPasteResults,
+  ShowSubmissionResults,
+  Submitting,
+  SubmittingToPaste,
+  Testing,
+}
+
 export type ExerciseDetails = {
   id: number
   availablePoints?: number

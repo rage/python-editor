@@ -17,7 +17,12 @@ import {
   parseImportAll,
   parseImportSome,
 } from "../services/import_parsing"
-import { OutputObject, TestResultObject, FeedBackAnswer } from "../types"
+import {
+  OutputObject,
+  TestResultObject,
+  FeedBackAnswer,
+  EditorState,
+} from "../types"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
@@ -88,34 +93,21 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
   const [workerAvailable, setWorkerAvailable] = useState(true)
-  const [inputRequested, setInputRequested] = useState(false)
   const [files, setFiles] = useState([defaultFile])
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
-  const [running, setRunning] = useState(false)
-  const [aborted, setAborted] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<{
-    submitting: boolean
-    paste?: boolean
-  }>({ submitting: false })
-  const [testing, setTesting] = useState(false)
   const [pasteUrl, setPasteUrl] = useState("")
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
   const [openNotification, setOpenNotification] = useState(false)
-  const [isEditorReady, setIsEditorReady] = useState(false)
-  const [showHelp, setShowHelp] = useState(false)
   const [worker] = useWorker()
   const outputBoxRef = React.createRef<AnimatedOutputBoxRef>()
+  const [editorState, setEditorState] = useState(EditorState.Initializing)
 
   function handleRun(code?: string) {
     if (workerAvailable) {
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
-      setShowHelp(false)
-      setRunning(true)
-      setAborted(false)
-      setTesting(false)
+      setEditorState(EditorState.Running)
       worker.postMessage({
         type: "run",
         msg: remove_fstrings(code ? code : editorValue),
@@ -200,7 +192,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     if (type === "print") {
       setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
     } else if (type === "input_required") {
-      setInputRequested(true)
+      setEditorState(EditorState.RunningWaitingInput)
     } else if (type === "error") {
       console.log(msg)
       if (msg.includes("bad token T_OP")) {
@@ -215,7 +207,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     } else if (type === "ready") {
       setWorkerAvailable(true)
     } else if (type === "print_batch") {
-      if (running) {
+      if (editorState === EditorState.Running) {
         const prints = msg.map((text: string) => ({
           id: uuid(),
           type: "output",
@@ -224,10 +216,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         setOutput((prevState) => prevState.concat(prints))
       }
     } else if (type === "print_done") {
-      setRunning(false)
+      setEditorState(EditorState.Idle)
     } else if (type === "testResults") {
       console.log("[TEST RESULTS]", msg)
-      setRunning(false)
       const results = msg.map((result: any) => ({
         id: uuid(),
         testName: result.testName,
@@ -240,8 +231,8 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   })
 
   const sendInput = (input: string) => {
-    if (inputRequested) {
-      setInputRequested(false)
+    if (editorState === EditorState.RunningWaitingInput) {
+      setEditorState(EditorState.Running)
       setOutput(
         output.concat({ id: uuid(), type: "input", text: `${input}\n` }),
       )
@@ -255,8 +246,11 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   const handleSubmit = (paste: boolean) => {
+    setPasteUrl("")
     setStateForSelectedFile()
-    setSubmitStatus({ submitting: true, paste })
+    setEditorState(
+      paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
+    )
   }
 
   const setStateForSelectedFile = () => {
@@ -289,32 +283,34 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }, [initialFiles])
 
   useEffect(() => {
-    if (submitStatus.submitting) {
-      if (submitStatus.paste) {
-        submitToPaste(files).then((res) => setPasteUrl(res))
-        setSubmitStatus(() => ({ submitting: false }))
-      } else {
+    switch (editorState) {
+      case EditorState.Submitting:
         submitProgrammingExercise(files).then((data) => {
-          // console.log(data)
           closeOutput()
           setTestResults(data)
           setOutput([])
-          setTesting(true)
-          setSubmitStatus(() => ({ submitting: false }))
-          setShowFeedbackForm(data.allTestsPassed || false)
+          setEditorState(
+            data.allTestsPassed
+              ? EditorState.ShowPassedFeedbackForm
+              : EditorState.ShowSubmissionResults,
+          )
         })
-      }
+        break
+      case EditorState.SubmittingToPaste:
+        submitToPaste(files).then((res) => {
+          setPasteUrl(res)
+          setEditorState(EditorState.ShowPasteResults)
+        })
+        break
     }
-  }, [submitStatus])
+  }, [editorState])
 
   const stopWorker = () => {
     if (!workerAvailable) {
       worker.terminate()
     }
     worker.postMessage({ type: "stop" })
-    setRunning(false)
-    setAborted(true)
-    setInputRequested(false)
+    setEditorState(EditorState.RunAborted)
     setWorkerAvailable(true)
   }
 
@@ -366,17 +362,17 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           </StyledOutput>
         </OverlayBox>
       )}
-      {showFeedbackForm && (
+      {editorState === EditorState.ShowPassedFeedbackForm && (
         <FeedbackForm
           awardedPoints={testResults?.points}
           onSubmitFeedback={(feedback) => {
-            setShowFeedbackForm(false)
+            setEditorState(EditorState.ShowSubmissionResults)
             if (testResults) {
               submitFeedback(testResults, feedback)
               feedback.length > 0 && setOpenNotification(true)
             }
           }}
-          onClose={() => setShowFeedbackForm(false)}
+          onClose={() => setEditorState(EditorState.ShowSubmissionResults)}
           solutionUrl={testResults?.solutionUrl}
           feedbackQuestions={testResults?.feedbackQuestions}
         />
@@ -412,14 +408,12 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         </OverlayCenterWrapper>
       )}
       <PyEditorButtons
+        allowRun={workerAvailable}
+        editorState={editorState}
         handleRun={handleRun}
         handleRunWrapped={handleRunWrapped}
-        allowRun={workerAvailable}
         handleStop={stopWorker}
-        isRunning={running}
-        isSubmitting={submitStatus.submitting}
         solutionUrl={solutionUrl}
-        isEditorReady={isEditorReady}
       />
       {!signedIn && (
         <WarningBox>
@@ -437,34 +431,32 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
         editorHeight={editorHeight}
-        setIsEditorReady={(isReady) => setIsEditorReady(isReady)}
+        setIsEditorReady={(isReady) =>
+          setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
+        }
       />
       <AnimatedOutputBox
-        isRunning={running}
+        isRunning={
+          editorState === EditorState.Running ||
+          editorState === EditorState.RunningWaitingInput
+        }
         outputHeight={outputHeight}
         outputPosition={outputPosition}
         ref={outputBoxRef}
       >
         <Grid container direction="column">
           <OutputTitle
-            testResults={testResults}
-            inputRequested={inputRequested}
-            isRunning={running}
-            isAborted={aborted}
-            isSubmitting={submitStatus.submitting}
-            expired={expired}
-            testing={testing}
-            help={false}
-            signedIn={signedIn}
-            hasErrors={output.some((item: any) => item.type === "error")}
-            handleSubmit={() => handleSubmit(false)}
+            allowSubmitting={signedIn && !expired}
             closeOutput={closeOutput}
-            showHelp={() => setShowHelp(true)}
+            editorState={editorState}
+            handleSubmit={() => handleSubmit(false)}
+            hasErrors={output.some((item: any) => item.type === "error")}
+            showHelp={() => setEditorState(EditorState.ShowHelp)}
+            testResults={testResults}
           />
           <OutputContent
-            inputRequested={inputRequested}
+            editorState={editorState}
             outputContent={output}
-            help={showHelp}
             handlePasteSubmit={() => handleSubmit(true)}
             pasteUrl={pasteUrl}
             sendInput={sendInput}
@@ -473,6 +465,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           />
         </Grid>
       </AnimatedOutputBox>
+      {/* <div>
+        {EditorState[editorState]}
+      </div> */}
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}
