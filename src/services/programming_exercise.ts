@@ -41,14 +41,14 @@ const getZipFromUrl = async (
       headers: getHeaders(token),
       responseType: "arraybuffer",
     })
-    return new Ok(await zip.loadAsync(response.data))
+    return Ok(await zip.loadAsync(response.data))
   } catch (error) {
     return error?.response?.status
-      ? new Err({
+      ? Err({
           status: error.response.status,
           message: t("failedToDownloadExercise"),
         })
-      : new Err({
+      : Err({
           status: 418,
           message: t("failedToEstablishConnectionToServer"),
         })
@@ -66,7 +66,7 @@ const getExerciseDetails = async (
   const headers = getHeaders(token)
   try {
     const data = (await axios.get(url, { headers, responseType: "json" })).data
-    return new Ok({
+    return Ok({
       id: data.id,
       availablePoints: data.available_points?.length,
       awardedPoints: data.awarded_points?.length,
@@ -77,11 +77,11 @@ const getExerciseDetails = async (
     })
   } catch (error) {
     return error?.response?.status
-      ? new Err({
+      ? Err({
           status: error.response.status,
           message: t("couldNotFindExerciseDetails"),
         })
-      : new Err({
+      : Err({
           status: 418,
           message: t("failedToEstablishConnectionToServer"),
         })
@@ -112,13 +112,13 @@ const getLatestSubmissionZip = async (
     const response = await axios.get(url, { headers, responseType: "json" })
     submissions = response.data as any[]
   } catch (error) {
-    return new Err({
+    return Err({
       status: error.response.status,
       message: t("failedToDownloadExercise"),
     })
   }
   if (submissions.length <= 0) {
-    return new Ok(undefined)
+    return Ok(undefined)
   }
   const latest = submissions
     .map((submission) => ({
@@ -166,7 +166,7 @@ const getSubmissionResults = async (
       submissionStatus = { status: "error", statusCode: error.response.status }
     }
     if (submissionStatus.status === "error") {
-      return new Err({
+      return Err({
         status: submissionStatus.statusCode,
         message: t("submissionProcessFailed"),
       })
@@ -179,7 +179,7 @@ const getSubmissionResults = async (
         feedback: test.message,
       }))
       const points = submissionStatus.points as string[]
-      return new Ok({
+      return Ok({
         allTestsPassed: submissionStatus.all_tests_passed,
         points,
         testCases,
@@ -189,7 +189,7 @@ const getSubmissionResults = async (
       })
     }
   }
-  return new Err({
+  return Err({
     status: 418,
     message: t("submissionTookTooLong"),
   })
@@ -221,7 +221,7 @@ const postExerciseSubmission = async (
       form,
       { headers },
     )
-    return new Ok({
+    return Ok({
       pasteUrl: paste ? response.data.paste_url : undefined,
       showSubmissionUrl: response.data.show_submission_url,
       submissionUrl: response.data.submission_url,
@@ -233,7 +233,7 @@ const postExerciseSubmission = async (
         ? t("authenticationRequired")
         : t("submissionProcessFailed")
     console.error(error.response)
-    return new Err({ status, message })
+    return Err({ status, message })
   }
 }
 
@@ -258,7 +258,7 @@ const postExerciseFeedback = async (
     })
     return Ok.EMPTY
   } catch (error) {
-    return new Err({
+    return Err({
       status: error.response.status,
       message: JSON.parse(error.response),
     })
