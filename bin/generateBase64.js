@@ -2,9 +2,11 @@ const fs = require("fs")
 const path = require("path")
 
 const files = [
+  ["src/components/worker.js", "workerJsSource.ts"],
+  ["src/worker.js", "newWorkerJsSource.ts"],
+  ["static/pyodide.js", "pyodideJsSource.ts"],
   ["static/skulpt.min.js", "skulptMinJsSource.ts"],
   ["static/skulpt-stdlib.js", "skulptStdlibJsSource.ts"],
-  ["src/components/worker.js", "workerJsSource.ts"],
 ]
 
 files.forEach(([source, targetName]) => {
