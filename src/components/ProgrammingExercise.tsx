@@ -44,6 +44,8 @@ type ProgrammingExerciseProps = {
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
+  testFiles: Array<FileEntry>
+  tmcFiles: Array<FileEntry>
   signedIn: boolean
   editorHeight?: string
   outputHeight?: string
@@ -81,6 +83,8 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitProgrammingExercise,
   submitToPaste,
   initialFiles,
+  testFiles,
+  tmcFiles,
   signedIn,
   editorHeight,
   outputHeight,

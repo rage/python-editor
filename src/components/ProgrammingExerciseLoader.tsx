@@ -12,6 +12,8 @@ import {
 import { TestResultObject, Language, ExerciseDetails } from "../types"
 import { useTime } from "../hooks/customHooks"
 import { DateTime } from "luxon"
+import JSZip, { JSZipObject } from "jszip"
+import { Result } from "ts-results"
 
 type ProgrammingExerciseLoaderProps = {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
@@ -51,7 +53,8 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const [t, i18n] = useTranslation()
   const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
-  const [testFiles, setTestFiles] = useState([] as Array<FileEntry>)
+  const [testFiles, setTestFiles] = useState<Array<FileEntry>>([])
+  const [tmcFiles, setTmcFiles] = useState<Array<FileEntry>>([])
   const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -60,16 +63,16 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const mainSourceFile = "__main__.py"
 
   const getFileEntries = (
-    zip: any,
+    zip: JSZip,
     directory: string,
     main: string | null,
   ): Promise<Array<FileEntry>> => {
     const fileSelector: RegExp = RegExp(`${directory}/\\w*\\.py$`)
     const files = orderFiles(zip.file(fileSelector), main)
-    return Promise.all(files.map((f: any) => createEntry(zip, f)))
+    return Promise.all(files.map((f: JSZipObject) => createEntry(f)))
   }
 
-  const orderFiles = (files: any, main: string | null) => {
+  const orderFiles = (files: JSZipObject[], main: string | null) => {
     if (main) {
       const mainIndex = files.findIndex((file: any) => file.name.includes(main))
       if (mainIndex > -1) {
@@ -89,28 +92,37 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       },
     ]
 
-    const downloadExercise = async () => {
-      const result = await getExerciseZip(
-        organization,
-        course,
-        exercise,
-        apiConfig,
-      )
-      if (result.ok) {
-        try {
-          return getFileEntries(result.val, "src", mainSourceFile)
-        } catch (e) {
-          return wrapError(418, t("malformedExerciseTemplate"))
-        }
-      }
-      return wrapError(result.val.status, result.val.message)
+    setExerciseDetails(undefined)
+    const downloadResult = await getExerciseZip(
+      organization,
+      course,
+      exercise,
+      apiConfig,
+    )
+    if (downloadResult.err) {
+      return wrapError(downloadResult.val.status, downloadResult.val.message)
     }
 
-    setExerciseDetails(undefined)
-    if (!hasToken) {
-      setSrcFiles(await downloadExercise())
+    const zip = downloadResult.val
+    const unzipResult = Result.all(
+      await Result.wrapAsync(() => getFileEntries(zip, "src", mainSourceFile)),
+      await Result.wrapAsync(() => getFileEntries(zip, "test", mainSourceFile)),
+      await Result.wrapAsync(() => getFileEntries(zip, "tmc", mainSourceFile)),
+    )
+    if (unzipResult.err) {
+      setSrcFiles(wrapError(418, t("malformedExerciseTemplate")))
       return
     }
+
+    const [src, test, tmc] = unzipResult.val
+    setTestFiles(test)
+    setTmcFiles(tmc)
+
+    if (!hasToken) {
+      setSrcFiles(src)
+      return
+    }
+
     const detailsResult = await getExerciseDetails(
       organization,
       course,
@@ -124,6 +136,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       return
     }
     setExerciseDetails(detailsResult.val)
+
     try {
       const submissionResult = await getLatestSubmissionZip(
         detailsResult.val.id,
@@ -140,12 +153,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
           return
         }
       }
-    } catch (e) {}
-    setSrcFiles(await downloadExercise())
+    } catch (e) {
+      setSrcFiles(src)
+    }
   }
 
-  const createEntry = async (zip: any, f: any): Promise<FileEntry> => {
-    const file = zip.file(f.name)
+  const createEntry = async (f: JSZipObject): Promise<FileEntry> => {
     const content = await f.async("string")
     const fullName: string = f.name
     const matches = fullName.match(/(\w+\.py)/)
@@ -246,6 +259,8 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     <>
       <ProgrammingExercise
         initialFiles={srcFiles}
+        testFiles={testFiles}
+        tmcFiles={tmcFiles}
         submitFeedback={(testResults, feedback) => {
           if (testResults.feedbackAnswerUrl && feedback.length > 0) {
             postExerciseFeedback(testResults, feedback, apiConfig)
