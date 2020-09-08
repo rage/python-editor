@@ -14,7 +14,6 @@ type PyEditorButtonsProps = {
   allowRun?: boolean
   editorState: EditorState
   handleRun: (code?: string) => void
-  handleRunWrapped: (code?: string) => void
   handleStop: () => void
   solutionUrl?: string
 }
@@ -23,7 +22,6 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
   allowRun = true,
   editorState,
   handleRun,
-  handleRunWrapped,
   handleStop,
   solutionUrl,
 }) => {
@@ -65,13 +63,6 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
           {t("modelSolution")}
         </StyledButton>
       )}
-      {/* <StyledButton
-            onClick={() => handleRunWrapped(editorValue)}
-            disabled={!(isEditorReady && allowRun)}
-            data-cy="run-wrapped-btn"
-          >
-            Run with wrapped imports
-          </StyledButton> */}
     </>
   )
 }

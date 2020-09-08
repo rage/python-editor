@@ -1,3 +1,5 @@
+import { FileEntry } from "../components/ProgrammingExerciseLoader"
+
 type PythonImportAll = {
   pkg: string
 }
@@ -5,6 +7,89 @@ type PythonImportAll = {
 type PythonImportSome = {
   pkg: string
   names: Array<string>
+}
+
+/**
+ * Replace import statements of the form `import .mymodule` and `from .mymodule
+ * import myClass, myFunction` with the contents of mymodule.py, appropriately
+ * wrapped. Cyclical imports (module foo imports from module bar, bar imports
+ * from foo) are detected and result in an exception.
+ *
+ * @param start Initial file where to start
+ * @param files List of files used for replacing imports.
+ * @returns File content with imports resolved.
+ */
+const resolveImports = (start: FileEntry, files: FileEntry[]): string => {
+  return wrap(start.content, [start.shortName], files)
+}
+
+const wrap = (
+  source: string,
+  presentlyImported: Array<string>,
+  files: FileEntry[],
+) => {
+  const importAllPattern = /^import \./
+  const importSomePattern = /^from \.\w+ import/
+  const sourceLines = source.split("\n")
+  const lines = sourceLines.map((line, num) => {
+    if (line.match(importAllPattern)) {
+      return replaceImportAll(parseImportAll(line), presentlyImported, files)
+    }
+    return line.match(importSomePattern)
+      ? replaceImportSome(parseImportSome(line), num, presentlyImported, files)
+      : line
+  })
+  return lines.join("\n")
+}
+
+const replaceImportAll = (
+  im: PythonImportAll,
+  presentlyImported: Array<string>,
+  files: Array<FileEntry>,
+): string => {
+  const sourceShortName = im.pkg.slice(1) + ".py"
+  if (presentlyImported.includes(sourceShortName)) {
+    const errMsg =
+      sourceShortName +
+      " has already been imported. Mutually recursive imports are not allowed."
+    throw errMsg
+  }
+  const source = getContentByShortName(sourceShortName, files)
+  const wrapped = wrap(
+    source,
+    presentlyImported.concat([sourceShortName]),
+    files,
+  )
+  return `\n${wrapped}\n`
+}
+
+const replaceImportSome = (
+  im: PythonImportSome,
+  lineNumber: number,
+  presentlyImported: Array<string>,
+  files: Array<FileEntry>,
+): string => {
+  const sourceShortName = im.pkg.slice(1) + ".py"
+  if (presentlyImported.includes(sourceShortName)) {
+    const errMsg =
+      sourceShortName +
+      " has already been imported. Mutually recursive imports are not allowed."
+    throw errMsg
+  }
+  const source = getContentByShortName(sourceShortName, files)
+  const wrapped = wrap(
+    source,
+    presentlyImported.concat([sourceShortName]),
+    files,
+  )
+  const sourceLines = wrapped.split("\n").map((line: string) => "\t" + line)
+  const names = im.names.join(", ")
+  const functionName = `__wrap${lineNumber}`
+  const head = `def ${functionName}():\n`
+  const body = sourceLines.join("\n") + "\n"
+  const ret = `\treturn ${names}\n`
+  const tail = `${names} = ${functionName}()`
+  return head + body + ret + tail
 }
 
 /* Parse a Python import statement of the type
@@ -35,4 +120,10 @@ const parseImportSome = (line: string): PythonImportSome => {
   throw "Malformed import statement"
 }
 
-export { PythonImportAll, PythonImportSome, parseImportAll, parseImportSome }
+const getContentByShortName = (name: string, fileSet: Array<FileEntry>) => {
+  console.log(name)
+  console.log(fileSet)
+  return fileSet.filter(({ shortName }) => shortName === name)[0].content
+}
+
+export { resolveImports }

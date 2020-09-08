@@ -12,12 +12,6 @@ import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
 import { v4 as uuid } from "uuid"
 import { FileEntry } from "./ProgrammingExerciseLoader"
 import {
-  PythonImportAll,
-  PythonImportSome,
-  parseImportAll,
-  parseImportSome,
-} from "../services/import_parsing"
-import {
   OutputObject,
   TestResultObject,
   FeedBackAnswer,
@@ -119,76 +113,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     } else {
       console.log("Worker is busy")
     }
-  }
-
-  const handleRunWrapped = () => {
-    try {
-      const wrapped = wrap(editorValue, [selectedFile.shortName])
-      return handleRun(wrapped)
-    } catch (error) {
-      return handleRun(`print("${error}")`)
-    }
-  }
-
-  /* Replace import statements of the form "import .mymodule" and
-  "from .mymodule import myClass, myFunction" with the contents of
-  mymodule.py, appropriately wrapped. Cyclical imports (module foo
-  imports from module bar, bar imports from foo) are detected and
-  result in an exception. */
-  const wrap = (source: string, presentlyImported: Array<string>) => {
-    const importAllPattern = /^import \./
-    const importSomePattern = /^from \.\w+ import/
-    const sourceLines = source.split("\n")
-    const lines = sourceLines.map((line, num) => {
-      if (line.match(importAllPattern)) {
-        return replaceImportAll(parseImportAll(line), num, presentlyImported)
-      }
-      return line.match(importSomePattern)
-        ? replaceImportSome(parseImportSome(line), num, presentlyImported)
-        : line
-    })
-    return lines.join("\n")
-  }
-
-  const replaceImportAll = (
-    im: PythonImportAll,
-    lineNumber: number,
-    presentlyImported: Array<string>,
-  ): string => {
-    const sourceShortName = im.pkg.slice(1) + ".py"
-    if (presentlyImported.includes(sourceShortName)) {
-      const errMsg =
-        sourceShortName +
-        " has already been imported. Mutually recursive imports are not allowed."
-      throw errMsg
-    }
-    const source = getContentByShortName(sourceShortName, files)
-    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
-    return `\n${wrapped}\n`
-  }
-
-  const replaceImportSome = (
-    im: PythonImportSome,
-    lineNumber: number,
-    presentlyImported: Array<string>,
-  ): string => {
-    const sourceShortName = im.pkg.slice(1) + ".py"
-    if (presentlyImported.includes(sourceShortName)) {
-      const errMsg =
-        sourceShortName +
-        " has already been imported. Mutually recursive imports are not allowed."
-      throw errMsg
-    }
-    const source = getContentByShortName(sourceShortName, files)
-    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
-    const sourceLines = wrapped.split("\n").map((line: string) => "\t" + line)
-    const names = im.names.join(", ")
-    const functionName = `__wrap${lineNumber}`
-    const head = `def ${functionName}():\n`
-    const body = sourceLines.join("\n") + "\n"
-    const ret = `\treturn ${names}\n`
-    const tail = `${names} = ${functionName}()`
-    return head + body + ret + tail
   }
 
   worker.setMessageListener((e: any) => {
@@ -415,7 +339,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         allowRun={workerAvailable}
         editorState={editorState}
         handleRun={handleRun}
-        handleRunWrapped={handleRunWrapped}
         handleStop={stopWorker}
         solutionUrl={solutionUrl}
       />
