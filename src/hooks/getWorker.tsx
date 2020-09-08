@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react"
-import { pyodideJsSource, newWorkerJsSource } from "../constants"
+import {
+  skulptMinJsSource,
+  skulptStdlibJsSource,
+  workerJsSource,
+} from "../constants"
 
 const blobObject = URL.createObjectURL(
-  new Blob([pyodideJsSource, newWorkerJsSource], {
+  new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
     type: "application/javascript",
   }),
 )
