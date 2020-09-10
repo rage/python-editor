@@ -23,6 +23,31 @@ const resolveImports = (start: FileEntry, files: FileEntry[]): string => {
   return wrap(start.content, [start.shortName], files)
 }
 
+const resolveTestImports = (
+  code: string,
+  test: FileEntry,
+  tmcFiles: FileEntry[],
+): string => {
+  const utils = tmcFiles.find((x) => x.shortName === "utils.py")
+  let content = utils?.content ?? ""
+  content = replaceFunction(
+    content,
+    "load_module",
+    `    code = """\n    ${code}\n    """\n    mod = ModuleType("editorcontent")\n    exec(code, mod.__dict__)\n    return mod`,
+  )
+  content = replaceFunction(
+    content,
+    "reload_module",
+    '    return load_module("editorcontent")',
+  )
+
+  return wrap(
+    test.content,
+    [test.shortName],
+    tmcFiles.map((x) => (x.shortName === "utils.py" ? { ...x, content } : x)),
+  )
+}
+
 const wrap = (
   source: string,
   presentlyImported: Array<string>,
@@ -34,11 +59,9 @@ const wrap = (
   const sourceLines = source.split("\n")
   const lines = sourceLines.map((line, num) => {
     if (line.match(importAllPattern)) {
-      console.log("import all")
       return replaceImportAll(parseImportAll(line), presentlyImported, files)
     }
     if (line.match(importSomePattern)) {
-      console.log("import some")
       return replaceImportSome(
         parseImportSome(line),
         num,
@@ -47,7 +70,6 @@ const wrap = (
       )
     }
     if (line.match(importTmcPattern)) {
-      console.log("import tmc")
       return replaceImportTmc(line, num, presentlyImported, files)
     }
     return line
@@ -168,4 +190,23 @@ const replaceImportTmc = (
   throw "Malformed import statement"
 }
 
-export { resolveImports }
+const replaceFunction = (
+  file: string,
+  functionName: string,
+  replacement: string,
+): string => {
+  const lines = file.split("\n")
+  const start = lines.findIndex((x) => x.startsWith(`def ${functionName}(`))
+  // const end = lines.slice(start).findIndex(x => x.startsWith("def "))
+  const end = lines.slice(start).findIndex((x) => x === "") + start
+  if (0 <= start && start < end) {
+    return lines
+      .slice(0, start + 1)
+      .concat(replacement)
+      .concat(lines.slice(end))
+      .join("\n")
+  }
+  return file
+}
+
+export { resolveImports, resolveTestImports }
