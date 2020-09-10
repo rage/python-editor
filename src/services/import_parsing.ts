@@ -30,14 +30,27 @@ const wrap = (
 ) => {
   const importAllPattern = /^import \./
   const importSomePattern = /^from \.\w+ import/
+  const importTmcPattern = /^from tmc\.?\w* import/
   const sourceLines = source.split("\n")
   const lines = sourceLines.map((line, num) => {
     if (line.match(importAllPattern)) {
+      console.log("import all")
       return replaceImportAll(parseImportAll(line), presentlyImported, files)
     }
-    return line.match(importSomePattern)
-      ? replaceImportSome(parseImportSome(line), num, presentlyImported, files)
-      : line
+    if (line.match(importSomePattern)) {
+      console.log("import some")
+      return replaceImportSome(
+        parseImportSome(line),
+        num,
+        presentlyImported,
+        files,
+      )
+    }
+    if (line.match(importTmcPattern)) {
+      console.log("import tmc")
+      return replaceImportTmc(line, num, presentlyImported, files)
+    }
+    return line
   })
   return lines.join("\n")
 }
@@ -47,7 +60,7 @@ const replaceImportAll = (
   presentlyImported: Array<string>,
   files: Array<FileEntry>,
 ): string => {
-  const sourceShortName = im.pkg.slice(1) + ".py"
+  const sourceShortName = im.pkg + ".py"
   if (presentlyImported.includes(sourceShortName)) {
     const errMsg =
       sourceShortName +
@@ -69,7 +82,7 @@ const replaceImportSome = (
   presentlyImported: Array<string>,
   files: Array<FileEntry>,
 ): string => {
-  const sourceShortName = im.pkg.slice(1) + ".py"
+  const sourceShortName = im.pkg + ".py"
   if (presentlyImported.includes(sourceShortName)) {
     const errMsg =
       sourceShortName +
@@ -96,7 +109,7 @@ const replaceImportSome = (
 "import .foo" */
 const parseImportAll = (line: string): PythonImportAll => {
   let pkg: string
-  const importMatches = line.match(/^import (\.\w+)[ \t]*$/)
+  const importMatches = line.match(/^import \.(\w+)[ \t]*$/)
   if (importMatches) {
     pkg = importMatches[1]
     return { pkg }
@@ -109,9 +122,7 @@ const parseImportAll = (line: string): PythonImportAll => {
 const parseImportSome = (line: string): PythonImportSome => {
   let pkg: string
   let names: Array<string>
-  const importMatches = line.match(
-    /^from (\.\w+) import (\w+|(\w+, ?)\w+)[ \t]*$/,
-  )
+  const importMatches = line.match(/^from \.(w+) import ([\w,\s]+$)/)
   if (importMatches) {
     pkg = importMatches[1]
     names = importMatches[2].split(",").map((s) => s.trim())
@@ -124,6 +135,37 @@ const getContentByShortName = (name: string, fileSet: Array<FileEntry>) => {
   console.log(name)
   console.log(fileSet)
   return fileSet.filter(({ shortName }) => shortName === name)[0].content
+}
+
+const replaceImportTmc = (
+  line: string,
+  lineNumber: number,
+  presentlyImported: Array<string>,
+  files: Array<FileEntry>,
+): string => {
+  const importMatches = line.match(/^from tmc import ([\w,\s]+)/)
+  if (importMatches) {
+    return importMatches[1]
+      .split(",")
+      .map((pkg) =>
+        replaceImportAll({ pkg: pkg.trim() }, presentlyImported, files),
+      )
+      .join("\n")
+  }
+
+  const importMatches2 = line.match(/from tmc\.(\w+) import ([\w,\s]+)/)
+  if (importMatches2) {
+    const pkg = importMatches2[1]
+    const names = importMatches2[2].split(",").map((x) => x.trim())
+    return replaceImportSome(
+      { pkg, names },
+      lineNumber,
+      presentlyImported,
+      files,
+    )
+  }
+
+  throw "Malformed import statement"
 }
 
 export { resolveImports }
