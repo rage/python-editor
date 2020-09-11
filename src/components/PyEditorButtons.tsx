@@ -15,6 +15,7 @@ type PyEditorButtonsProps = {
   editorState: EditorState
   handleRun: (code?: string) => void
   handleStop: () => void
+  handleTests: (code?: string) => void
   solutionUrl?: string
 }
 
@@ -23,6 +24,7 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
   editorState,
   handleRun,
   handleStop,
+  handleTests,
   solutionUrl,
 }) => {
   const [t] = useTranslation()
@@ -48,6 +50,12 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
           <FontAwesomeIcon color="#B40A0A" icon={faStop} />
         </StyledButton>
       )}
+      <StyledButton
+        onClick={() => handleTests()}
+        disabled={editorState !== EditorState.Idle}
+      >
+        Test
+      </StyledButton>
       {solutionUrl && (
         <StyledButton
           style={{

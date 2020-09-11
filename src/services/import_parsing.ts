@@ -33,7 +33,7 @@ const resolveTestImports = (
   content = replaceFunction(
     content,
     "load_module",
-    `    mod = ModuleType("editorcontent")\n    exec(__code, mod.__dict__)\n    return mod\n`,
+    `    from types import ModuleType\n    mod = ModuleType("editorcontent")\n    exec(__code, mod.__dict__)\n    return mod\n`,
   )
   content = replaceFunction(
     content,
@@ -41,7 +41,7 @@ const resolveTestImports = (
     '    return load_module("editorcontent")',
   )
 
-  return wrap(
+  const wrapped = wrap(
     `
 __code = """
 ${code}
@@ -51,6 +51,25 @@ ${test.content}
     [test.shortName],
     tmcFiles.map((x) => (x.shortName === "utils.py" ? { ...x, content } : x)),
   )
+
+  const lines = wrapped.split("\n")
+  return lines
+    .slice(0, lines.length - 6)
+    .concat(
+      `
+testOutput = ""
+import io, contextlib
+from unittest import TextTestRunner
+test_suite = unittest.TestLoader().loadTestsFromTestCase(HymioTest)
+with io.StringIO() as buf:
+    # run the tests
+    with contextlib.redirect_stdout(buf):
+        TextTestRunner(stream=buf).run(test_suite)
+    # process (in this case: print) the results
+    testOutput = buf.getvalue()
+  `,
+    )
+    .join("\n")
 }
 
 const wrap = (

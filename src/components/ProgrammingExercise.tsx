@@ -27,6 +27,7 @@ import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
 import PyEditorButtons from "./PyEditorButtons"
 import OutputTitle from "./OutputTitle"
 import OutputContent from "./OutputContent"
+import { resolveTestImports } from "../services/import_parsing"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -109,6 +110,21 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       worker.postMessage({
         type: "run",
         msg: remove_fstrings(code ? code : editorValue),
+      })
+    } else {
+      console.log("Worker is busy")
+    }
+  }
+
+  function handleTests(code?: string) {
+    if (workerAvailable) {
+      setOutput([])
+      setTestResults(undefined)
+      setWorkerAvailable(false)
+      setEditorState(EditorState.Testing)
+      worker.postMessage({
+        type: "run_tests",
+        msg: resolveTestImports(code ?? editorValue, testFiles[1], tmcFiles),
       })
     } else {
       console.log("Worker is busy")
@@ -327,9 +343,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           </Select>
         </>
       )}
-      {/* <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
-        Run tests
-      </Button> */}
       {!ready && (
         <OverlayCenterWrapper>
           <CircularProgress thickness={5} color="inherit" />
@@ -340,6 +353,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         editorState={editorState}
         handleRun={handleRun}
         handleStop={stopWorker}
+        handleTests={handleTests}
         solutionUrl={solutionUrl}
       />
       {!signedIn && (

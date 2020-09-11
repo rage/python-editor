@@ -1,5 +1,4 @@
-// importScripts("skulpt.min.js", "skulpt-stdlib.js")
-// postMessage({ type: "ready" })
+self.languagePluginUrl = "https://pyodide.cdn.iodide.io/"
 
 let printBuffer = []
 let intervalId = null
@@ -140,6 +139,26 @@ function run(code) {
     })
 }
 
+function test(code) {
+  if (!code || code.length === 0) return
+  languagePluginLoader
+    .then(() => {
+      pyodide
+        .loadPackage()
+        .then(() => pyodide.runPythonAsync(code))
+        .then(() => {
+          console.log("running pyodide completed")
+          console.log(pyodide.globals.testOutput)
+          postMessage({ type: "ready" })
+        })
+    })
+    .catch((e) => {
+      printBuffer = []
+      printBuffer.push({ type: "error", msg: e.toString() })
+    })
+    .finally(() => (running = false))
+}
+
 const defaultTest = `
 import unittest
 import StringIO
@@ -207,12 +226,11 @@ self.onmessage = function (e) {
     run(msg)
   } else if (type === "stop") {
     intervalManager(false)
-  } else if (type === "runTests") {
-    testing = true
-    if (!msg) {
-      run(defaultTest)
-    } else {
-      run(msg)
-    }
+  } else if (type === "run_tests") {
+    intervalManager(true)
+    running = true
+    printBuffer = []
+    console.log(msg)
+    test(msg)
   }
 }

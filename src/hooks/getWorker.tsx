@@ -2,13 +2,17 @@ import { useEffect, useState } from "react"
 import {
   skulptMinJsSource,
   skulptStdlibJsSource,
+  pyodideJsSource,
   workerJsSource,
 } from "../constants"
 
 const blobObject = URL.createObjectURL(
-  new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
-    type: "application/javascript",
-  }),
+  new Blob(
+    [skulptMinJsSource, skulptStdlibJsSource, pyodideJsSource, workerJsSource],
+    {
+      type: "application/javascript",
+    },
+  ),
 )
 
 interface Message {
