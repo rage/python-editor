@@ -33,7 +33,7 @@ const resolveTestImports = (
   content = replaceFunction(
     content,
     "load_module",
-    `    code = """\n    ${code}\n    """\n    mod = ModuleType("editorcontent")\n    exec(code, mod.__dict__)\n    return mod`,
+    `    mod = ModuleType("editorcontent")\n    exec(__code, mod.__dict__)\n    return mod\n`,
   )
   content = replaceFunction(
     content,
@@ -42,7 +42,12 @@ const resolveTestImports = (
   )
 
   return wrap(
-    test.content,
+    `
+__code = """
+${code}
+"""
+${test.content}
+`,
     [test.shortName],
     tmcFiles.map((x) => (x.shortName === "utils.py" ? { ...x, content } : x)),
   )
@@ -197,16 +202,30 @@ const replaceFunction = (
 ): string => {
   const lines = file.split("\n")
   const start = lines.findIndex((x) => x.startsWith(`def ${functionName}(`))
-  // const end = lines.slice(start).findIndex(x => x.startsWith("def "))
-  const end = lines.slice(start).findIndex((x) => x === "") + start
-  if (0 <= start && start < end) {
-    return lines
-      .slice(0, start + 1)
-      .concat(replacement)
-      .concat(lines.slice(end))
-      .join("\n")
+  if (start === -1) {
+    return file
   }
-  return file
+
+  const startDepth = countIndentationDepth(lines[start])
+  let end = start + 1
+  while (end < lines.length && startDepth < countIndentationDepth(lines[end])) {
+    end++
+  }
+
+  console.log(end)
+
+  return lines
+    .slice(0, start + 1)
+    .concat(replacement)
+    .concat(lines.slice(end))
+    .join("\n")
+}
+
+const countIndentationDepth = (line: string): number => {
+  if (line.trim() === "") {
+    return Number.MAX_SAFE_INTEGER
+  }
+  return line.search(/\S/)
 }
 
 export { resolveImports, resolveTestImports }
