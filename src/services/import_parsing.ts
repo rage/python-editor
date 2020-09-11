@@ -1,4 +1,5 @@
 import { FileEntry } from "../components/ProgrammingExerciseLoader"
+import { patchTmcUtilsPy } from "./test_patching"
 
 type PythonImportAll = {
   pkg: string
@@ -28,28 +29,25 @@ const resolveTestImports = (
   test: FileEntry,
   tmcFiles: FileEntry[],
 ): string => {
-  const utils = tmcFiles.find((x) => x.shortName === "utils.py")
-  let content = utils?.content ?? ""
-  content = replaceFunction(
-    content,
-    "load_module",
-    `    from types import ModuleType\n    mod = ModuleType("editorcontent")\n    exec(__code, mod.__dict__)\n    return mod\n`,
-  )
-  content = replaceFunction(
-    content,
-    "reload_module",
-    '    return load_module("editorcontent")',
-  )
+  const files = tmcFiles.map((x) => {
+    switch (x.shortName) {
+      case "utils.py":
+        return { ...x, content: patchTmcUtilsPy(x.content) }
+      default:
+        return x
+    }
+  })
 
   const wrapped = wrap(
     `
 __code = """
 ${code}
 """
+_stdout_pointer = 0
 ${test.content}
 `,
     [test.shortName],
-    tmcFiles.map((x) => (x.shortName === "utils.py" ? { ...x, content } : x)),
+    files,
   )
 
   const lines = wrapped.split("\n")
@@ -62,12 +60,10 @@ import io, contextlib
 from unittest import TextTestRunner
 test_suite = unittest.TestLoader().loadTestsFromTestCase(HymioTest)
 with io.StringIO() as buf:
-    # run the tests
     with contextlib.redirect_stdout(buf):
         TextTestRunner(stream=buf).run(test_suite)
-    # process (in this case: print) the results
     testOutput = buf.getvalue()
-  `,
+`,
     )
     .join("\n")
 }
@@ -212,39 +208,6 @@ const replaceImportTmc = (
   }
 
   throw "Malformed import statement"
-}
-
-const replaceFunction = (
-  file: string,
-  functionName: string,
-  replacement: string,
-): string => {
-  const lines = file.split("\n")
-  const start = lines.findIndex((x) => x.startsWith(`def ${functionName}(`))
-  if (start === -1) {
-    return file
-  }
-
-  const startDepth = countIndentationDepth(lines[start])
-  let end = start + 1
-  while (end < lines.length && startDepth < countIndentationDepth(lines[end])) {
-    end++
-  }
-
-  console.log(end)
-
-  return lines
-    .slice(0, start + 1)
-    .concat(replacement)
-    .concat(lines.slice(end))
-    .join("\n")
-}
-
-const countIndentationDepth = (line: string): number => {
-  if (line.trim() === "") {
-    return Number.MAX_SAFE_INTEGER
-  }
-  return line.search(/\S/)
 }
 
 export { resolveImports, resolveTestImports }
