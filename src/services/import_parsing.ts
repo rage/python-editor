@@ -1,5 +1,5 @@
 import { FileEntry } from "../components/ProgrammingExerciseLoader"
-import { patchTmcUtilsPy } from "./test_patching"
+import { patchTmcResultPy, patchTmcUtilsPy } from "./test_patching"
 
 type PythonImportAll = {
   pkg: string
@@ -31,6 +31,8 @@ const resolveTestImports = (
 ): string => {
   const files = tmcFiles.map((x) => {
     switch (x.shortName) {
+      case "result.py":
+        return { ...x, content: patchTmcResultPy(x.content) }
       case "utils.py":
         return { ...x, content: patchTmcUtilsPy(x.content) }
       default:
@@ -38,34 +40,28 @@ const resolveTestImports = (
     }
   })
 
-  const wrapped = wrap(
-    `
+  const template = `
 __code = """
 ${code}
 """
 _stdout_pointer = 0
 ${test.content}
-`,
-    [test.shortName],
-    files,
-  )
 
-  const lines = wrapped.split("\n")
-  return lines
-    .slice(0, lines.length - 6)
-    .concat(
-      `
 testOutput = ""
-import io, contextlib
+results = []
+from tmc.runner import TMCTestRunner
+
+import io, json, contextlib
 from unittest import TextTestRunner
 test_suite = unittest.TestLoader().loadTestsFromTestCase(HymioTest)
 with io.StringIO() as buf:
     with contextlib.redirect_stdout(buf):
-        TextTestRunner(stream=buf).run(test_suite)
-    testOutput = buf.getvalue()
-`,
-    )
-    .join("\n")
+        TMCTestRunner(stream=buf).run(test_suite)
+    testOutput = json.dumps(results, ensure_ascii=False)
+`
+  console.log(template)
+  const wrapped = wrap(template, [test.shortName], files)
+  return wrapped
 }
 
 const wrap = (
@@ -164,13 +160,13 @@ const parseImportAll = (line: string): PythonImportAll => {
 const parseImportSome = (line: string): PythonImportSome => {
   let pkg: string
   let names: Array<string>
-  const importMatches = line.match(/^from \.(w+) import ([\w,\s]+$)/)
+  const importMatches = line.match(/^from \.(\w+) import ([\w,\s]+)/)
   if (importMatches) {
     pkg = importMatches[1]
     names = importMatches[2].split(",").map((s) => s.trim())
     return { pkg, names }
   }
-  throw "Malformed import statement"
+  throw `Malformed import statement: ${line}`
 }
 
 const getContentByShortName = (name: string, fileSet: Array<FileEntry>) => {

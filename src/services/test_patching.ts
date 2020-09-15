@@ -6,8 +6,29 @@ const DEF_LOAD_MODULE = `\
 `
 
 const DEF_RELOAD_MODULE = `\
+    _stdout_pointer = len(sys.stdout.getvalue())
     return load_module("editorcontent")
 `
+
+const patchTmcResultPy = (code: string): string => {
+  let lines = code.split("\n")
+  let i = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+    if (line.trimStart().startsWith("def addResult")) {
+      lines = lines
+        .slice(0, i + 1)
+        .concat("        global results")
+        .concat(lines.slice(i + 1))
+      i += 2
+    } else {
+      i++
+    }
+  }
+
+  return lines.join("\n")
+}
 
 const patchTmcUtilsPy = (code: string): string => {
   let lines = code.split("\n")
@@ -59,4 +80,4 @@ const countIndentationDepth = (line: string): number => {
   return line.search(/\S/)
 }
 
-export { patchTmcUtilsPy }
+export { patchTmcResultPy, patchTmcUtilsPy }
