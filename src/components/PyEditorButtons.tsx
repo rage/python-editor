@@ -12,6 +12,7 @@ const StyledButton = styled((props) => (
 
 type PyEditorButtonsProps = {
   allowRun?: boolean
+  allowTest?: boolean
   editorState: EditorState
   handleRun: (code?: string) => void
   handleStop: () => void
@@ -21,6 +22,7 @@ type PyEditorButtonsProps = {
 
 const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
   allowRun = true,
+  allowTest = false,
   editorState,
   handleRun,
   handleStop,
@@ -52,7 +54,7 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
       )}
       <StyledButton
         onClick={() => handleTests()}
-        disabled={editorState !== EditorState.Idle}
+        disabled={!allowTest || editorState !== EditorState.Idle}
       >
         Test
       </StyledButton>

@@ -148,7 +148,10 @@ function test(code) {
         .then(() => pyodide.runPythonAsync(code))
         .then(() => {
           console.log("running pyodide completed")
-          console.log(pyodide.globals.testOutput)
+          postMessage({
+            type: "test_results",
+            msg: JSON.parse(pyodide.globals.testOutput),
+          })
           postMessage({ type: "ready" })
         })
     })
@@ -158,64 +161,6 @@ function test(code) {
     })
     .finally(() => (running = false))
 }
-
-const defaultTest = `
-import unittest
-import StringIO
-import sys
-
-def hello():
-    print('Hello world!')
-
-def points(*args):
-    def jsonify_arr(arr):
-        return str(arr).replace("'", '"')
-
-    def wrapper(fn):
-        print('Points: {"name": "{}", "points": {}}'.format(fn.__name__, jsonify_arr(list(args))))
-        return fn
-    return wrapper
-
-class TestStringMethods(unittest.TestCase):
-
-    @points('1.1')
-    def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-
-    @points('1.2')
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
-
-class TestOtherThings(unittest.TestCase):
-
-    @points('2.1')
-    def test_failing(self):
-        self.assertEqual('foobar', 'foo')
-
-    @points('2.2')
-    def test_hello(self):
-        sys.stdout = StringIO.StringIO()
-        hello()
-        output = sys.stdout.getvalue().strip()
-        sys.stdout = sys.__stdout__
-
-        self.assertEqual(output, 'Hello world!')
-
-@points('3.1', '3.2')
-class TestClassPoints(unittest.TestCase):
-    
-    def test_true(self):
-        self.assertEqual('foo', 'foo')
-
-    def test_trueagain(self):
-        self.assertEqual('foo', 'foo')
-    
-if __name__ == '__main__':
-    # Running tests requires verbosity > 1 at the moment 
-    # Make sure to run with command unittest.main(2) or equal
-    unittest.main(2)
-`
 
 self.onmessage = function (e) {
   const { type, msg } = e.data

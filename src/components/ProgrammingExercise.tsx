@@ -28,6 +28,7 @@ import PyEditorButtons from "./PyEditorButtons"
 import OutputTitle from "./OutputTitle"
 import OutputContent from "./OutputContent"
 import { resolveTestImports } from "../services/import_parsing"
+import { parseTestCases } from "../services/test_parsing"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -161,16 +162,13 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       }
     } else if (type === "print_done") {
       setEditorState(EditorState.Idle)
-    } else if (type === "testResults") {
+    } else if (type === "test_results") {
       console.log("[TEST RESULTS]", msg)
-      const results = msg.map((result: any) => ({
-        id: uuid(),
-        testName: result.testName,
-        passed: result.passed,
-        feedback: result.feedback || null,
-        points: result.points,
-      }))
-      setTestResults(results)
+      setOutput([])
+      setTestResults({
+        points: [],
+        testCases: parseTestCases(msg),
+      })
     }
   })
 
@@ -274,16 +272,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     setOpenNotification(false)
   }
 
-  /*
-  const runTests = () => {
-    console.log("Running tests")
-    setOutput([])
-    setRunning(true)
-    setTesting(true)
-    worker.postMessage({ type: "runTests" })
-  }
-  */
-
   const ieOrEdge =
     window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
 
@@ -350,6 +338,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       )}
       <PyEditorButtons
         allowRun={workerAvailable}
+        allowTest={testFiles.length > 0 && tmcFiles.length > 0}
         editorState={editorState}
         handleRun={handleRun}
         handleStop={stopWorker}
@@ -379,7 +368,8 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       <AnimatedOutputBox
         isRunning={
           editorState === EditorState.Running ||
-          editorState === EditorState.RunningWaitingInput
+          editorState === EditorState.RunningWaitingInput ||
+          editorState === EditorState.Testing
         }
         outputHeight={outputHeight}
         outputPosition={outputPosition}
@@ -406,9 +396,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           />
         </Grid>
       </AnimatedOutputBox>
-      {/* <div>
+      {/* {<div>
         {EditorState[editorState]}
-      </div> */}
+      </div>} */}
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}
