@@ -6,6 +6,7 @@ const DEF_LOAD_MODULE = `\
 `
 
 const DEF_RELOAD_MODULE = `\
+    global _stdout_pointer
     _stdout_pointer = len(sys.stdout.getvalue())
     return load_module("editorcontent")
 `

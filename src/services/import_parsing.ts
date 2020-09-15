@@ -45,7 +45,10 @@ __code = """
 ${code}
 """
 _stdout_pointer = 0
-${test.content}
+${test.content.replaceAll(
+  /\w+Test\(unittest.TestCase\)/g,
+  "PythonEditorTest(unittest.TestCase)",
+)}
 
 testOutput = ""
 results = []
@@ -53,7 +56,7 @@ from tmc.runner import TMCTestRunner
 
 import io, json, contextlib
 from unittest import TextTestRunner
-test_suite = unittest.TestLoader().loadTestsFromTestCase(HymioTest)
+test_suite = unittest.TestLoader().loadTestsFromTestCase(PythonEditorTest)
 with io.StringIO() as buf:
     with contextlib.redirect_stdout(buf):
         TMCTestRunner(stream=buf).run(test_suite)
