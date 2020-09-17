@@ -32,21 +32,26 @@ const resolveTestImports = (
   tmcFiles: FileEntry[],
 ): string => {
   const files = tmcFiles.map((x) => {
+    let content = removeRelativeTmcImports(x.content)
     switch (x.shortName) {
-      case "result.py":
-        return { ...x, content: patchTmcResultPy(x.content) }
       case "utils.py":
-        return { ...x, content: patchTmcUtilsPy(x.content) }
+        return { ...x, content: patchTmcUtilsPy(content, Base64.encode(code)) }
       default:
-        return x
+        return { ...x, content }
     }
   })
 
+  const tempHelpTmcEncode = (fileName: string) => {
+    const file = files.find((x) => x.shortName === fileName) as FileEntry
+    const wrapped = wrap(file.content, [file.shortName], tmcFiles)
+    console.log(fileName, wrapped)
+    return Base64.encode(wrapped)
+  }
+
   const template = `
-import base64, importlib
+import sys, base64, importlib
 from types import ModuleType
 
-__code = "${Base64.encode(code)}"
 _stdout_pointer = 0
 
 def __wrap_import(module_name, code_b64):
@@ -55,14 +60,19 @@ def __wrap_import(module_name, code_b64):
     code = base64.b64decode(code_b64).decode("utf-8")
     exec(code, mod.__dict__)
 
+__wrap_import("tmc_points", "${tempHelpTmcEncode("points.py")}")
+__wrap_import("tmc_result", "${tempHelpTmcEncode("result.py")}")
+__wrap_import("tmc_runner", "${tempHelpTmcEncode("runner.py")}")
+__wrap_import("tmc_utils", "${tempHelpTmcEncode("utils.py")}")
+
 ${test.content.replaceAll(
   /\w+Test\(unittest.TestCase\)/g,
   "PythonEditorTest(unittest.TestCase)",
 )}
 
 testOutput = ""
-results = []
 from tmc.runner import TMCTestRunner
+from tmc.result import results
 
 import io, json, contextlib
 from unittest import TextTestRunner
@@ -84,7 +94,7 @@ const wrap = (
 ) => {
   const importAllPattern = /^import \./
   const importSomePattern = /^from \.\w+ import/
-  const importTmcPattern = /^from tmc\.?\w* import/
+  const importTmcPattern = /^from tmc\.?[a-zA-Z0-9]* import/
   const sourceLines = source.split("\n")
   const lines = sourceLines.map((line, num) => {
     if (line.match(importAllPattern)) {
@@ -99,11 +109,30 @@ const wrap = (
       )
     }
     if (line.match(importTmcPattern)) {
-      return replaceImportTmc(line, num, presentlyImported, files)
+      return replaceImportTmc(line)
     }
     return line
   })
   return lines.join("\n")
+}
+
+const removeRelativeTmcImports = (source: string): string => {
+  const lines = source.split("\n")
+  return lines
+    .map((line) => {
+      let match = line.match(/^import \.(\w+)/)
+      if (match) {
+        return `import tmc_${match[1]}`
+      }
+
+      match = line.match(/^from \.(\w+) import ([\w,\s]+)/)
+      if (match) {
+        return `from tmc_${match[1]} import ${match[2]}`
+      }
+
+      return line
+    })
+    .join("\n")
 }
 
 const replaceImportAll = (
@@ -188,35 +217,21 @@ const getContentByShortName = (name: string, fileSet: Array<FileEntry>) => {
   return fileSet.filter(({ shortName }) => shortName === name)[0].content
 }
 
-const replaceImportTmc = (
-  line: string,
-  lineNumber: number,
-  presentlyImported: Array<string>,
-  files: Array<FileEntry>,
-): string => {
+const replaceImportTmc = (line: string): string => {
   const importMatches = line.match(/^from tmc import ([\w,\s]+)/)
   if (importMatches) {
     return importMatches[1]
       .split(",")
-      .map((pkg) =>
-        replaceImportAll({ pkg: pkg.trim() }, presentlyImported, files),
-      )
+      .map((pkg) => `from tmc_${pkg.trim()} import ${pkg.trim()}`)
       .join("\n")
   }
 
   const importMatches2 = line.match(/from tmc\.(\w+) import ([\w,\s]+)/)
   if (importMatches2) {
-    const pkg = importMatches2[1]
-    const names = importMatches2[2].split(",").map((x) => x.trim())
-    return replaceImportSome(
-      { pkg, names },
-      lineNumber,
-      presentlyImported,
-      files,
-    )
+    return `from tmc_${importMatches2[1]} import ${importMatches2[2]}`
   }
 
-  throw "Malformed import statement"
+  throw `Malformed import statement: ${line}`
 }
 
 export { resolveImports, resolveTestImports }

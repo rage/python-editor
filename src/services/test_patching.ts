@@ -1,5 +1,11 @@
-const DEF_LOAD_MODULE = `\
-    return __wrap_import("editorcontent", __code)
+const DEF_LOAD_MODULE = (code: string): string => `\
+    from types import ModuleType
+    import base64
+    global __code
+    mod = ModuleType("editorcontent")
+    code = base64.b64decode("${code}").decode("utf-8")
+    exec(code, mod.__dict__)
+    return mod
 `
 
 const DEF_RELOAD_MODULE = `\
@@ -8,8 +14,8 @@ const DEF_RELOAD_MODULE = `\
     return load_module("editorcontent")
 `
 
-const patchTmcResultPy = (code: string): string => {
-  let lines = code.split("\n")
+const patchTmcResultPy = (source: string): string => {
+  let lines = source.split("\n")
   let i = 0
 
   while (i < lines.length) {
@@ -28,15 +34,16 @@ const patchTmcResultPy = (code: string): string => {
   return lines.join("\n")
 }
 
-const patchTmcUtilsPy = (code: string): string => {
-  let lines = code.split("\n")
+const patchTmcUtilsPy = (source: string, editorCode: string): string => {
+  let lines = source.split("\n")
   let i = 0
 
   while (i < lines.length) {
     const line = lines[i]
     if (line.startsWith("def load_module")) {
       const blockEnd = findBlockEnd(lines, i)
-      const newBlock = DEF_LOAD_MODULE.split("\n")
+      const body = DEF_LOAD_MODULE(editorCode)
+      const newBlock = body.split("\n")
       lines = replaceLines(lines, i + 1, blockEnd, newBlock)
       i += newBlock.length
     } else if (line.startsWith("def reload_module")) {
