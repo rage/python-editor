@@ -1,3 +1,5 @@
+import { Base64 } from "js-base64"
+
 import { FileEntry } from "../components/ProgrammingExerciseLoader"
 import { patchTmcResultPy, patchTmcUtilsPy } from "./test_patching"
 
@@ -41,10 +43,18 @@ const resolveTestImports = (
   })
 
   const template = `
-__code = """
-${code}
-"""
+import base64, importlib
+from types import ModuleType
+
+__code = "${Base64.encode(code)}"
 _stdout_pointer = 0
+
+def __wrap_import(module_name, code_b64):
+    mod = ModuleType(module_name)
+    sys.modules[module_name] = mod
+    code = base64.b64decode(code_b64).decode("utf-8")
+    exec(code, mod.__dict__)
+
 ${test.content.replaceAll(
   /\w+Test\(unittest.TestCase\)/g,
   "PythonEditorTest(unittest.TestCase)",

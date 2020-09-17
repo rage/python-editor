@@ -1,8 +1,5 @@
 const DEF_LOAD_MODULE = `\
-    from types import ModuleType
-    mod = ModuleType("editorcontent")
-    exec(__code, mod.__dict__)
-    return mod
+    return __wrap_import("editorcontent", __code)
 `
 
 const DEF_RELOAD_MODULE = `\
