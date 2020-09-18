@@ -157,8 +157,6 @@ const App = () => {
           <ProgrammingExercise
             editorHeight={height}
             outputHeight={outputHeight}
-            testFiles={[]}
-            tmcFiles={[]}
           />
         </I18nextProvider>
       )}

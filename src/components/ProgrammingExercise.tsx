@@ -27,8 +27,8 @@ import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
 import PyEditorButtons from "./PyEditorButtons"
 import OutputTitle from "./OutputTitle"
 import OutputContent from "./OutputContent"
-import { resolveTestImports } from "../services/import_parsing"
 import { parseTestCases } from "../services/test_parsing"
+import { createWebEditorModuleSource } from "../services/patch_exercise"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -40,8 +40,7 @@ type ProgrammingExerciseProps = {
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
-  testFiles: Array<FileEntry>
-  tmcFiles: Array<FileEntry>
+  testSource?: string
   signedIn: boolean
   editorHeight?: string
   outputHeight?: string
@@ -79,8 +78,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitProgrammingExercise,
   submitToPaste,
   initialFiles,
-  testFiles,
-  tmcFiles,
+  testSource,
   signedIn,
   editorHeight,
   outputHeight,
@@ -119,14 +117,15 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   function handleTests(code?: string) {
     if (workerAvailable) {
+      const msg = `
+__webeditor_module_source = ${createWebEditorModuleSource(code ?? editorValue)}
+${testSource}
+`
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
       setEditorState(EditorState.Testing)
-      worker.postMessage({
-        type: "run_tests",
-        msg: resolveTestImports(code ?? editorValue, testFiles[1], tmcFiles),
-      })
+      worker.postMessage({ type: "run_tests", msg })
     } else {
       console.log("Worker is busy")
     }
@@ -338,7 +337,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       )}
       <PyEditorButtons
         allowRun={workerAvailable}
-        allowTest={testFiles.length > 0 && tmcFiles.length > 0}
+        allowTest={!!testSource}
         editorState={editorState}
         handleRun={handleRun}
         handleStop={stopWorker}

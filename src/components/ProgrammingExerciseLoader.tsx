@@ -14,6 +14,7 @@ import { useTime } from "../hooks/customHooks"
 import { DateTime } from "luxon"
 import JSZip, { JSZipObject } from "jszip"
 import { Result } from "ts-results"
+import { inlineAndPatchTestSources } from "../services/patch_exercise"
 
 type ProgrammingExerciseLoaderProps = {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
@@ -53,8 +54,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const [t, i18n] = useTranslation()
   const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
-  const [testFiles, setTestFiles] = useState<Array<FileEntry>>([])
-  const [tmcFiles, setTmcFiles] = useState<Array<FileEntry>>([])
+  const [testSource, setTestSource] = useState<string | undefined>()
   const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -115,8 +115,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
 
     const [src, test, tmc] = unzipResult.val
-    setTestFiles(test)
-    setTmcFiles(tmc)
+    setTestSource(inlineAndPatchTestSources(test, tmc))
 
     if (!hasToken) {
       setSrcFiles(src)
@@ -259,8 +258,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     <>
       <ProgrammingExercise
         initialFiles={srcFiles}
-        testFiles={testFiles}
-        tmcFiles={tmcFiles}
+        testSource={testSource}
         submitFeedback={(testResults, feedback) => {
           if (testResults.feedbackAnswerUrl && feedback.length > 0) {
             postExerciseFeedback(testResults, feedback, apiConfig)
