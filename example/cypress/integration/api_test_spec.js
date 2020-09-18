@@ -92,7 +92,7 @@ describe("API Endpoint tests #1", () => {
     })
     cy.contains("hello from python")
     cy.get("[data-cy=submit-btn]").click()
-    cy.contains("Need help?")
+    cy.get("[data-cy=output-container]").contains("Need help?")
     cy.get("[data-cy=need-help-btn]").click()
     cy.contains("TMC Paste")
     cy.get("[data-cy=send-to-paste-btn]").click()
