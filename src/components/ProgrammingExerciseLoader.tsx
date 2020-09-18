@@ -100,7 +100,10 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       apiConfig,
     )
     if (downloadResult.err) {
-      return wrapError(downloadResult.val.status, downloadResult.val.message)
+      setSrcFiles(
+        wrapError(downloadResult.val.status, downloadResult.val.message),
+      )
+      return
     }
 
     const zip = downloadResult.val

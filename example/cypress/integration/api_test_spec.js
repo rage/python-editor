@@ -33,11 +33,11 @@ describe("API Endpoint tests #1", () => {
       url: "/api/v8/core/submissions/7313248/download",
       response: { errors: ["Authentication required"] },
     })
-    cy.route(
-      "GET",
-      `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
-      "",
-    )
+    cy.route({
+      method: "GET",
+      url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      response: "fx:osa01-01_hymio.zip,binary",
+    })
     cy.get("[data-cy=load-btn]").click()
   })
 
@@ -64,7 +64,7 @@ describe("API Endpoint tests #1", () => {
       .type("{shift}{ctrl}{home}{backspace}")
       .type(program)
     cy.get("[data-cy=run-btn]").click()
-    cy.contains("hello from python")
+    cy.get("[data-cy=output-container]").contains("hello from python")
     cy.get("[data-cy=submit-btn]").click()
     cy.contains("Submitting to server")
     cy.contains("0%")
@@ -179,11 +179,11 @@ describe("API Endpoint tests #2", () => {
       url: "/api/v8/core/submissions/7313248/download",
       response: { errors: ["Authentication required"] },
     })
-    cy.route(
-      "GET",
-      `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
-      "",
-    )
+    cy.route({
+      method: "GET",
+      url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      response: "fx:osa01-01_hymio.zip,binary",
+    })
     cy.get("[data-cy=load-btn]").click()
   })
 
