@@ -1,7 +1,7 @@
 import { Base64 } from "js-base64"
 
 import { FileEntry } from "../components/ProgrammingExerciseLoader"
-import { patchTmcResultPy, patchTmcUtilsPy } from "./test_patching"
+import { patchTmcUtilsPy } from "./test_patching"
 
 type PythonImportAll = {
   pkg: string
@@ -35,7 +35,7 @@ const resolveTestImports = (
     let content = removeRelativeTmcImports(x.content)
     switch (x.shortName) {
       case "utils.py":
-        return { ...x, content: patchTmcUtilsPy(content, Base64.encode(code)) }
+        return { ...x, content: patchTmcUtilsPy(content) }
       default:
         return { ...x, content }
     }
@@ -54,16 +54,23 @@ from types import ModuleType
 
 _stdout_pointer = 0
 
-def __wrap_import(module_name, code_b64):
+def __decode(code_b64):
+    return base64.b64decode(code_b64).decode("utf-8")
+
+def __wrap_import(module_name, code):
     mod = ModuleType(module_name)
     sys.modules[module_name] = mod
-    code = base64.b64decode(code_b64).decode("utf-8")
     exec(code, mod.__dict__)
 
-__wrap_import("tmc_points", "${tempHelpTmcEncode("points.py")}")
-__wrap_import("tmc_result", "${tempHelpTmcEncode("result.py")}")
-__wrap_import("tmc_runner", "${tempHelpTmcEncode("runner.py")}")
-__wrap_import("tmc_utils", "${tempHelpTmcEncode("utils.py")}")
+__wrap_import("webeditor", """
+import base64
+code = base64.b64decode("${Base64.encode(code)}").decode("utf-8")
+""")
+
+__wrap_import("tmc_points", __decode("${tempHelpTmcEncode("points.py")}"))
+__wrap_import("tmc_result", __decode("${tempHelpTmcEncode("result.py")}"))
+__wrap_import("tmc_runner", __decode("${tempHelpTmcEncode("runner.py")}"))
+__wrap_import("tmc_utils", __decode("${tempHelpTmcEncode("utils.py")}"))
 
 ${test.content.replaceAll(
   /\w+Test\(unittest.TestCase\)/g,
