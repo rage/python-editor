@@ -74,7 +74,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
 
   useEffect(() => {
     scrollToBottom()
-    if (editorState === EditorState.RunningWaitingInput) focusOnInputField()
+    if (editorState === EditorState.WaitingInput) focusOnInputField()
   }, [editorState, outputContent])
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
   }, [testResults])
 
   const keyPressOnInput = (e: any) => {
-    if (e.key === "Enter" && editorState === EditorState.RunningWaitingInput) {
+    if (e.key === "Enter" && editorState === EditorState.WaitingInput) {
       sendInput(e.target.value)
     }
   }
@@ -112,7 +112,7 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
       <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
         {showOutput()}
       </pre>
-      {editorState === EditorState.RunningWaitingInput && (
+      {editorState === EditorState.WaitingInput && (
         <TextField
           inputRef={userInputFieldRef}
           label={t("enterInputAndPressEnter")}

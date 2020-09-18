@@ -2,7 +2,7 @@ import React from "react"
 import styled from "styled-components"
 import { Button } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
+import { faEye, faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
 import { useTranslation } from "react-i18next"
 import { EditorState } from "../types"
 
@@ -33,16 +33,10 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
 
   return (
     <>
-      {editorState !== EditorState.Running &&
-      editorState !== EditorState.RunningWaitingInput ? (
+      {(editorState & EditorState.WorkerActive) === 0 ? (
         <StyledButton
           onClick={() => handleRun()}
-          disabled={
-            editorState === EditorState.Initializing ||
-            !allowRun ||
-            editorState === EditorState.Submitting ||
-            editorState === EditorState.SubmittingToPaste
-          }
+          disabled={!allowRun}
           data-cy="run-btn"
         >
           <FontAwesomeIcon color="#32CD32" icon={faPlay} />
@@ -52,11 +46,8 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
           <FontAwesomeIcon color="#B40A0A" icon={faStop} />
         </StyledButton>
       )}
-      <StyledButton
-        onClick={() => handleTests()}
-        disabled={!allowTest || editorState !== EditorState.Idle}
-      >
-        Test
+      <StyledButton onClick={() => handleTests()} disabled={!allowTest}>
+        <FontAwesomeIcon color="#ED9410" icon={faEye} />
       </StyledButton>
       {solutionUrl && (
         <StyledButton

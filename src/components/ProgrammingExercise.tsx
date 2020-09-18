@@ -105,7 +105,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
-      setEditorState(EditorState.Running)
+      setEditorState(EditorState.ExecutingCode)
       worker.postMessage({
         type: "run",
         msg: remove_fstrings(code ? code : editorValue),
@@ -136,7 +136,7 @@ ${testSource}
     if (type === "print") {
       setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
     } else if (type === "input_required") {
-      setEditorState(EditorState.RunningWaitingInput)
+      setEditorState(EditorState.WaitingInput)
     } else if (type === "error") {
       console.log(msg)
       if (msg.includes("bad token T_OP")) {
@@ -151,7 +151,7 @@ ${testSource}
     } else if (type === "ready") {
       setWorkerAvailable(true)
     } else if (type === "print_batch") {
-      if (editorState === EditorState.Running) {
+      if (editorState === EditorState.ExecutingCode) {
         const prints = msg.map((text: string) => ({
           id: uuid(),
           type: "output",
@@ -172,8 +172,8 @@ ${testSource}
   })
 
   const sendInput = (input: string) => {
-    if (editorState === EditorState.RunningWaitingInput) {
-      setEditorState(EditorState.Running)
+    if (editorState === EditorState.WaitingInput) {
+      setEditorState(EditorState.ExecutingCode)
       setOutput(
         output.concat({ id: uuid(), type: "input", text: `${input}\n` }),
       )
@@ -336,8 +336,12 @@ ${testSource}
         </OverlayCenterWrapper>
       )}
       <PyEditorButtons
-        allowRun={workerAvailable}
-        allowTest={!!testSource}
+        allowRun={
+          workerAvailable && (editorState & EditorState.WorkerActive) === 0
+        }
+        allowTest={
+          !!testSource && (editorState & EditorState.WorkerActive) === 0
+        }
         editorState={editorState}
         handleRun={handleRun}
         handleStop={stopWorker}
@@ -365,11 +369,7 @@ ${testSource}
         }
       />
       <AnimatedOutputBox
-        isRunning={
-          editorState === EditorState.Running ||
-          editorState === EditorState.RunningWaitingInput ||
-          editorState === EditorState.Testing
-        }
+        isRunning={(editorState & EditorState.WorkerActive) > 0}
         outputHeight={outputHeight}
         outputPosition={outputPosition}
         ref={outputBoxRef}

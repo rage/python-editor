@@ -97,7 +97,7 @@ describe("API Endpoint tests #1", () => {
     cy.contains("TMC Paste")
     cy.get("[data-cy=send-to-paste-btn]").click()
     cy.get("[data-cy=copy-text-btn]").click()
-    cy.contains("Copied!")
+    cy.get("[data-cy=output-container]").contains("Copied!")
   })
 
   it("solve exercise correctly gives points, congratulates, feedback form, model solution", () => {
