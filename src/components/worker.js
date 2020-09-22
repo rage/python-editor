@@ -70,6 +70,25 @@ const handleTestOutput = (text) => {
 
 let prevDate = null
 
+/**
+ * Python print alias when running with Pyodide. include lines
+ * `from js import print` and `__builtins__.print = print` to use.
+ */
+function print(...args) {
+  const kwargs = args.pop()
+  console.log(args, kwargs)
+  const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
+  printBuffer.push(text)
+  const newDate = Date.now()
+  if (newDate - prevDate > 50) {
+    postMessage({
+      type: "print_batch",
+      msg: printBuffer.splice(0, batchSize),
+    })
+    prevDate = newDate
+  }
+}
+
 function outf(text) {
   if (testing) {
     handleTestOutput(text)
