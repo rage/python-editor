@@ -171,12 +171,17 @@ const patchTmcUtilsPy = (source: string): string => {
     from types import ModuleType
     from tmc_webeditor import code
     mod = ModuleType("editorcontent")
-    exec(code, mod.__dict__)
+    try:
+        exec(code, mod.__dict__)
+    except Exception:
+        return AssertionError("Failed to run code.")
     return mod
 `
 
   const defReloadModule = `\
     global _stdout_pointer
+    if isinstance(module, AssertionError):
+        raise module
     _stdout_pointer = len(sys.stdout.getvalue())
     return load_module("editorcontent")
 `

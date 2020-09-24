@@ -173,6 +173,10 @@ function test(code) {
           })
           postMessage({ type: "ready" })
         })
+        .catch((e) => {
+          printBuffer = []
+          printBuffer.push({ type: "error", msg: e.toString() })
+        })
     })
     .catch((e) => {
       printBuffer = []
