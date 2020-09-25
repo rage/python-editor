@@ -20,13 +20,17 @@ interface Message {
   msg?: any
 }
 
+console.log("Creating first worker")
+let nextWorker = new Worker(blobObject)
+
 const useWorker = () => {
   const [worker, setWorker] = useState<Worker | undefined>()
   const [messageBuffer, setMessageBuffer] = useState<Array<Message>>([])
 
   const createWorker = () => {
-    console.log("Creating worker")
-    const w = new Worker(blobObject)
+    const w = nextWorker
+    console.log("Creating another worker")
+    nextWorker = new Worker(blobObject)
     setWorker(w)
   }
 
