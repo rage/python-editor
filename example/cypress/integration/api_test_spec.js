@@ -37,8 +37,9 @@ describe("API Endpoint tests #1", () => {
       method: "GET",
       url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
       response: "fx:osa01-01_hymio.zip,binary",
-    })
+    }).as("getExercise")
     cy.get("[data-cy=load-btn]").click()
+    cy.wait("@getExercise")
   })
 
   it("should not have sign-in warning", () => {
@@ -97,7 +98,7 @@ describe("API Endpoint tests #1", () => {
     cy.contains("TMC Paste")
     cy.get("[data-cy=send-to-paste-btn]").click()
     cy.get("[data-cy=copy-text-btn]").click()
-    cy.get("[data-cy=output-container]").contains("Copied!")
+    cy.contains("Copied!")
   })
 
   it("solve exercise correctly gives points, congratulates, feedback form, model solution", () => {
