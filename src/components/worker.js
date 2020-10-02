@@ -5,6 +5,7 @@ let intervalId = null
 const batchSize = 50
 let running = false
 let testing = false
+let inputBuffer = undefined
 
 // used to check if a control message "input_required" has been appended to buffer
 const checkForMsg = () => {
@@ -89,6 +90,33 @@ function print(...args) {
   }
 }
 
+function request_input() {
+  inputBuffer = undefined
+  postMessage({ type: "input_required" })
+}
+
+function fetch_input() {
+  let val = inputBuffer
+  inputBuffer = undefined
+  return val
+}
+
+async function inputPromise(...args) {
+  printBuffer.push({ type: "input_required" })
+  return new Promise((resolve, reject) => {
+    self.addEventListener("message", function (e) {
+      if (e.data.type === "input") {
+        resolve(e.data.msg)
+        self.Sk.execStart = new Date()
+      }
+    })
+  })
+}
+
+async function wait(ms) {
+  await new Promise((res) => setTimeout(res, ms))
+}
+
 function outf(text) {
   if (testing) {
     handleTestOutput(text)
@@ -114,47 +142,81 @@ function builtinRead(x) {
   return Sk.builtinFiles["files"][x]
 }
 
+function end() {
+  postMessage({ type: "ready" })
+  running = false
+}
+
 function run(code) {
   if (!code || code.length === 0) return
-  self.Sk.execLimit = 7500
-  self.Sk.inputfun = function () {
-    printBuffer.push({ type: "input_required" })
-    return new Promise((resolve, reject) => {
-      self.addEventListener("message", function (e) {
-        if (e.data.type === "input") {
-          resolve(e.data.msg)
-          self.Sk.execStart = new Date()
-        }
-      })
-    })
-  }
-  self.Sk.configure({
-    output: outf,
-    read: builtinRead,
-    __future__: self.Sk.python3,
-  })
 
-  self.Sk.misceval
-    .asyncToPromise(function () {
-      return self.Sk.importMainWithBody("<stdin>", false, code, true)
-    })
-    .then((e) => {
-      console.log("running skulpt completed")
-      if (testing) {
-        postMessage({ type: "testResults", msg: testResults })
-        testResults = []
-        testPoints = []
-      }
-      postMessage({ type: "ready" })
+  // Async function workaround for input by Andreas Klostermann
+  // https://github.com/akloster/aioweb-demo/blob/master/src/main.py
+  code = `
+from functools import partial
+from js import print, inputPromise, wait, end
+__builtins__.print = print
+
+class WrappedPromise:
+    def __init__(self, promise):
+        self.promise = promise
+    def __await__(self):
+        x = yield self.promise
+        return x
+
+def input(*args):
+    print(args)
+    return WrappedPromise(inputPromise())
+__builtins__.input = input
+
+class PromiseException(RuntimeError):
+    pass
+
+class WebLoop:
+    def __init__(self):
+        self.coros = []
+    def call_soon(self, coro):
+        self.step(coro)
+    def step(self, coro, arg=None):
+        try:
+            x = coro.send(arg)
+            x = x.then(partial(self.step, coro))
+            x.catch(partial(self.fail,coro))
+        except StopIteration as result:
+            pass
+
+    def fail(self, coro,arg=None):
+        try:
+            coro.throw(PromiseException(arg))
+        except StopIteration:
+            pass
+
+async def task():
+${code
+  .replaceAll(/input/g, "await input")
+  .split("\n")
+  .map((x) => `    ${x}`)
+  .join("\n")}
+    end()
+
+loop = WebLoop()
+loop.call_soon(task())
+`
+  console.log(code)
+
+  languagePluginLoader
+    .then(() => {
+      pyodide
+        .loadPackage()
+        .then(() => pyodide.runPythonAsync(code))
+        .catch((e) => {
+          printBuffer = []
+          printBuffer.push({ type: "error", msg: e.toString() })
+        })
     })
     .catch((e) => {
-      console.log(e)
       printBuffer = []
       printBuffer.push({ type: "error", msg: e.toString() })
-    })
-    .finally(() => {
-      running = false
-      testing = false
     })
 }
 
@@ -200,5 +262,7 @@ self.onmessage = function (e) {
     printBuffer = []
     console.log(msg)
     test(msg)
+  } else if (type === "input") {
+    inputBuffer = msg
   }
 }

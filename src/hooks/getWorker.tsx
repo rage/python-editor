@@ -7,12 +7,9 @@ import {
 } from "../constants"
 
 const blobObject = URL.createObjectURL(
-  new Blob(
-    [skulptMinJsSource, skulptStdlibJsSource, pyodideJsSource, workerJsSource],
-    {
-      type: "application/javascript",
-    },
-  ),
+  new Blob([pyodideJsSource, workerJsSource], {
+    type: "application/javascript",
+  }),
 )
 
 interface Message {
