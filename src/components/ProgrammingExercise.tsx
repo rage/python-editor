@@ -162,11 +162,12 @@ ${testSource}
     } else if (type === "print_done") {
       setEditorState(EditorState.Idle)
     } else if (type === "test_results") {
-      console.log("[TEST RESULTS]", msg)
+      const testCases = parseTestCases(msg)
       setOutput([])
       setTestResults({
+        allTestsPassed: testCases.every((x) => x.passed),
         points: [],
-        testCases: parseTestCases(msg),
+        testCases,
       })
     }
   })
