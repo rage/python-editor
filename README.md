@@ -13,3 +13,12 @@ To install the project, follow these steps:
 ## Running the project
 
 To run the project after installing it, go to the `example` directory and run `npm run start`.
+
+## License
+
+This project is licensed under either of
+
+- Apache License, Version 2.0, ([LICENSE](LICENSE) or https://www.apache.org/licenses/LICENSE-2.0)
+- MIT license, ([LICENSE-MIT](LICENSE-MIT) or https://opensource.org/licenses/MIT)
+
+at your option.
