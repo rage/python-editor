@@ -120,7 +120,6 @@ ${code
   .join("\n")}
     pass
 
-import traceback
 from functools import partial
 from js import print, inputPromise, wait, exit
 
