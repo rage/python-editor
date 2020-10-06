@@ -1,11 +1,7 @@
-self.languagePluginUrl = "https://pyodide.cdn.iodide.io/"
-
 let printBuffer = []
 let intervalId = null
 const batchSize = 50
 let running = false
-let testing = false
-let inputBuffer = undefined
 
 // used to check if a control message "input_required" has been appended to buffer
 const checkForMsg = () => {
@@ -90,24 +86,12 @@ function print(...args) {
   }
 }
 
-function request_input() {
-  inputBuffer = undefined
-  postMessage({ type: "input_required" })
-}
-
-function fetch_input() {
-  let val = inputBuffer
-  inputBuffer = undefined
-  return val
-}
-
-async function inputPromise(...args) {
+async function inputPromise() {
   printBuffer.push({ type: "input_required" })
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     self.addEventListener("message", function (e) {
       if (e.data.type === "input") {
         resolve(e.data.msg)
-        self.Sk.execStart = new Date()
       }
     })
   })
@@ -117,32 +101,7 @@ async function wait(ms) {
   await new Promise((res) => setTimeout(res, ms))
 }
 
-function outf(text) {
-  if (testing) {
-    handleTestOutput(text)
-  } else {
-    printBuffer.push(text)
-    const newDate = Date.now()
-    if (newDate - prevDate > 50) {
-      postMessage({
-        type: "print_batch",
-        msg: printBuffer.splice(0, batchSize),
-      })
-      prevDate = newDate
-    }
-  }
-}
-
-function builtinRead(x) {
-  if (
-    self.Sk.builtinFiles === undefined ||
-    self.Sk.builtinFiles["files"][x] === undefined
-  )
-    throw "File not found: '" + x + "'"
-  return Sk.builtinFiles["files"][x]
-}
-
-function end() {
+function exit() {
   postMessage({ type: "ready" })
   running = false
 }
@@ -152,10 +111,18 @@ function run(code) {
 
   // Async function workaround for input by Andreas Klostermann
   // https://github.com/akloster/aioweb-demo/blob/master/src/main.py
-  code = `
+  code = `\
+async def execute():
+${code
+  .replaceAll(/input/g, "await input")
+  .split("\n")
+  .map((x) => `    ${x}`)
+  .join("\n")}
+    pass
+
+import traceback
 from functools import partial
-from js import print, inputPromise, wait, end
-__builtins__.print = print
+from js import print, inputPromise, wait, exit
 
 class WrappedPromise:
     def __init__(self, promise):
@@ -164,10 +131,10 @@ class WrappedPromise:
         x = yield self.promise
         return x
 
-def input(*args):
-    print(args)
+def input(prompt=None):
+    if prompt:
+        print(prompt, end="")
     return WrappedPromise(inputPromise())
-__builtins__.input = input
 
 class PromiseException(RuntimeError):
     pass
@@ -191,16 +158,15 @@ class WebLoop:
         except StopIteration:
             pass
 
-async def task():
-${code
-  .replaceAll(/input/g, "await input")
-  .split("\n")
-  .map((x) => `    ${x}`)
-  .join("\n")}
-    end()
+async def wrap_execution():
+    try:
+        await execute()
+    except Exception as e:
+        print(e)
+    exit()
 
 loop = WebLoop()
-loop.call_soon(task())
+loop.call_soon(wrap_execution())
 `
   console.log(code)
 
@@ -212,11 +178,13 @@ loop.call_soon(task())
         .catch((e) => {
           printBuffer = []
           printBuffer.push({ type: "error", msg: e.toString() })
+          exit()
         })
     })
     .catch((e) => {
       printBuffer = []
       printBuffer.push({ type: "error", msg: e.toString() })
+      exit()
     })
 }
 
@@ -262,7 +230,5 @@ self.onmessage = function (e) {
     printBuffer = []
     console.log(msg)
     test(msg)
-  } else if (type === "input") {
-    inputBuffer = msg
   }
 }

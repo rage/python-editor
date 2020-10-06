@@ -6,7 +6,7 @@ var languagePluginLoader = new Promise((resolve, reject) => {
   // This is filled in by the Makefile to be either a local file or the
   // deployed location. TODO: This should be done in a less hacky
   // way.
-  var baseURL = self.languagePluginUrl || 'https://pyodide-cdn2.iodide.io/v0.15.0/full/';
+  var baseURL = self.languagePluginUrl || 'https://download.mooc.fi/pyodide-cdn/v0.15.0/';
   baseURL = baseURL.substr(0, baseURL.lastIndexOf('/')) + '/';
 
   ////////////////////////////////////////////////////////////

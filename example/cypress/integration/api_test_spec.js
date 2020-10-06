@@ -142,7 +142,6 @@ describe("API Endpoint tests #1", () => {
       .type(testString)
     cy.get("[data-cy=yes-feedback]").should("not.be.disabled")
     cy.get("[data-cy=no-feedback]").click()
-    cy.get("[data-cy=show-all-results-checkbox]").click()
     cy.get("[data-cy=test-result]").should("have.length", 1)
   })
 

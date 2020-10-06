@@ -173,8 +173,8 @@ const patchTmcUtilsPy = (source: string): string => {
     mod = ModuleType("editorcontent")
     try:
         exec(code, mod.__dict__)
-    except Exception:
-        return AssertionError("Failed to run code.")
+    except Exception as e:
+        return AssertionError(e)
     return mod
 `
 
