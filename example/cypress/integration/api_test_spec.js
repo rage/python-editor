@@ -33,12 +33,13 @@ describe("API Endpoint tests #1", () => {
       url: "/api/v8/core/submissions/7313248/download",
       response: { errors: ["Authentication required"] },
     })
-    cy.route(
-      "GET",
-      `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
-      "",
-    )
+    cy.route({
+      method: "GET",
+      url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      response: "fx:osa01-01_hymio.zip,binary",
+    }).as("getExercise")
     cy.get("[data-cy=load-btn]").click()
+    cy.wait("@getExercise")
   })
 
   it("should not have sign-in warning", () => {
@@ -64,7 +65,7 @@ describe("API Endpoint tests #1", () => {
       .type("{shift}{ctrl}{home}{backspace}")
       .type(program)
     cy.get("[data-cy=run-btn]").click()
-    cy.contains("hello from python")
+    cy.get("[data-cy=output-container]").contains("hello from python")
     cy.get("[data-cy=submit-btn]").click()
     cy.contains("Submitting to server")
     cy.contains("0%")
@@ -92,7 +93,7 @@ describe("API Endpoint tests #1", () => {
     })
     cy.contains("hello from python")
     cy.get("[data-cy=submit-btn]").click()
-    cy.contains("Need help?")
+    cy.get("[data-cy=output-container]").contains("Need help?")
     cy.get("[data-cy=need-help-btn]").click()
     cy.contains("TMC Paste")
     cy.get("[data-cy=send-to-paste-btn]").click()
@@ -141,7 +142,6 @@ describe("API Endpoint tests #1", () => {
       .type(testString)
     cy.get("[data-cy=yes-feedback]").should("not.be.disabled")
     cy.get("[data-cy=no-feedback]").click()
-    cy.get("[data-cy=show-all-results-checkbox]").click()
     cy.get("[data-cy=test-result]").should("have.length", 1)
   })
 
@@ -179,11 +179,11 @@ describe("API Endpoint tests #2", () => {
       url: "/api/v8/core/submissions/7313248/download",
       response: { errors: ["Authentication required"] },
     })
-    cy.route(
-      "GET",
-      `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
-      "",
-    )
+    cy.route({
+      method: "GET",
+      url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      response: "fx:osa01-01_hymio.zip,binary",
+    })
     cy.get("[data-cy=load-btn]").click()
   })
 

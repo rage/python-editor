@@ -31,6 +31,7 @@
   "submissionTookTooLong": "Tehtävän lähettäminen kesti liian kauan.\nVarmistathan, että koodissasi ei ole ikuista silmukkaa.",
   "submitting": "Lähetetään",
   "submittingToServer": "Lähetetään palvelimelle",
+  "testing": "Ajetaan testejä",
   "testResults": "Testien tulokset",
   "testsPassed": "Testejä läpi",
   "thankYouForFeedback": "Kiitos palautteesta!",

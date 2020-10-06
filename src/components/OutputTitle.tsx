@@ -85,12 +85,14 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
 
   const getStatusText = () => {
     switch (editorState) {
-      case EditorState.Running:
+      case EditorState.ExecutingCode:
         return t("running")
-      case EditorState.RunningWaitingInput:
-        return t("waitingForInput")
       case EditorState.Submitting:
         return t("submitting")
+      case EditorState.Testing:
+        return t("testing")
+      case EditorState.WaitingInput:
+        return t("waitingForInput")
       default:
         return null
     }
@@ -98,10 +100,11 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
 
   const getStatusIcon = () => {
     switch (editorState) {
-      case EditorState.RunningWaitingInput:
+      case EditorState.WaitingInput:
         return <FontAwesomeIcon icon={faExclamation} />
-      case EditorState.Running:
+      case EditorState.ExecutingCode:
       case EditorState.Submitting:
+      case EditorState.Testing:
         return <CircularProgress size={25} color="inherit" disableShrink />
       default:
         return null
@@ -132,12 +135,12 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
   }
 
   const running =
-    editorState === EditorState.Running ||
-    editorState === EditorState.RunningWaitingInput
+    editorState === EditorState.ExecutingCode ||
+    editorState === EditorState.WaitingInput
 
   return (
     <OutputTitleBox
-      inputRequested={editorState === EditorState.RunningWaitingInput}
+      inputRequested={editorState === EditorState.WaitingInput}
       container
       item
       direction="row"
@@ -193,7 +196,7 @@ const OutputTitle: React.FunctionComponent<OutputTitleProps> = (props) => {
             variant="contained"
             disabled={
               !allowSubmitting ||
-              editorState === EditorState.Running ||
+              editorState === EditorState.ExecutingCode ||
               editorState === EditorState.RunAborted ||
               editorState === EditorState.Submitting
             }

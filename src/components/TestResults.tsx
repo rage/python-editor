@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import {
@@ -92,6 +92,10 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
   const [t] = useTranslation()
   const [showAll, setShowAll] = useState(false)
 
+  useEffect(() => {
+    setShowAll(results.allTestsPassed ?? false)
+  }, [results])
+
   const showResults = () => {
     if (!showAll) {
       const failedTest = results.testCases.find(
@@ -107,7 +111,9 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
           />
         )
       }
-      return <Points points={results.points} />
+      return results.points.length > 0 ? (
+        <Points points={results.points} />
+      ) : null
     }
     const points = <Points points={results.points} />
     const testResults = results.testCases.map((r) => (

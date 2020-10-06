@@ -2,7 +2,7 @@ import React from "react"
 import styled from "styled-components"
 import { Button } from "@material-ui/core"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
+import { faEye, faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
 import { useTranslation } from "react-i18next"
 import { EditorState } from "../types"
 
@@ -12,35 +12,31 @@ const StyledButton = styled((props) => (
 
 type PyEditorButtonsProps = {
   allowRun?: boolean
+  allowTest?: boolean
   editorState: EditorState
   handleRun: (code?: string) => void
-  handleRunWrapped: (code?: string) => void
   handleStop: () => void
+  handleTests: (code?: string) => void
   solutionUrl?: string
 }
 
 const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
   allowRun = true,
+  allowTest = false,
   editorState,
   handleRun,
-  handleRunWrapped,
   handleStop,
+  handleTests,
   solutionUrl,
 }) => {
   const [t] = useTranslation()
 
   return (
     <>
-      {editorState !== EditorState.Running &&
-      editorState !== EditorState.RunningWaitingInput ? (
+      {(editorState & EditorState.WorkerActive) === 0 ? (
         <StyledButton
           onClick={() => handleRun()}
-          disabled={
-            editorState === EditorState.Initializing ||
-            !allowRun ||
-            editorState === EditorState.Submitting ||
-            editorState === EditorState.SubmittingToPaste
-          }
+          disabled={!allowRun}
           data-cy="run-btn"
         >
           <FontAwesomeIcon color="#32CD32" icon={faPlay} />
@@ -50,6 +46,9 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
           <FontAwesomeIcon color="#B40A0A" icon={faStop} />
         </StyledButton>
       )}
+      <StyledButton onClick={() => handleTests()} disabled={!allowTest}>
+        <FontAwesomeIcon color="#ED9410" icon={faEye} />
+      </StyledButton>
       {solutionUrl && (
         <StyledButton
           style={{
@@ -65,13 +64,6 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
           {t("modelSolution")}
         </StyledButton>
       )}
-      {/* <StyledButton
-            onClick={() => handleRunWrapped(editorValue)}
-            disabled={!(isEditorReady && allowRun)}
-            data-cy="run-wrapped-btn"
-          >
-            Run with wrapped imports
-          </StyledButton> */}
     </>
   )
 }

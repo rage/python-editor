@@ -12,12 +12,6 @@ import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
 import { v4 as uuid } from "uuid"
 import { FileEntry } from "./ProgrammingExerciseLoader"
 import {
-  PythonImportAll,
-  PythonImportSome,
-  parseImportAll,
-  parseImportSome,
-} from "../services/import_parsing"
-import {
   OutputObject,
   TestResultObject,
   FeedBackAnswer,
@@ -33,6 +27,8 @@ import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
 import PyEditorButtons from "./PyEditorButtons"
 import OutputTitle from "./OutputTitle"
 import OutputContent from "./OutputContent"
+import { parseTestCases } from "../services/test_parsing"
+import { createWebEditorModuleSource } from "../services/patch_exercise"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -44,6 +40,7 @@ type ProgrammingExerciseProps = {
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
+  testSource?: string
   signedIn: boolean
   editorHeight?: string
   outputHeight?: string
@@ -81,6 +78,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitProgrammingExercise,
   submitToPaste,
   initialFiles,
+  testSource,
   signedIn,
   editorHeight,
   outputHeight,
@@ -107,7 +105,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
-      setEditorState(EditorState.Running)
+      setEditorState(EditorState.ExecutingCode)
       worker.postMessage({
         type: "run",
         msg: remove_fstrings(code ? code : editorValue),
@@ -117,74 +115,20 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     }
   }
 
-  const handleRunWrapped = () => {
-    try {
-      const wrapped = wrap(editorValue, [selectedFile.shortName])
-      return handleRun(wrapped)
-    } catch (error) {
-      return handleRun(`print("${error}")`)
+  function handleTests(code?: string) {
+    if (workerAvailable) {
+      const msg = `
+__webeditor_module_source = ${createWebEditorModuleSource(code ?? editorValue)}
+${testSource}
+`
+      setOutput([])
+      setTestResults(undefined)
+      setWorkerAvailable(false)
+      setEditorState(EditorState.Testing)
+      worker.postMessage({ type: "run_tests", msg })
+    } else {
+      console.log("Worker is busy")
     }
-  }
-
-  /* Replace import statements of the form "import .mymodule" and
-  "from .mymodule import myClass, myFunction" with the contents of
-  mymodule.py, appropriately wrapped. Cyclical imports (module foo
-  imports from module bar, bar imports from foo) are detected and
-  result in an exception. */
-  const wrap = (source: string, presentlyImported: Array<string>) => {
-    const importAllPattern = /^import \./
-    const importSomePattern = /^from \.\w+ import/
-    const sourceLines = source.split("\n")
-    const lines = sourceLines.map((line, num) => {
-      if (line.match(importAllPattern)) {
-        return replaceImportAll(parseImportAll(line), num, presentlyImported)
-      }
-      return line.match(importSomePattern)
-        ? replaceImportSome(parseImportSome(line), num, presentlyImported)
-        : line
-    })
-    return lines.join("\n")
-  }
-
-  const replaceImportAll = (
-    im: PythonImportAll,
-    lineNumber: number,
-    presentlyImported: Array<string>,
-  ): string => {
-    const sourceShortName = im.pkg.slice(1) + ".py"
-    if (presentlyImported.includes(sourceShortName)) {
-      const errMsg =
-        sourceShortName +
-        " has already been imported. Mutually recursive imports are not allowed."
-      throw errMsg
-    }
-    const source = getContentByShortName(sourceShortName, files)
-    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
-    return `\n${wrapped}\n`
-  }
-
-  const replaceImportSome = (
-    im: PythonImportSome,
-    lineNumber: number,
-    presentlyImported: Array<string>,
-  ): string => {
-    const sourceShortName = im.pkg.slice(1) + ".py"
-    if (presentlyImported.includes(sourceShortName)) {
-      const errMsg =
-        sourceShortName +
-        " has already been imported. Mutually recursive imports are not allowed."
-      throw errMsg
-    }
-    const source = getContentByShortName(sourceShortName, files)
-    const wrapped = wrap(source, presentlyImported.concat([sourceShortName]))
-    const sourceLines = wrapped.split("\n").map((line: string) => "\t" + line)
-    const names = im.names.join(", ")
-    const functionName = `__wrap${lineNumber}`
-    const head = `def ${functionName}():\n`
-    const body = sourceLines.join("\n") + "\n"
-    const ret = `\treturn ${names}\n`
-    const tail = `${names} = ${functionName}()`
-    return head + body + ret + tail
   }
 
   worker.setMessageListener((e: any) => {
@@ -192,7 +136,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     if (type === "print") {
       setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
     } else if (type === "input_required") {
-      setEditorState(EditorState.RunningWaitingInput)
+      setEditorState(EditorState.WaitingInput)
     } else if (type === "error") {
       console.log(msg)
       if (msg.includes("bad token T_OP")) {
@@ -207,7 +151,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     } else if (type === "ready") {
       setWorkerAvailable(true)
     } else if (type === "print_batch") {
-      if (editorState === EditorState.Running) {
+      if (editorState === EditorState.ExecutingCode) {
         const prints = msg.map((text: string) => ({
           id: uuid(),
           type: "output",
@@ -217,22 +161,20 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       }
     } else if (type === "print_done") {
       setEditorState(EditorState.Idle)
-    } else if (type === "testResults") {
-      console.log("[TEST RESULTS]", msg)
-      const results = msg.map((result: any) => ({
-        id: uuid(),
-        testName: result.testName,
-        passed: result.passed,
-        feedback: result.feedback || null,
-        points: result.points,
-      }))
-      setTestResults(results)
+    } else if (type === "test_results") {
+      const testCases = parseTestCases(msg)
+      setOutput([])
+      setTestResults({
+        allTestsPassed: testCases.every((x) => x.passed),
+        points: [],
+        testCases,
+      })
     }
   })
 
   const sendInput = (input: string) => {
-    if (editorState === EditorState.RunningWaitingInput) {
-      setEditorState(EditorState.Running)
+    if (editorState === EditorState.WaitingInput) {
+      setEditorState(EditorState.ExecutingCode)
       setOutput(
         output.concat({ id: uuid(), type: "input", text: `${input}\n` }),
       )
@@ -330,16 +272,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     setOpenNotification(false)
   }
 
-  /*
-  const runTests = () => {
-    console.log("Running tests")
-    setOutput([])
-    setRunning(true)
-    setTesting(true)
-    worker.postMessage({ type: "runTests" })
-  }
-  */
-
   const ieOrEdge =
     window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
 
@@ -399,20 +331,22 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           </Select>
         </>
       )}
-      {/* <Button variant="contained" onClick={runTests} data-cy="run-tests-btn">
-        Run tests
-      </Button> */}
       {!ready && (
         <OverlayCenterWrapper>
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
       <PyEditorButtons
-        allowRun={workerAvailable}
+        allowRun={
+          workerAvailable && (editorState & EditorState.WorkerActive) === 0
+        }
+        allowTest={
+          !!testSource && (editorState & EditorState.WorkerActive) === 0
+        }
         editorState={editorState}
         handleRun={handleRun}
-        handleRunWrapped={handleRunWrapped}
         handleStop={stopWorker}
+        handleTests={handleTests}
         solutionUrl={solutionUrl}
       />
       {!signedIn && (
@@ -436,10 +370,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         }
       />
       <AnimatedOutputBox
-        isRunning={
-          editorState === EditorState.Running ||
-          editorState === EditorState.RunningWaitingInput
-        }
+        isRunning={(editorState & EditorState.WorkerActive) > 0}
         outputHeight={outputHeight}
         outputPosition={outputPosition}
         ref={outputBoxRef}
@@ -465,9 +396,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           />
         </Grid>
       </AnimatedOutputBox>
-      {/* <div>
+      {/* {<div>
         {EditorState[editorState]}
-      </div> */}
+      </div>} */}
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}

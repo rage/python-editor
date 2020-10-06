@@ -2,11 +2,12 @@ import { useEffect, useState } from "react"
 import {
   skulptMinJsSource,
   skulptStdlibJsSource,
+  pyodideJsSource,
   workerJsSource,
 } from "../constants"
 
 const blobObject = URL.createObjectURL(
-  new Blob([skulptMinJsSource, skulptStdlibJsSource, workerJsSource], {
+  new Blob([pyodideJsSource, workerJsSource], {
     type: "application/javascript",
   }),
 )
@@ -16,13 +17,17 @@ interface Message {
   msg?: any
 }
 
+console.log("Creating first worker")
+let nextWorker = new Worker(blobObject)
+
 const useWorker = () => {
   const [worker, setWorker] = useState<Worker | undefined>()
   const [messageBuffer, setMessageBuffer] = useState<Array<Message>>([])
 
   const createWorker = () => {
-    console.log("Creating worker")
-    const w = new Worker(blobObject)
+    const w = nextWorker
+    console.log("Creating another worker")
+    nextWorker = new Worker(blobObject)
     setWorker(w)
   }
 
