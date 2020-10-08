@@ -395,6 +395,20 @@ ${testSource}
             outputHeight={outputHeight}
           />
         </Grid>
+        {window.innerHeight < 650 && (
+          <PyEditorButtons
+            allowRun={
+              workerAvailable && (editorState & EditorState.WorkerActive) === 0
+            }
+            allowTest={
+              !!testSource && (editorState & EditorState.WorkerActive) === 0
+            }
+            editorState={editorState}
+            handleRun={handleRun}
+            handleStop={stopWorker}
+            handleTests={handleTests}
+          />
+        )}
       </AnimatedOutputBox>
       {/* {<div>
         {EditorState[editorState]}
