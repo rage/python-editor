@@ -1,5 +1,4 @@
 {
   "baseUrl": "http://localhost:1234",
-  "experimentalNetworkStubbing": true,
-  "retries": { "runMode": 1, "openMode": 1 }
+  "retries": { "runMode": 2, "openMode": 2 }
 }
