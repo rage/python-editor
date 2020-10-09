@@ -114,7 +114,7 @@ function run(code) {
   code = `\
 async def execute():
 ${code
-  .replaceAll(/input/g, "await input")
+  .replace(/input/g, "await input")
   .split("\n")
   .map((x) => `    ${x}`)
   .join("\n")}
