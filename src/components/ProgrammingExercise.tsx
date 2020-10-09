@@ -336,19 +336,23 @@ ${testSource}
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
-      <PyEditorButtons
-        allowRun={
-          workerAvailable && (editorState & EditorState.WorkerActive) === 0
-        }
-        allowTest={
-          !!testSource && (editorState & EditorState.WorkerActive) === 0
-        }
-        editorState={editorState}
-        handleRun={handleRun}
-        handleStop={stopWorker}
-        handleTests={handleTests}
-        solutionUrl={solutionUrl}
-      />
+      {outputPosition === "absolute" ? (
+        <PyEditorButtons
+          allowRun={
+            workerAvailable && (editorState & EditorState.WorkerActive) === 0
+          }
+          allowTest={
+            !!testSource && (editorState & EditorState.WorkerActive) === 0
+          }
+          editorState={editorState}
+          handleRun={handleRun}
+          handleStop={stopWorker}
+          handleTests={handleTests}
+          solutionUrl={solutionUrl}
+        />
+      ) : (
+        <PyEditorButtons editorState={editorState} solutionUrl={solutionUrl} />
+      )}
       {!signedIn && (
         <WarningBox>
           <FontAwesomeIcon icon={faExclamationTriangle} />
@@ -369,6 +373,20 @@ ${testSource}
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
         }
       />
+      {outputPosition === "relative" ? (
+        <PyEditorButtons
+          allowRun={
+            workerAvailable && (editorState & EditorState.WorkerActive) === 0
+          }
+          allowTest={
+            !!testSource && (editorState & EditorState.WorkerActive) === 0
+          }
+          editorState={editorState}
+          handleRun={handleRun}
+          handleStop={stopWorker}
+          handleTests={handleTests}
+        />
+      ) : null}
       <AnimatedOutputBox
         isRunning={(editorState & EditorState.WorkerActive) > 0}
         outputHeight={outputHeight}
@@ -395,20 +413,6 @@ ${testSource}
             outputHeight={outputHeight}
           />
         </Grid>
-        {window.innerHeight < 650 && (
-          <PyEditorButtons
-            allowRun={
-              workerAvailable && (editorState & EditorState.WorkerActive) === 0
-            }
-            allowTest={
-              !!testSource && (editorState & EditorState.WorkerActive) === 0
-            }
-            editorState={editorState}
-            handleRun={handleRun}
-            handleStop={stopWorker}
-            handleTests={handleTests}
-          />
-        )}
       </AnimatedOutputBox>
       {/* {<div>
         {EditorState[editorState]}
