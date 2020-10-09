@@ -22,8 +22,7 @@ import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { remove_fstrings } from "../services/polyfill_python"
 import { useWorker } from "../hooks/getWorker"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
+import Notification from "./Notification"
 import PyEditorButtons from "./PyEditorButtons"
 import OutputTitle from "./OutputTitle"
 import OutputContent from "./OutputContent"
@@ -56,14 +55,6 @@ const StyledOutput = styled(Grid)`
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
-`
-
-const WarningBox = styled(Grid)`
-  background-color: #ff9800;
-  color: white;
-  border-radius: 3px 3px 0 0;
-  padding: 8px;
-  font-size: 1.25rem;
 `
 
 const defaultFile: FileEntry = {
@@ -350,17 +341,9 @@ ${testSource}
         solutionUrl={solutionUrl}
       />
       {!signedIn && (
-        <WarningBox>
-          <FontAwesomeIcon icon={faExclamationTriangle} />
-          <span style={{ marginLeft: 10 }}>{t("signInToSubmitExercise")}</span>
-        </WarningBox>
+        <Notification style="warning" text={t("signInToSubmitExercise")} />
       )}
-      {expired && (
-        <WarningBox>
-          <FontAwesomeIcon icon={faExclamationTriangle} />
-          <span style={{ marginLeft: 10 }}>{t("deadlineExpired")}</span>
-        </WarningBox>
-      )}
+      {expired && <Notification style="warning" text={t("deadlineExpired")} />}
       <PyEditor
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
