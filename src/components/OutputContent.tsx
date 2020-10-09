@@ -104,14 +104,14 @@ const OutputContent: React.FunctionComponent<OutputContentProps> = (props) => {
 
   return (
     <StyledOutput outputheight={outputHeight} ref={outputRef}>
+      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {showOutput()}
+      </pre>
       {(editorState === EditorState.ShowHelp ||
         editorState === EditorState.SubmittingToPaste ||
         editorState === EditorState.ShowPasteResults) && (
         <Help handlePasteSubmit={handlePasteSubmit} pasteUrl={pasteUrl} />
       )}
-      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-        {showOutput()}
-      </pre>
       {editorState === EditorState.WaitingInput && (
         <TextField
           inputRef={userInputFieldRef}

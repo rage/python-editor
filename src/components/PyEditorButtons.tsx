@@ -14,9 +14,9 @@ type PyEditorButtonsProps = {
   allowRun?: boolean
   allowTest?: boolean
   editorState: EditorState
-  handleRun: (code?: string) => void
-  handleStop: () => void
-  handleTests: (code?: string) => void
+  handleRun?: (code?: string) => void
+  handleStop?: () => void
+  handleTests?: (code?: string) => void
   solutionUrl?: string
 }
 
@@ -33,7 +33,7 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
 
   return (
     <>
-      {(editorState & EditorState.WorkerActive) === 0 ? (
+      {(editorState & EditorState.WorkerActive) === 0 && handleRun ? (
         <StyledButton
           onClick={() => handleRun()}
           disabled={!allowRun}
@@ -41,23 +41,29 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
         >
           <FontAwesomeIcon color="#32CD32" icon={faPlay} />
         </StyledButton>
-      ) : (
+      ) : handleStop ? (
         <StyledButton onClick={() => handleStop()} data-cy="stop-btn">
           <FontAwesomeIcon color="#B40A0A" icon={faStop} />
         </StyledButton>
-      )}
-      <StyledButton onClick={() => handleTests()} disabled={!allowTest}>
-        <FontAwesomeIcon color="#ED9410" icon={faEye} />
-      </StyledButton>
+      ) : null}
+      {handleTests ? (
+        <StyledButton onClick={() => handleTests()} disabled={!allowTest}>
+          <FontAwesomeIcon color="#ED9410" icon={faEye} />
+        </StyledButton>
+      ) : null}
       {solutionUrl && (
         <StyledButton
-          style={{
-            fontSize: "12px",
-            position: "absolute",
-            right: "0",
-            top: "0",
-            padding: "2px 16px",
-          }}
+          style={
+            handleRun
+              ? {
+                  fontSize: "12px",
+                  position: "absolute",
+                  right: "0",
+                  top: "0",
+                  padding: "2px 16px",
+                }
+              : {}
+          }
           variant="contained"
           onClick={() => window.open(solutionUrl, "_blank")}
         >
