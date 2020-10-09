@@ -20,7 +20,6 @@ import {
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
-import { remove_fstrings } from "../services/polyfill_python"
 import { useWorker } from "../hooks/getWorker"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
@@ -108,7 +107,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       setEditorState(EditorState.ExecutingCode)
       worker.postMessage({
         type: "run",
-        msg: remove_fstrings(code ? code : editorValue),
+        msg: code ? code : editorValue,
       })
     } else {
       console.log("Worker is busy")
