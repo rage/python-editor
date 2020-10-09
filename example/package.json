@@ -6,13 +6,13 @@
   "scripts": {
     "start": "rm -rf ./dist && rm -rf ./.cache && rm -rf ../dist && parcel index.html",
     "build": "parcel build index.html",
-    "cypress:open": "cypress open"
+    "cypress:open": "cypress open",
+    "now-build": "parcel build index.html --out-dir ../public"
   },
   "dependencies": {
     "parcel": "^1.12.4",
     "react": "^16.13.0",
-    "react-app-polyfill": "^1.0.6",
-    "react-webworker": "^2.1.0"
+    "react-app-polyfill": "^1.0.6"
   },
   "devDependencies": {
     "@types/react": "^16.9.51",
