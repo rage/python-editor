@@ -16,6 +16,7 @@
   "failedToEstablishConnectionToServer": "Yhteyden muodostaminen TMC-palvelimeen epäonnistui.",
   "failedToDownloadExercise": "Tehtävän lataaminen epäonnistui.",
   "feedbackTitle": "Tehtävä suoritettu, onneksi olkoon!",
+  "infiniteLoopMessage": "Varmista, että koodissasi ei ole ikuista silmukkaa.",
   "malformedExerciseTemplate": "Väärän muotoinen tehtäväpohja",
   "modelSolution": "Mallivastaus",
   "needHelp": "Tarvitsetko apua?",

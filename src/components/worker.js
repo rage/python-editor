@@ -42,7 +42,7 @@ let prevDate = null
  */
 function print(...args) {
   const kwargs = args.pop()
-  console.log(args, kwargs)
+  //console.log(args, kwargs)
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   printBuffer.push(text)
   const newDate = Date.now()
@@ -56,8 +56,18 @@ function print(...args) {
 }
 
 function printError(...args) {
-  const fixedString = fixLineNumberOffset(args[0])
-  print(fixedString, undefined)
+  const kwargs = args.pop()
+  //console.log(args, kwargs)
+  const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
+  printBuffer.push(fixLineNumberOffset(text))
+  const newDate = Date.now()
+  if (newDate - prevDate > 50) {
+    postMessage({
+      type: "error",
+      msg: printBuffer.splice(0, batchSize),
+    })
+    prevDate = newDate
+  }
 }
 
 async function inputPromise() {
