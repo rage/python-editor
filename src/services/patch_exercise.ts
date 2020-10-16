@@ -77,7 +77,7 @@ with io.StringIO() as buf:
     testOutput = json.dumps(results, ensure_ascii=False)
 `
 
-  console.log(testCode)
+  //console.log(testCode)
   return testCode
 }
 
@@ -162,7 +162,7 @@ const patchAndEncodeTmcFile = (
       break
   }
   const wrapped = resolveImports({ ...file, content }, tmcFiles)
-  console.log(file.shortName, wrapped)
+  //console.log(file.shortName, wrapped)
   return Base64.encode(wrapped)
 }
 

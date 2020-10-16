@@ -3,8 +3,11 @@ let intervalId = null
 const batchSize = 50
 let running = false
 
-// used to check if a control message "input_required" has been appended to buffer
-const checkForMsg = () => {
+/**
+ * printBuffer should only contain strings, if an object is encountered it's an input request
+ * @returns The last element, i.e. input request from printBuffer
+ */
+const checkForInputMessage = () => {
   let msgObject = null
   if (typeof printBuffer[printBuffer.length - 1] === "object") {
     msgObject = printBuffer.pop()
@@ -12,20 +15,21 @@ const checkForMsg = () => {
   return msgObject
 }
 
-const intervalManager = (runInterval) => {
+const printBufferManager = (runInIntervals) => {
   if (intervalId) {
     clearInterval(intervalId)
   }
-  if (runInterval) {
+  if (runInIntervals) {
     intervalId = setInterval(() => {
       if (printBuffer.length > 0) {
-        let msgObject = null
+        let inputObject = null
+        // Code halts at input, if input requested, it's the last element in the buffer.
         if (printBuffer.length <= batchSize) {
-          msgObject = checkForMsg()
+          inputObject = checkForInputMessage()
         }
         const batch = printBuffer.splice(0, batchSize)
         postMessage({ type: "print_batch", msg: batch })
-        if (msgObject) postMessage(msgObject)
+        if (inputObject) postMessage(inputObject)
       }
       if (!running && printBuffer.length === 0) {
         clearInterval(intervalId)
@@ -35,47 +39,18 @@ const intervalManager = (runInterval) => {
   }
 }
 
-let testResults = []
-let testPoints = []
-// Running tests requires verbosity > 1 from unittest
-// Make sure to run with command unittest.main(2) or equal
-const handleTestOutput = (text) => {
-  console.log(text)
-  if (text.startsWith("Running")) {
-    const testName = text.split(" ")[2]
-    const matchingPoint = testPoints.find(
-      (t) =>
-        t.name === testName.split(".")[0] || t.name === testName.split(".")[1],
-    )
-    testResults.push({
-      testName,
-      passed: true,
-      points: matchingPoint ? matchingPoint.points : "",
-    })
-  } else if (
-    text.startsWith("Fail:") ||
-    text.startsWith("Test threw exception")
-  ) {
-    const lastResult = testResults.pop()
-    const updatedResult = { ...lastResult, passed: false, feedback: text }
-    testResults.push(updatedResult)
-  } else if (text.startsWith("Points:")) {
-    const pointObj = JSON.parse(text.slice(7))
-    testPoints.push(pointObj)
-  }
-}
-
 let prevDate = null
-
 /**
  * Python print alias when running with Pyodide. include lines
  * `from js import print` and `__builtins__.print = print` to use.
  */
 function print(...args) {
   const kwargs = args.pop()
-  console.log(args, kwargs)
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   printBuffer.push(text)
+
+  // If code is in loop, intervalManager doesn't print batches(?)
+  // This below makes sure there are prints done.
   const newDate = Date.now()
   if (newDate - prevDate > 50) {
     postMessage({
@@ -84,6 +59,15 @@ function print(...args) {
     })
     prevDate = newDate
   }
+}
+
+function printError(...args) {
+  const kwargs = args.pop()
+  const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
+  postMessage({
+    type: "error",
+    msg: fixLineNumberOffset(text),
+  })
 }
 
 async function inputPromise() {
@@ -107,21 +91,20 @@ function exit() {
 }
 
 function run(code) {
-  if (!code || code.length === 0) return
-
   // Async function workaround for input by Andreas Klostermann
   // https://github.com/akloster/aioweb-demo/blob/master/src/main.py
   code = `\
 async def execute():
 ${code
-  .replaceAll(/input/g, "await input")
+  .replace(/input\(/g, "await input(")
   .split("\n")
   .map((x) => `    ${x}`)
   .join("\n")}
-    pass
+    pass # SyntaxError: EOF - Missing end parentheses at end of code?
 
 from functools import partial
-from js import print, inputPromise, wait, exit
+from js import exit, inputPromise, print, printError, wait
+import traceback
 
 class WrappedPromise:
     def __init__(self, promise):
@@ -161,13 +144,13 @@ async def wrap_execution():
     try:
         await execute()
     except Exception as e:
-        print(e)
+        tb = traceback.format_exc()
+        printError(tb)
     exit()
 
 loop = WebLoop()
 loop.call_soon(wrap_execution())
 `
-  console.log(code)
 
   languagePluginLoader
     .then(() => {
@@ -176,19 +159,32 @@ loop.call_soon(wrap_execution())
         .then(() => pyodide.runPythonAsync(code))
         .catch((e) => {
           printBuffer = []
-          printBuffer.push({ type: "error", msg: e.toString() })
+          printBuffer.push({
+            type: "error",
+            msg: fixLineNumberOffset(e.toString()),
+          })
           exit()
         })
     })
     .catch((e) => {
       printBuffer = []
-      printBuffer.push({ type: "error", msg: e.toString() })
+      printBuffer.push({
+        type: "error",
+        msg: fixLineNumberOffset(e.toString()),
+      })
       exit()
     })
 }
 
+function lineOffsetReplacer(m, number, o, s) {
+  return "line " + (parseInt(number) - 1).toString()
+}
+
+function fixLineNumberOffset(msg) {
+  return msg.replace(/line\s(\d+)/g, lineOffsetReplacer)
+}
+
 function test(code) {
-  if (!code || code.length === 0) return
   languagePluginLoader
     .then(() => {
       pyodide
@@ -217,17 +213,17 @@ function test(code) {
 self.onmessage = function (e) {
   const { type, msg } = e.data
   if (type === "run") {
-    intervalManager(true)
+    printBufferManager(true)
     running = true
     printBuffer = []
     run(msg)
   } else if (type === "stop") {
-    intervalManager(false)
+    printBufferManager(false)
   } else if (type === "run_tests") {
-    intervalManager(true)
+    printBufferManager(true)
     running = true
     printBuffer = []
-    console.log(msg)
+    //console.log(msg)
     test(msg)
   }
 }

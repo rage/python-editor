@@ -20,7 +20,6 @@ import {
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
-import { remove_fstrings } from "../services/polyfill_python"
 import { useWorker } from "../hooks/getWorker"
 import Notification from "./Notification"
 import PyEditorButtons from "./PyEditorButtons"
@@ -88,6 +87,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [editorValue, setEditorValue] = useState("")
   const [pasteUrl, setPasteUrl] = useState("")
   const [openNotification, setOpenNotification] = useState(false)
+  const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
+    NodeJS.Timeout | undefined
+  >()
   const [worker] = useWorker()
   const outputBoxRef = React.createRef<AnimatedOutputBoxRef>()
   const [editorState, setEditorState] = useState(EditorState.Initializing)
@@ -100,7 +102,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       setEditorState(EditorState.ExecutingCode)
       worker.postMessage({
         type: "run",
-        msg: remove_fstrings(code ? code : editorValue),
+        msg: code ? code : editorValue,
       })
     } else {
       console.log("Worker is busy")
@@ -130,14 +132,7 @@ ${testSource}
     } else if (type === "input_required") {
       setEditorState(EditorState.WaitingInput)
     } else if (type === "error") {
-      console.log(msg)
-      if (msg.includes("bad token T_OP")) {
-        msg =
-          msg +
-          "\nMake sure you don't use any special characters as variable names, such as å, ä, ö."
-      } else if (msg.includes("TypeError: Cannot read property")) {
-        msg = msg + "\nMake sure all Python commands use proper syntax."
-      }
+      console.error(msg)
       setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
       setWorkerAvailable(true)
     } else if (type === "ready") {
@@ -240,6 +235,28 @@ ${testSource}
           setPasteUrl(res)
           setEditorState(EditorState.ShowPasteResults)
         })
+        break
+      case EditorState.ExecutingCode:
+      case EditorState.Testing:
+        const msg = t("infiniteLoopMessage")
+        const timeout = setTimeout(() => {
+          setOutput([
+            {
+              id: uuid(),
+              type: "output",
+              text: msg,
+            },
+          ])
+          stopWorker()
+        }, 10000)
+        setExecutionTimeoutTimer(timeout)
+        break
+      case EditorState.Idle:
+      case EditorState.RunAborted:
+      case EditorState.WaitingInput:
+        if (executionTimeoutTimer) {
+          clearTimeout(executionTimeoutTimer)
+        }
         break
     }
   }, [editorState])
@@ -368,19 +385,23 @@ ${testSource}
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
-      <PyEditorButtons
-        allowRun={
-          workerAvailable && (editorState & EditorState.WorkerActive) === 0
-        }
-        allowTest={
-          !!testSource && (editorState & EditorState.WorkerActive) === 0
-        }
-        editorState={editorState}
-        handleRun={handleRun}
-        handleStop={stopWorker}
-        handleTests={handleTests}
-        solutionUrl={solutionUrl}
-      />
+      {outputPosition === "absolute" ? (
+        <PyEditorButtons
+          allowRun={
+            workerAvailable && (editorState & EditorState.WorkerActive) === 0
+          }
+          allowTest={
+            !!testSource && (editorState & EditorState.WorkerActive) === 0
+          }
+          editorState={editorState}
+          handleRun={handleRun}
+          handleStop={stopWorker}
+          handleTests={handleTests}
+          solutionUrl={solutionUrl}
+        />
+      ) : (
+        <PyEditorButtons editorState={editorState} solutionUrl={solutionUrl} />
+      )}
       {!signedIn && (
         <Notification style="warning" text={t("signInToSubmitExercise")} />
       )}
@@ -393,6 +414,20 @@ ${testSource}
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
         }
       />
+      {outputPosition === "relative" ? (
+        <PyEditorButtons
+          allowRun={
+            workerAvailable && (editorState & EditorState.WorkerActive) === 0
+          }
+          allowTest={
+            !!testSource && (editorState & EditorState.WorkerActive) === 0
+          }
+          editorState={editorState}
+          handleRun={handleRun}
+          handleStop={stopWorker}
+          handleTests={handleTests}
+        />
+      ) : null}
       <AnimatedOutputBox
         isRunning={(editorState & EditorState.WorkerActive) > 0}
         outputHeight={outputHeight}
