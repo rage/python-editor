@@ -140,7 +140,7 @@ ${testSource}
     } else if (type === "input_required") {
       setEditorState(EditorState.WaitingInput)
     } else if (type === "error") {
-      console.log(msg)
+      console.error(msg)
       setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
       setWorkerAvailable(true)
     } else if (type === "ready") {

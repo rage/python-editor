@@ -3,8 +3,11 @@ let intervalId = null
 const batchSize = 50
 let running = false
 
-// used to check if a control message "input_required" has been appended to buffer
-const checkForMsg = () => {
+/**
+ * printBuffer should only contain strings, if an object is encountered it's an input request
+ * @returns The last element, i.e. input request from printBuffer
+ */
+const checkForInputMessage = () => {
   let msgObject = null
   if (typeof printBuffer[printBuffer.length - 1] === "object") {
     msgObject = printBuffer.pop()
@@ -12,20 +15,21 @@ const checkForMsg = () => {
   return msgObject
 }
 
-const intervalManager = (runInterval) => {
+const printBufferManager = (runInIntervals) => {
   if (intervalId) {
     clearInterval(intervalId)
   }
-  if (runInterval) {
+  if (runInIntervals) {
     intervalId = setInterval(() => {
       if (printBuffer.length > 0) {
-        let msgObject = null
+        let inputObject = null
+        // Code halts at input, if input requested, it's the last element in the buffer.
         if (printBuffer.length <= batchSize) {
-          msgObject = checkForMsg()
+          inputObject = checkForInputMessage()
         }
         const batch = printBuffer.splice(0, batchSize)
         postMessage({ type: "print_batch", msg: batch })
-        if (msgObject) postMessage(msgObject)
+        if (inputObject) postMessage(inputObject)
       }
       if (!running && printBuffer.length === 0) {
         clearInterval(intervalId)
@@ -42,9 +46,11 @@ let prevDate = null
  */
 function print(...args) {
   const kwargs = args.pop()
-  //console.log(args, kwargs)
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   printBuffer.push(text)
+
+  // If code is in loop, intervalManager doesn't print batches(?)
+  // This below makes sure there are prints done.
   const newDate = Date.now()
   if (newDate - prevDate > 50) {
     postMessage({
@@ -57,17 +63,11 @@ function print(...args) {
 
 function printError(...args) {
   const kwargs = args.pop()
-  //console.log(args, kwargs)
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
-  printBuffer.push(fixLineNumberOffset(text))
-  const newDate = Date.now()
-  if (newDate - prevDate > 50) {
-    postMessage({
-      type: "error",
-      msg: printBuffer.splice(0, batchSize),
-    })
-    prevDate = newDate
-  }
+  postMessage({
+    type: "error",
+    msg: fixLineNumberOffset(text),
+  })
 }
 
 async function inputPromise() {
@@ -213,17 +213,17 @@ function test(code) {
 self.onmessage = function (e) {
   const { type, msg } = e.data
   if (type === "run") {
-    intervalManager(true)
+    printBufferManager(true)
     running = true
     printBuffer = []
     run(msg)
   } else if (type === "stop") {
-    intervalManager(false)
+    printBufferManager(false)
   } else if (type === "run_tests") {
-    intervalManager(true)
+    printBufferManager(true)
     running = true
     printBuffer = []
-    console.log(msg)
+    //console.log(msg)
     test(msg)
   }
 }
