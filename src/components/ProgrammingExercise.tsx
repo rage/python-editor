@@ -24,10 +24,11 @@ import { remove_fstrings } from "../services/polyfill_python"
 import { useWorker } from "../hooks/getWorker"
 import Notification from "./Notification"
 import PyEditorButtons from "./PyEditorButtons"
-import OutputTitle from "./OutputTitle"
-import OutputContent from "./OutputContent"
 import { parseTestCases } from "../services/test_parsing"
 import { createWebEditorModuleSource } from "../services/patch_exercise"
+import EditorOutput from "./EditorOutput"
+import TestOutput from "./TestOutput"
+import SubmissionOutput from "./SubmissionOutput"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -151,7 +152,12 @@ ${testSource}
         setOutput((prevState) => prevState.concat(prints))
       }
     } else if (type === "print_done") {
-      setEditorState(EditorState.Idle)
+      setEditorState((previous) => {
+        if (previous === EditorState.Testing) {
+          return EditorState.ShowTestResults
+        }
+        return EditorState.Idle
+      })
     } else if (type === "test_results") {
       const testCases = parseTestCases(msg)
       setOutput([])
@@ -250,6 +256,7 @@ ${testSource}
   const closeOutput = () => {
     stopWorker()
     outputBoxRef.current?.close()
+    setEditorState(EditorState.Idle)
     setOutput([])
   }
 
@@ -261,6 +268,40 @@ ${testSource}
       return
     }
     setOpenNotification(false)
+  }
+
+  const mapStateToOutput = () => {
+    switch (editorState) {
+      case EditorState.ShowTestResults:
+        return (
+          <TestOutput
+            onClose={closeOutput}
+            outputHeight={outputHeight}
+            onSubmit={() => handleSubmit(false)}
+            testResults={testResults ?? { points: [], testCases: [] }}
+          />
+        )
+      case EditorState.Submitting:
+      case EditorState.ShowPassedFeedbackForm:
+      case EditorState.ShowSubmissionResults:
+        return (
+          <SubmissionOutput
+            onClose={closeOutput}
+            submitting={editorState === EditorState.Submitting}
+            testResults={testResults ?? { points: [], testCases: [] }}
+          />
+        )
+      default:
+        return (
+          <EditorOutput
+            editorState={editorState}
+            onClose={closeOutput}
+            outputContent={output}
+            outputHeight={outputHeight}
+            sendInput={sendInput}
+          />
+        )
+    }
   }
 
   const ieOrEdge =
@@ -358,30 +399,9 @@ ${testSource}
         outputPosition={outputPosition}
         ref={outputBoxRef}
       >
-        <Grid container direction="column">
-          <OutputTitle
-            allowSubmitting={signedIn && !expired}
-            closeOutput={closeOutput}
-            editorState={editorState}
-            handleSubmit={() => handleSubmit(false)}
-            hasErrors={output.some((item: any) => item.type === "error")}
-            showHelp={() => setEditorState(EditorState.ShowHelp)}
-            testResults={testResults}
-          />
-          <OutputContent
-            editorState={editorState}
-            outputContent={output}
-            handlePasteSubmit={() => handleSubmit(true)}
-            pasteUrl={pasteUrl}
-            sendInput={sendInput}
-            testResults={testResults}
-            outputHeight={outputHeight}
-          />
-        </Grid>
+        {mapStateToOutput()}
       </AnimatedOutputBox>
-      {/* {<div>
-        {EditorState[editorState]}
-      </div>} */}
+      <div>{EditorState[editorState]}</div>
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}
