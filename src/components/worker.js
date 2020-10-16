@@ -96,7 +96,7 @@ function run(code) {
   code = `\
 async def execute():
 ${code
-  .replace(/input\(/g, "await input(")
+  .replace(/"""/g, '\\"\\"\\"')
   .split("\n")
   .map((x) => `    ${x}`)
   .join("\n")}
@@ -152,11 +152,34 @@ loop = WebLoop()
 loop.call_soon(wrap_execution())
 `
 
+  parsedCode = `
+import ast
+
+class PatchInput(ast.NodeTransformer):
+    def generic_visit(self, node):
+        super().generic_visit(node)
+        input_conditions = (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == 'input'
+        )
+        if input_conditions:
+            result = ast.Await(node)
+            return ast.copy_location(result, node)
+        return node
+
+tree = ast.parse("""${code}""")
+optimizer = PatchInput()
+tree = optimizer.visit(tree)
+code = compile(tree, "<string>", "exec")
+exec(code)
+`
+
   languagePluginLoader
     .then(() => {
       pyodide
         .loadPackage()
-        .then(() => pyodide.runPythonAsync(code))
+        .then(() => pyodide.runPythonAsync(parsedCode))
         .catch((e) => {
           printBuffer = []
           printBuffer.push({
