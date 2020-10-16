@@ -21,13 +21,13 @@ import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { useWorker } from "../hooks/getWorker"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
+import Notification from "./Notification"
 import PyEditorButtons from "./PyEditorButtons"
-import OutputTitle from "./OutputTitle"
-import OutputContent from "./OutputContent"
 import { parseTestCases } from "../services/test_parsing"
 import { createWebEditorModuleSource } from "../services/patch_exercise"
+import EditorOutput from "./EditorOutput"
+import TestOutput from "./TestOutput"
+import SubmissionOutput from "./SubmissionOutput"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -55,14 +55,6 @@ const StyledOutput = styled(Grid)`
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
-`
-
-const WarningBox = styled(Grid)`
-  background-color: #ff9800;
-  color: white;
-  border-radius: 3px 3px 0 0;
-  padding: 8px;
-  font-size: 1.25rem;
 `
 
 const defaultFile: FileEntry = {
@@ -93,7 +85,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [files, setFiles] = useState([defaultFile])
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
-  const [pasteUrl, setPasteUrl] = useState("")
   const [openNotification, setOpenNotification] = useState(false)
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
     NodeJS.Timeout | undefined
@@ -155,7 +146,12 @@ ${testSource}
         setOutput((prevState) => prevState.concat(prints))
       }
     } else if (type === "print_done") {
-      setEditorState(EditorState.Idle)
+      setEditorState((previous) => {
+        if (previous === EditorState.Testing) {
+          return EditorState.ShowTestResults
+        }
+        return EditorState.Idle
+      })
     } else if (type === "test_results") {
       const testCases = parseTestCases(msg)
       setOutput([])
@@ -182,11 +178,21 @@ ${testSource}
     changeFile(e.target.value, files)
   }
 
-  const handleSubmit = (paste: boolean) => {
-    setPasteUrl("")
+  const handleSubmit = () => {
     setStateForSelectedFile()
     setEditorState(
-      paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
+      // paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
+      EditorState.Submitting,
+    )
+  }
+
+  const handlePasteSubmit = () => {
+    return submitToPaste(
+      files.map((x) =>
+        x.shortName === selectedFile.shortName
+          ? { ...x, content: editorValue }
+          : x,
+      ),
     )
   }
 
@@ -233,12 +239,6 @@ ${testSource}
           )
         })
         break
-      case EditorState.SubmittingToPaste:
-        submitToPaste(files).then((res) => {
-          setPasteUrl(res)
-          setEditorState(EditorState.ShowPasteResults)
-        })
-        break
       case EditorState.ExecutingCode:
       case EditorState.Testing:
         const msg = t("infiniteLoopMessage")
@@ -276,6 +276,7 @@ ${testSource}
   const closeOutput = () => {
     stopWorker()
     outputBoxRef.current?.close()
+    setEditorState(EditorState.Idle)
     setOutput([])
   }
 
@@ -287,6 +288,42 @@ ${testSource}
       return
     }
     setOpenNotification(false)
+  }
+
+  const mapStateToOutput = () => {
+    switch (editorState) {
+      case EditorState.ShowTestResults:
+        return (
+          <TestOutput
+            onClose={closeOutput}
+            outputHeight={outputHeight}
+            onSubmit={() => handleSubmit()}
+            testResults={testResults ?? { points: [], testCases: [] }}
+          />
+        )
+      case EditorState.Submitting:
+      case EditorState.ShowPassedFeedbackForm:
+      case EditorState.ShowSubmissionResults:
+        return (
+          <SubmissionOutput
+            onClose={closeOutput}
+            submitting={editorState === EditorState.Submitting}
+            testResults={testResults ?? { points: [], testCases: [] }}
+          />
+        )
+      default:
+        return (
+          <EditorOutput
+            editorState={editorState}
+            getPasteLink={handlePasteSubmit}
+            onClose={closeOutput}
+            outputContent={output}
+            outputHeight={outputHeight}
+            pasteDisabled={!signedIn || expired}
+            sendInput={sendInput}
+          />
+        )
+    }
   }
 
   const ieOrEdge =
@@ -371,17 +408,9 @@ ${testSource}
         <PyEditorButtons editorState={editorState} solutionUrl={solutionUrl} />
       )}
       {!signedIn && (
-        <WarningBox>
-          <FontAwesomeIcon icon={faExclamationTriangle} />
-          <span style={{ marginLeft: 10 }}>{t("signInToSubmitExercise")}</span>
-        </WarningBox>
+        <Notification style="warning" text={t("signInToSubmitExercise")} />
       )}
-      {expired && (
-        <WarningBox>
-          <FontAwesomeIcon icon={faExclamationTriangle} />
-          <span style={{ marginLeft: 10 }}>{t("deadlineExpired")}</span>
-        </WarningBox>
-      )}
+      {expired && <Notification style="warning" text={t("deadlineExpired")} />}
       <PyEditor
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
@@ -410,30 +439,9 @@ ${testSource}
         outputPosition={outputPosition}
         ref={outputBoxRef}
       >
-        <Grid container direction="column">
-          <OutputTitle
-            allowSubmitting={signedIn && !expired}
-            closeOutput={closeOutput}
-            editorState={editorState}
-            handleSubmit={() => handleSubmit(false)}
-            hasErrors={output.some((item: any) => item.type === "error")}
-            showHelp={() => setEditorState(EditorState.ShowHelp)}
-            testResults={testResults}
-          />
-          <OutputContent
-            editorState={editorState}
-            outputContent={output}
-            handlePasteSubmit={() => handleSubmit(true)}
-            pasteUrl={pasteUrl}
-            sendInput={sendInput}
-            testResults={testResults}
-            outputHeight={outputHeight}
-          />
-        </Grid>
+        {mapStateToOutput()}
       </AnimatedOutputBox>
-      {/* {<div>
-        {EditorState[editorState]}
-      </div>} */}
+      <div>{EditorState[editorState]}</div>
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}
