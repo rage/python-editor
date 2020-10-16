@@ -4,8 +4,7 @@ import styled from "styled-components"
 import { Button, Input, Paper, Typography } from "@material-ui/core"
 
 type HelpProps = {
-  handlePasteSubmit: () => void
-  pasteUrl: string
+  getPasteUrl: () => Promise<string>
 }
 
 const StyledButton = styled((props) => (
@@ -25,14 +24,19 @@ const StyledPaper = styled(({ ...props }) => <Paper {...props} />)`
 `
 
 const Help: React.FunctionComponent<HelpProps> = (props) => {
-  const { handlePasteSubmit, pasteUrl } = props
+  const { getPasteUrl } = props
   const [t] = useTranslation()
-  const [pasteTriggered, setPasteTriggered] = useState(false)
+  const [pasteUrl, setPasteUrl] = useState<string | undefined>()
   const [copySuccess, setCopySuccess] = useState("")
 
   const pasteHandler = async () => {
-    setPasteTriggered(true)
-    handlePasteSubmit()
+    getPasteUrl()
+      .then((url) => {
+        setPasteUrl(url)
+      })
+      .catch((error) => {
+        setPasteUrl(error)
+      })
   }
 
   const copyToClipboard = () => {
@@ -45,7 +49,7 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
   return (
     <StyledPaper>
       <Typography>{t("tmcPasteDescription")}</Typography>
-      {pasteTriggered && (
+      {pasteUrl && (
         <div>
           <StyledInput
             id="textField"
@@ -63,7 +67,7 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
       )}
       <StyledButton
         onClick={pasteHandler}
-        disabled={pasteTriggered}
+        disabled={pasteUrl?.startsWith("error")}
         data-cy="send-to-paste-btn"
       >
         {t("sendToTmcPaste")}

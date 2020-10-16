@@ -85,7 +85,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [files, setFiles] = useState([defaultFile])
   const [selectedFile, setSelectedFile] = useState(defaultFile)
   const [editorValue, setEditorValue] = useState("")
-  const [pasteUrl, setPasteUrl] = useState("")
   const [openNotification, setOpenNotification] = useState(false)
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
     NodeJS.Timeout | undefined
@@ -179,11 +178,21 @@ ${testSource}
     changeFile(e.target.value, files)
   }
 
-  const handleSubmit = (paste: boolean) => {
-    setPasteUrl("")
+  const handleSubmit = () => {
     setStateForSelectedFile()
     setEditorState(
-      paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
+      // paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
+      EditorState.Submitting,
+    )
+  }
+
+  const handlePasteSubmit = () => {
+    return submitToPaste(
+      files.map((x) =>
+        x.shortName === selectedFile.shortName
+          ? { ...x, content: editorValue }
+          : x,
+      ),
     )
   }
 
@@ -228,12 +237,6 @@ ${testSource}
               ? EditorState.ShowPassedFeedbackForm
               : EditorState.ShowSubmissionResults,
           )
-        })
-        break
-      case EditorState.SubmittingToPaste:
-        submitToPaste(files).then((res) => {
-          setPasteUrl(res)
-          setEditorState(EditorState.ShowPasteResults)
         })
         break
       case EditorState.ExecutingCode:
@@ -294,7 +297,7 @@ ${testSource}
           <TestOutput
             onClose={closeOutput}
             outputHeight={outputHeight}
-            onSubmit={() => handleSubmit(false)}
+            onSubmit={() => handleSubmit()}
             testResults={testResults ?? { points: [], testCases: [] }}
           />
         )
@@ -312,9 +315,11 @@ ${testSource}
         return (
           <EditorOutput
             editorState={editorState}
+            getPasteLink={handlePasteSubmit}
             onClose={closeOutput}
             outputContent={output}
             outputHeight={outputHeight}
+            pasteDisabled={!signedIn || expired}
             sendInput={sendInput}
           />
         )

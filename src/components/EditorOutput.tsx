@@ -20,14 +20,24 @@ const { Blue, Orange } = OutputHeaderColor
 
 interface EditorOutputProps {
   editorState: EditorState
+  getPasteLink: () => Promise<string>
   onClose: () => void
   outputContent: OutputObject[]
   outputHeight?: string
+  pasteDisabled?: boolean
   sendInput: (input: string) => void
 }
 
 const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
-  const { editorState, onClose, outputContent, outputHeight, sendInput } = props
+  const {
+    editorState,
+    getPasteLink,
+    onClose,
+    outputContent,
+    outputHeight,
+    pasteDisabled,
+    sendInput,
+  } = props
   const [t] = useTranslation()
   const [showHelp, setShowHelp] = useState(false)
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
@@ -64,6 +74,7 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
         {getStatus()}
         {hasErrors && (
           <OutputHeaderButton
+            disabled={pasteDisabled}
             label={t("needHelp")}
             onClick={() => setShowHelp(true)}
             dataCy="need-help-btn"
@@ -83,9 +94,7 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
             scrollToBottom={() => scrollBoxRef.current?.scrollToBottom()}
             sendInput={sendInput}
           />
-          {showHelp && (
-            <Help handlePasteSubmit={() => console.log("no op")} pasteUrl="" />
-          )}
+          {showHelp && <Help getPasteUrl={getPasteLink} />}
         </ScrollBox>
       </OutputBody>
     </Grid>

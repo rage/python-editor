@@ -74,28 +74,15 @@ describe("API Endpoint tests #1", () => {
     cy.contains("FAIL: HymioTest: test_print_hymio")
   })
 
-  // Need worker fix from master
-  it.skip("ask for help works with failed tests", () => {
+  it("ask for help works with failed tests", () => {
     cy.get(".monaco-editor")
       .first()
       .click()
       .focused()
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
-      .type(program)
+      .type(program + "asd")
     cy.get("[data-cy=run-btn]").click()
-    cy.route({
-      method: "POST",
-      url: "/api/v8/core/exercises/90703/submissions",
-      response: "@sendSubmission",
-    })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/core/submissions/123123",
-      response: "@resultSubmissionFail",
-    })
-    cy.contains("hello from python")
-    cy.get("[data-cy=submit-btn]").click()
     cy.get("[data-cy=output-container]").contains("Need help?")
     cy.get("[data-cy=need-help-btn]").click()
     cy.contains("TMC Paste")
