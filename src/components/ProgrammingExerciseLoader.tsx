@@ -57,6 +57,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testSource, setTestSource] = useState<string | undefined>()
+  const [incompatibleMessage, setIncompatibleMessage] = useState<
+    string | undefined
+  >()
   const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -120,7 +123,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
 
     const [src, test, tmc] = unzipResult.val
-    setTestSource(inlineAndPatchTestSources(test, tmc))
+    try {
+      const inlined = inlineAndPatchTestSources(test, tmc)
+      setTestSource(inlined)
+    } catch (e) {
+      setIncompatibleMessage(e)
+    }
 
     if (!hasToken) {
       setSrcFiles(src)
@@ -263,6 +271,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     <div>
       {!signedIn && (
         <Notification style="warning" text={t("signInToSubmitExercise")} />
+      )}
+      {incompatibleMessage && (
+        <Notification
+          style="warning"
+          text={`${t("incompatibleExerciseTemplate")}: ${incompatibleMessage}`}
+        />
       )}
       {exerciseDetails?.expired && (
         <Notification style="warning" text={t("deadlineExpired")} />

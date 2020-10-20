@@ -16,6 +16,7 @@
   "failedToEstablishConnectionToServer": "Failed to establish a connection to TMC Server.",
   "failedToDownloadExercise": "Failed to download exercise.",
   "feedbackTitle": "Exercise completed, congratulations!",
+  "incompatibleExerciseTemplate": "Incompatible exercise template",
   "infiniteLoopMessage": "Make sure you don't have an infinite loop in your code.",
   "malformedExerciseTemplate": "Malformed exercise template",
   "modelSolution": "Model solution",

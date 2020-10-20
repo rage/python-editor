@@ -162,11 +162,14 @@ const patchAndEncodeTmcFile = (
       break
   }
   const wrapped = resolveImports({ ...file, content }, tmcFiles)
-  //console.log(file.shortName, wrapped)
   return Base64.encode(wrapped)
 }
 
 const patchTmcUtilsPy = (source: string): string => {
+  let stdOutPointerFound = false
+  let loadModuleFound = false
+  let reloadModuleFound = false
+
   const defLoadModule = `\
     from types import ModuleType
     from tmc_webeditor import code
@@ -191,12 +194,17 @@ const patchTmcUtilsPy = (source: string): string => {
 
   while (i < lines.length) {
     const line = lines[i]
-    if (line.startsWith("def load_module")) {
+    if (line.startsWith("_stdout_pointer")) {
+      stdOutPointerFound = true
+      i++
+    } else if (line.startsWith("def load_module")) {
+      loadModuleFound = true
       const blockEnd = findBlockEnd(lines, i)
       const newBlock = defLoadModule.split("\n")
       lines = replaceLines(lines, i + 1, blockEnd, newBlock)
       i += newBlock.length
     } else if (line.startsWith("def reload_module")) {
+      reloadModuleFound = true
       const blockEnd = findBlockEnd(lines, i)
       const newBlock = defReloadModule.split("\n")
       lines = replaceLines(lines, i + 1, blockEnd, newBlock)
@@ -204,6 +212,14 @@ const patchTmcUtilsPy = (source: string): string => {
     } else {
       i++
     }
+  }
+
+  if (!stdOutPointerFound) {
+    throw "Expected to find global `_stdout_pointer` from utils.py"
+  } else if (!loadModuleFound) {
+    throw "Expected to find function `load_module` from utils.py"
+  } else if (!reloadModuleFound) {
+    throw "Expected to find function `reload_module` from utils.py"
   }
 
   return lines.join("\n")
