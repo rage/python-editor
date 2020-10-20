@@ -159,6 +159,7 @@ ${testSource}
     } else if (type === "test_results") {
       const testCases = parseTestCases(msg)
       setOutput([])
+      setEditorState(EditorState.ShowTestResults)
       setTestResults({
         allTestsPassed: testCases.every((x) => x.passed),
         points: [],
@@ -256,6 +257,7 @@ ${testSource}
         break
       case EditorState.Idle:
       case EditorState.RunAborted:
+      case EditorState.ShowTestResults:
       case EditorState.WaitingInput:
         if (executionTimeoutTimer) {
           clearTimeout(executionTimeoutTimer)
@@ -431,9 +433,7 @@ ${testSource}
           />
         </Grid>
       </AnimatedOutputBox>
-      {/* {<div>
-        {EditorState[editorState]}
-      </div>} */}
+      <div>{EditorState[editorState]}</div>
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}
