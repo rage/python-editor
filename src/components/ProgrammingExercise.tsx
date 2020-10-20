@@ -256,6 +256,7 @@ ${testSource}
         break
       case EditorState.Idle:
       case EditorState.RunAborted:
+      case EditorState.ShowTestResults:
       case EditorState.WaitingInput:
         if (executionTimeoutTimer) {
           clearTimeout(executionTimeoutTimer)
