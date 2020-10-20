@@ -155,7 +155,6 @@ ${testSource}
     } else if (type === "test_results") {
       const testCases = parseTestCases(msg)
       setOutput([])
-      setEditorState(EditorState.ShowTestResults)
       setTestResults({
         allTestsPassed: testCases.every((x) => x.passed),
         points: [],
