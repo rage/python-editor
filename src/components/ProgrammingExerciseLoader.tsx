@@ -1,5 +1,11 @@
+import JSZip, { JSZipObject } from "jszip"
+import { DateTime } from "luxon"
 import React, { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { Result } from "ts-results"
+
+import { useTime } from "../hooks/customHooks"
+import { TestResultObject, Language, ExerciseDetails } from "../types"
 import { ProgrammingExercise, defaultFile } from "./ProgrammingExercise"
 import {
   getExerciseDetails,
@@ -9,12 +15,8 @@ import {
   postExerciseSubmission,
   getLatestSubmissionZip,
 } from "../services/programming_exercise"
-import { TestResultObject, Language, ExerciseDetails } from "../types"
-import { useTime } from "../hooks/customHooks"
-import { DateTime } from "luxon"
-import JSZip, { JSZipObject } from "jszip"
-import { Result } from "ts-results"
 import { inlineAndPatchTestSources } from "../services/patch_exercise"
+import Notification from "./Notification"
 
 type ProgrammingExerciseLoaderProps = {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
@@ -55,6 +57,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const [ready, setReady] = useState(false)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testSource, setTestSource] = useState<string | undefined>()
+  const [incompatibleMessage, setIncompatibleMessage] = useState<
+    string | undefined
+  >()
   const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -118,7 +123,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
 
     const [src, test, tmc] = unzipResult.val
-    setTestSource(inlineAndPatchTestSources(test, tmc))
+    try {
+      const inlined = inlineAndPatchTestSources(test, tmc)
+      setTestSource(inlined)
+    } catch (e) {
+      setIncompatibleMessage(e)
+    }
 
     if (!hasToken) {
       setSrcFiles(src)
@@ -258,7 +268,19 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }, [token])
 
   return (
-    <>
+    <div>
+      {!signedIn && (
+        <Notification style="warning" text={t("signInToSubmitExercise")} />
+      )}
+      {incompatibleMessage && (
+        <Notification
+          style="warning"
+          text={`${t("incompatibleExerciseTemplate")}: ${incompatibleMessage}`}
+        />
+      )}
+      {exerciseDetails?.expired && (
+        <Notification style="warning" text={t("deadlineExpired")} />
+      )}
       <ProgrammingExercise
         initialFiles={srcFiles}
         testSource={testSource}
@@ -269,19 +291,18 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         }}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
-        signedIn={signedIn}
+        submitDisabled={exerciseDetails?.expired ?? !signedIn}
         editorHeight={height}
         outputHeight={outputHeight}
         outputPosition={outputPosition}
         ready={ready}
-        expired={exerciseDetails?.expired}
         solutionUrl={
           exerciseDetails?.completed || exerciseDetails?.expired
             ? `https://tmc.mooc.fi/exercises/${exerciseDetails.id}/solution`
             : undefined
         }
       />
-    </>
+    </div>
   )
 }
 

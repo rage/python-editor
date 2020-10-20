@@ -92,11 +92,6 @@ describe("The Playground", () => {
   })
 
   describe("Running code", () => {
-    it("without token gives sign in warning", () => {
-      cy.visit("/")
-      cy.contains("Sign in to submit exercise")
-    })
-
     it("code produces output", () => {
       cy.visit("/")
       cy.get(".monaco-editor")

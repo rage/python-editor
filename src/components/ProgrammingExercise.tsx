@@ -21,7 +21,6 @@ import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { useWorker } from "../hooks/getWorker"
-import Notification from "./Notification"
 import PyEditorButtons from "./PyEditorButtons"
 import { parseTestCases } from "../services/test_parsing"
 import { createWebEditorModuleSource } from "../services/patch_exercise"
@@ -40,12 +39,11 @@ type ProgrammingExerciseProps = {
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   initialFiles: Array<FileEntry>
   testSource?: string
-  signedIn: boolean
+  submitDisabled: boolean
   editorHeight?: string
   outputHeight?: string
   outputPosition?: string
   ready?: boolean
-  expired?: boolean
   solutionUrl?: string
 }
 
@@ -70,12 +68,11 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitToPaste,
   initialFiles,
   testSource,
-  signedIn,
+  submitDisabled,
   editorHeight,
   outputHeight,
   outputPosition = "absolute",
   ready = true,
-  expired,
   solutionUrl,
 }) => {
   const [t] = useTranslation()
@@ -320,7 +317,7 @@ ${testSource}
             onClose={closeOutput}
             outputContent={output}
             outputHeight={outputHeight}
-            pasteDisabled={!signedIn || expired}
+            pasteDisabled={submitDisabled}
             sendInput={sendInput}
           />
         )
@@ -408,10 +405,6 @@ ${testSource}
       ) : (
         <PyEditorButtons editorState={editorState} solutionUrl={solutionUrl} />
       )}
-      {!signedIn && (
-        <Notification style="warning" text={t("signInToSubmitExercise")} />
-      )}
-      {expired && <Notification style="warning" text={t("deadlineExpired")} />}
       <PyEditor
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
