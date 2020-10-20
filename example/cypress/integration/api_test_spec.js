@@ -64,8 +64,10 @@ describe("API Endpoint tests #1", () => {
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
       .type(program)
-    cy.get("[data-cy=run-btn]").click()
-    cy.get("[data-cy=output-container]").contains("hello from python")
+    cy.get("[data-cy=test-btn]").click()
+    cy.get("[data-cy=output-container]").contains(
+      "'hello from python' != ':-)'",
+    )
     cy.get("[data-cy=submit-btn]").click()
     cy.contains("Submitting to server")
     cy.contains("0%")
@@ -79,20 +81,8 @@ describe("API Endpoint tests #1", () => {
       .focused()
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
-      .type(program)
+      .type(program + "asd")
     cy.get("[data-cy=run-btn]").click()
-    cy.route({
-      method: "POST",
-      url: "/api/v8/core/exercises/90703/submissions",
-      response: "@sendSubmission",
-    })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/core/submissions/123123",
-      response: "@resultSubmissionFail",
-    })
-    cy.contains("hello from python")
-    cy.get("[data-cy=submit-btn]").click()
     cy.get("[data-cy=output-container]").contains("Need help?")
     cy.get("[data-cy=need-help-btn]").click()
     cy.contains("TMC Paste")
@@ -110,7 +100,7 @@ describe("API Endpoint tests #1", () => {
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
       .type(workingProgram)
-    cy.get("[data-cy=run-btn]").click()
+    cy.get("[data-cy=test-btn]").click()
     cy.route({
       method: "POST",
       url: "/api/v8/core/exercises/90703/submissions",
@@ -121,7 +111,7 @@ describe("API Endpoint tests #1", () => {
       url: "/api/v8/core/submissions/123123",
       response: "@resultSubmissionPass",
     })
-    cy.contains(":-)")
+    cy.contains("PASS")
     cy.get("[data-cy=submit-btn]").click()
     cy.contains("Submitting to server")
     cy.wait(250)

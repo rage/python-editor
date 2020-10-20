@@ -47,7 +47,11 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
         </StyledButton>
       ) : null}
       {handleTests ? (
-        <StyledButton onClick={() => handleTests()} disabled={!allowTest}>
+        <StyledButton
+          onClick={() => handleTests()}
+          disabled={!allowTest}
+          data-cy="test-btn"
+        >
           <FontAwesomeIcon color="#ED9410" icon={faEye} />
         </StyledButton>
       ) : null}
