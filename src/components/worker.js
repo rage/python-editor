@@ -154,22 +154,36 @@ loop.call_soon(wrap_execution())
 
   parsedCode = `
 import ast
+import re
 
-class PatchInput(ast.NodeTransformer):
+class PatchCode(ast.NodeTransformer):
     def generic_visit(self, node):
-        super().generic_visit(node)
-        input_conditions = (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Name)
-            and node.func.id == 'input'
-        )
-        if input_conditions:
-            result = ast.Await(node)
-            return ast.copy_location(result, node)
-        return node
+      super().generic_visit(node)
+
+      # Python 3.8 higher all is ast.Constant
+      if isinstance(node, ast.Constant):
+        remove_padding = re.sub('[\\n]    ', '\\n', node.value)
+        result = ast.Constant(remove_padding)
+        return ast.copy_location(result, node)
+      # Python ver 3.8 lower ast.Str is used
+      if isinstance(node, ast.Str):
+        remove_padding = re.sub('[\\n]    ', '\\n', node.s)
+        result = ast.Constant(remove_padding)
+        return ast.copy_location(result, node)
+
+      input_conditions = (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == 'input'
+      )
+      if input_conditions:
+        result = ast.Await(node)
+        return ast.copy_location(result, node)
+
+      return node
 
 tree = ast.parse("""${code}""")
-optimizer = PatchInput()
+optimizer = PatchCode()
 tree = optimizer.visit(tree)
 code = compile(tree, "<string>", "exec")
 exec(code)
