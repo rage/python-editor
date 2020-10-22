@@ -39,7 +39,6 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
   sendInput,
 }) => {
   const [t] = useTranslation()
-  const [showHelp, setShowHelp] = useState(false)
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
   const running = (editorState & EditorState.WorkerActive) !== 0
@@ -72,12 +71,6 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
       >
         {getStatus()}
         <OutputHeaderButton
-          disabled={pasteDisabled}
-          label={t("needHelp")}
-          onClick={() => setShowHelp(true)}
-          dataCy="need-help-btn"
-        />
-        <OutputHeaderButton
           label={t("button.close")}
           onClick={onClose}
           dataCy="close-btn"
@@ -85,13 +78,16 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
       </OutputHeader>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
+          <Help
+            getPasteUrl={getPasteLink}
+            pasteDisabled={running || pasteDisabled}
+          />
           <Console
             inputRequested={waitingInput}
             outputContent={outputContent}
             scrollToBottom={() => scrollBoxRef.current?.scrollToBottom()}
             sendInput={sendInput}
           />
-          {showHelp && <Help getPasteUrl={getPasteLink} />}
         </ScrollBox>
       </OutputBody>
     </OutputBox>

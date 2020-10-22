@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 
 import { TestResultObject } from "../types"
@@ -30,7 +30,6 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
   submitDisabled,
   testResults,
 }) => {
-  const [showHelp, setShowHelp] = useState(false)
   const [t] = useTranslation()
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
@@ -48,12 +47,6 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
       >
         <OutputHeaderButton
           disabled={submitDisabled}
-          label={t("needHelp")}
-          onClick={() => setShowHelp(true)}
-          dataCy="need-help-btn"
-        />
-        <OutputHeaderButton
-          disabled={submitDisabled}
           label={t("button.submit")}
           onClick={onSubmit}
           dataCy="submit-btn"
@@ -66,8 +59,8 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
       </OutputHeaderWithPercentage>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
+          <Help getPasteUrl={getPasteLink} pasteDisabled={submitDisabled} />
           <TestResults results={testResults} />
-          {showHelp && <Help getPasteUrl={getPasteLink} />}
         </ScrollBox>
       </OutputBody>
     </OutputBox>
