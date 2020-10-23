@@ -214,12 +214,15 @@ const patchTmcUtilsPy = (source: string): string => {
     }
   }
 
-  if (!stdOutPointerFound) {
-    throw "Expected to find global `_stdout_pointer` from utils.py"
-  } else if (!loadModuleFound) {
-    throw "Expected to find function `load_module` from utils.py"
-  } else if (!reloadModuleFound) {
-    throw "Expected to find function `reload_module` from utils.py"
+  const missing: string[] = []
+  !stdOutPointerFound &&
+    missing.push("Expected to find global `_stdout_pointer` from tmc/utils.py.")
+  !loadModuleFound &&
+    missing.push("Expected to find function `load_module` from tmc/utils.py.")
+  !reloadModuleFound &&
+    missing.push("Expected to find function `reload_module` from tmc/utils.py.")
+  if (missing.length > 0) {
+    throw missing.join(" ")
   }
 
   return lines.join("\n")
