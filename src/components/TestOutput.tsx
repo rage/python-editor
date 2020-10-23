@@ -2,6 +2,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 
 import { TestResultObject } from "../types"
+import Help from "./Help"
 import {
   OutputBox,
   OutputBody,
@@ -13,14 +14,22 @@ import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
 interface TestOutputProps {
+  getPasteLink: () => Promise<string>
   onClose: () => void
   onSubmit: () => void
   outputHeight?: string
+  submitDisabled?: boolean
   testResults: TestResultObject
 }
 
-const TestOutput: React.FunctionComponent<TestOutputProps> = (props) => {
-  const { onClose, onSubmit, outputHeight, testResults } = props
+const TestOutput: React.FunctionComponent<TestOutputProps> = ({
+  getPasteLink,
+  onClose,
+  onSubmit,
+  outputHeight,
+  submitDisabled,
+  testResults,
+}) => {
   const [t] = useTranslation()
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
@@ -37,6 +46,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = (props) => {
         title={t("testResults")}
       >
         <OutputHeaderButton
+          disabled={submitDisabled}
           label={t("button.submit")}
           onClick={onSubmit}
           dataCy="submit-btn"
@@ -49,6 +59,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = (props) => {
       </OutputHeaderWithPercentage>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
+          <Help getPasteUrl={getPasteLink} pasteDisabled={submitDisabled} />
           <TestResults results={testResults} />
         </ScrollBox>
       </OutputBody>

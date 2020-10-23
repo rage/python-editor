@@ -293,9 +293,11 @@ ${testSource}
       case EditorState.ShowTestResults:
         return (
           <TestOutput
+            getPasteLink={handlePasteSubmit}
             onClose={closeOutput}
             outputHeight={outputHeight}
             onSubmit={() => handleSubmit()}
+            submitDisabled={submitDisabled}
             testResults={testResults ?? { points: [], testCases: [] }}
           />
         )

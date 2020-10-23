@@ -5,6 +5,7 @@ import { Button, Input, Paper, Typography } from "@material-ui/core"
 
 type HelpProps = {
   getPasteUrl: () => Promise<string>
+  pasteDisabled?: boolean
 }
 
 const StyledButton = styled((props) => (
@@ -23,16 +24,21 @@ const StyledPaper = styled(({ ...props }) => <Paper {...props} />)`
   padding: 10px;
 `
 
-const Help: React.FunctionComponent<HelpProps> = (props) => {
-  const { getPasteUrl } = props
-  const [t] = useTranslation()
+const Help: React.FunctionComponent<HelpProps> = ({
+  getPasteUrl,
+  pasteDisabled,
+}) => {
+  const [copySuccess, setCopySuccess] = useState(false)
+  const [rePasteDisabled, setRePasteDisabled] = useState(false)
   const [pasteUrl, setPasteUrl] = useState<string | undefined>()
-  const [copySuccess, setCopySuccess] = useState("")
+  const [showHelp, setShowHelp] = useState(false)
+  const [t] = useTranslation()
 
   const pasteHandler = async () => {
     getPasteUrl()
       .then((url) => {
         setPasteUrl(url)
+        setRePasteDisabled(true)
       })
       .catch((error) => {
         setPasteUrl(error)
@@ -40,10 +46,26 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
   }
 
   const copyToClipboard = () => {
-    const element = document.getElementById("textField") as HTMLInputElement
-    element.select()
-    document.execCommand("copy")
-    setCopySuccess(t("copiedConfirmation"))
+    const element = document.getElementById("textField")
+    if (element instanceof HTMLInputElement) {
+      element.select()
+      document.execCommand("copy")
+      setCopySuccess(true)
+    }
+  }
+
+  if (!showHelp) {
+    return (
+      <div style={{ textAlign: "right" }}>
+        <StyledButton
+          disabled={pasteDisabled}
+          onClick={() => setShowHelp(true)}
+          data-cy="need-help-btn"
+        >
+          {t("needHelp")}
+        </StyledButton>
+      </div>
+    )
   }
 
   return (
@@ -62,12 +84,16 @@ const Help: React.FunctionComponent<HelpProps> = (props) => {
               {t("button.copy")}
             </StyledButton>
           )}
-          <span style={{ paddingLeft: "3px" }}>{copySuccess}</span>
+          {copySuccess && (
+            <span style={{ paddingLeft: "3px" }}>
+              {t("copiedConfirmation")}
+            </span>
+          )}
         </div>
       )}
       <StyledButton
         onClick={pasteHandler}
-        disabled={pasteUrl?.startsWith("error")}
+        disabled={rePasteDisabled}
         data-cy="send-to-paste-btn"
       >
         {t("sendToTmcPaste")}

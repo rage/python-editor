@@ -1,6 +1,6 @@
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { CircularProgress, Grid } from "@material-ui/core"
+import { CircularProgress } from "@material-ui/core"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -9,6 +9,7 @@ import Console from "./Console"
 import Help from "./Help"
 import {
   OutputBody,
+  OutputBox,
   OutputHeader,
   OutputHeaderButton,
   OutputHeaderColor,
@@ -28,21 +29,18 @@ interface EditorOutputProps {
   sendInput: (input: string) => void
 }
 
-const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
-  const {
-    editorState,
-    getPasteLink,
-    onClose,
-    outputContent,
-    outputHeight,
-    pasteDisabled,
-    sendInput,
-  } = props
+const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
+  editorState,
+  getPasteLink,
+  onClose,
+  outputContent,
+  outputHeight,
+  pasteDisabled,
+  sendInput,
+}) => {
   const [t] = useTranslation()
-  const [showHelp, setShowHelp] = useState(false)
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
-  const hasErrors = outputContent.some((item: any) => item.type === "error")
   const running = (editorState & EditorState.WorkerActive) !== 0
   const waitingInput = editorState === EditorState.WaitingInput
 
@@ -66,20 +64,12 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
   }
 
   return (
-    <Grid container direction="column">
+    <OutputBox>
       <OutputHeader
         title={t("outputTitle")}
         color={waitingInput ? Orange : Blue}
       >
         {getStatus()}
-        {hasErrors && (
-          <OutputHeaderButton
-            disabled={pasteDisabled}
-            label={t("needHelp")}
-            onClick={() => setShowHelp(true)}
-            dataCy="need-help-btn"
-          />
-        )}
         <OutputHeaderButton
           label={t("button.close")}
           onClick={onClose}
@@ -88,16 +78,19 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
       </OutputHeader>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
+          <Help
+            getPasteUrl={getPasteLink}
+            pasteDisabled={running || pasteDisabled}
+          />
           <Console
             inputRequested={waitingInput}
             outputContent={outputContent}
             scrollToBottom={() => scrollBoxRef.current?.scrollToBottom()}
             sendInput={sendInput}
           />
-          {showHelp && <Help getPasteUrl={getPasteLink} />}
         </ScrollBox>
       </OutputBody>
-    </Grid>
+    </OutputBox>
   )
 }
 

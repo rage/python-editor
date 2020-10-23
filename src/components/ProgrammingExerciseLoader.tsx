@@ -224,7 +224,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     return submissionResult.val
   }
 
-  const submitToPaste = async (files: FileEntry[]) => {
+  const submitToPaste = async (files: FileEntry[]): Promise<string> => {
     if (!exerciseDetails) {
       return ""
     }
@@ -234,9 +234,10 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       apiConfig,
       { paste: true },
     )
-    return submitResult.ok
-      ? submitResult.val.pasteUrl || ""
-      : submitResult.val.message
+    // Remap to avoid dependency to `ts-results`.
+    return submitResult
+      .map((x) => Promise.resolve(x.pasteUrl ?? ""))
+      .mapErr((x) => Promise.reject(x.message)).val
   }
 
   useEffect(() => {
