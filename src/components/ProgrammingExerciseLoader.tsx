@@ -271,16 +271,19 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   return (
     <div>
       {!signedIn && (
-        <Notification style="warning" text={t("signInToSubmitExercise")} />
+        <Notification style="warning">
+          {t("signInToSubmitExercise")}
+        </Notification>
       )}
       {incompatibleMessage && (
-        <Notification
-          style="warning"
-          text={`${t("incompatibleExerciseTemplate")}: ${incompatibleMessage}`}
-        />
+        <Notification style="warning">
+          {`${t("incompatibleExerciseTemplate")}. ${t(
+            "pleaseReportFollowingErrorToCourseInstructor",
+          )}: ${incompatibleMessage}`}
+        </Notification>
       )}
       {exerciseDetails?.expired && (
-        <Notification style="warning" text={t("deadlineExpired")} />
+        <Notification style="warning">{t("deadlineExpired")}</Notification>
       )}
       <ProgrammingExercise
         initialFiles={srcFiles}

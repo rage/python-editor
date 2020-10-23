@@ -18,19 +18,19 @@ const Content = styled.span`
 
 type NotificationProps = {
   style: "warning"
-  text: string
 }
 
-const Notification: React.FunctionComponent<NotificationProps> = (props) => {
-  const { style, text } = props
-
+const Notification: React.FunctionComponent<NotificationProps> = ({
+  children,
+  style,
+}) => {
   switch (style) {
     case "warning":
     default:
       return (
         <WarningBox>
           <FontAwesomeIcon icon={faExclamationTriangle} />
-          <Content>{text}</Content>
+          <Content>{children}</Content>
         </WarningBox>
       )
   }
