@@ -22,6 +22,7 @@ type ProgrammingExerciseLoaderProps = {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
   organization: string
   course: string
+  debug?: boolean
   exercise: string
   token: string
   height?: string
@@ -45,6 +46,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   onExerciseDetailsChange,
   organization,
   course,
+  debug,
   exercise,
   token,
   height,
@@ -286,6 +288,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         <Notification style="warning">{t("deadlineExpired")}</Notification>
       )}
       <ProgrammingExercise
+        debug={debug}
         initialFiles={srcFiles}
         testSource={testSource}
         submitFeedback={(testResults, feedback) => {
