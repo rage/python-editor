@@ -50,6 +50,7 @@ const App = () => {
         }}
         organization={organization}
         course={course}
+        debug={true}
         exercise={exercise}
         token={token}
         height={height}
@@ -155,6 +156,7 @@ const App = () => {
       {!fetch && (
         <I18nextProvider i18n={i18n}>
           <ProgrammingExercise
+            debug={true}
             editorHeight={height}
             outputHeight={outputHeight}
           />

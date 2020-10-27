@@ -37,6 +37,7 @@ type ProgrammingExerciseProps = {
     files: Array<FileEntry>,
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
+  debug?: boolean
   initialFiles: Array<FileEntry>
   testSource?: string
   submitDisabled: boolean
@@ -66,6 +67,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitFeedback,
   submitProgrammingExercise,
   submitToPaste,
+  debug,
   initialFiles,
   testSource,
   submitDisabled,
@@ -98,7 +100,10 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       setEditorState(EditorState.ExecutingCode)
       worker.postMessage({
         type: "run",
-        msg: code ? code : editorValue,
+        msg: {
+          code: code ?? editorValue,
+          debug,
+        },
       })
     } else {
       console.log("Worker is busy")
@@ -107,7 +112,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   function handleTests(code?: string) {
     if (workerAvailable) {
-      const msg = `
+      const testCode = `
 __webeditor_module_source = ${createWebEditorModuleSource(code ?? editorValue)}
 ${testSource}
 `
@@ -115,7 +120,7 @@ ${testSource}
       setTestResults(undefined)
       setWorkerAvailable(false)
       setEditorState(EditorState.Testing)
-      worker.postMessage({ type: "run_tests", msg })
+      worker.postMessage({ type: "run_tests", msg: { code: testCode, debug } })
     } else {
       console.log("Worker is busy")
     }
@@ -437,7 +442,7 @@ ${testSource}
       >
         {mapStateToOutput()}
       </AnimatedOutputBox>
-      <div>{EditorState[editorState]}</div>
+      {debug && <div>{EditorState[editorState]}</div>}
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}

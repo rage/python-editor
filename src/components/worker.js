@@ -90,7 +90,7 @@ function exit() {
   running = false
 }
 
-function run(code) {
+function run({ code, debug }) {
   // Async function workaround for input by Andreas Klostermann
   // https://github.com/akloster/aioweb-demo/blob/master/src/main.py
   code = `\
@@ -188,7 +188,9 @@ tree = optimizer.visit(tree)
 code = compile(tree, "<string>", "exec")
 exec(code)
 `
-
+  if (debug) {
+    console.log(parsedCode)
+  }
   languagePluginLoader
     .then(() => {
       pyodide
@@ -221,7 +223,10 @@ function fixLineNumberOffset(msg) {
   return msg.replace(/line\s(\d+)/g, lineOffsetReplacer)
 }
 
-function test(code) {
+function test({ code, debug }) {
+  if (debug) {
+    console.log(code)
+  }
   languagePluginLoader
     .then(() => {
       pyodide
