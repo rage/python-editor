@@ -299,7 +299,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         }}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
-        submitDisabled={exerciseDetails?.expired ?? !signedIn}
+        submitDisabled={exerciseDetails?.expired || !signedIn}
         editorHeight={height}
         outputHeight={outputHeight}
         outputPosition={outputPosition}
