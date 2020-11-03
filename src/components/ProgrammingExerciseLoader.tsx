@@ -132,11 +132,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       setIncompatibleMessage(e)
     }
 
-    if (!hasToken) {
-      setSrcFiles(src)
-      return
-    }
-
     const detailsResult = await getExerciseDetails(
       organization,
       course,
@@ -150,6 +145,11 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       return
     }
     setExerciseDetails(detailsResult.val)
+
+    if (!hasToken) {
+      setSrcFiles(src)
+      return
+    }
 
     try {
       const submissionResult = await getLatestSubmissionZip(
@@ -167,6 +167,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
           return
         }
       }
+      setSrcFiles(src)
     } catch (e) {
       setSrcFiles(src)
     }
@@ -298,7 +299,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         }}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
-        submitDisabled={exerciseDetails?.expired ?? !signedIn}
+        submitDisabled={exerciseDetails?.expired || !signedIn}
         editorHeight={height}
         outputHeight={outputHeight}
         outputPosition={outputPosition}
