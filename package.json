@@ -73,7 +73,7 @@
     "styled-components": "^5.2.0",
     "jszip": "^3.5.0",
     "jszip-utils": "^0.1.0",
-    "monaco-editor": "^0.20.0",
+    "monaco-editor": "^0.21.2",
     "ts-results": "^3.0.0",
     "uuid": "^8.3.1"
   },
