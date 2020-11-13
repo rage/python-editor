@@ -61,7 +61,7 @@ const useStyles = makeStyles({
   stopButton: {
     "&:hover": {
       backgroundColor: "#0275d8",
-      color: "F44141",
+      color: "#F44141",
     },
   },
   whiteText: {
@@ -343,6 +343,8 @@ ${testSource}
             onClose={closeOutput}
             submitting={editorState === EditorState.Submitting}
             testResults={testResults ?? { points: [], testCases: [] }}
+            getPasteLink={handlePasteSubmit}
+            pasteDisabled={submitDisabled}
           />
         )
       default:
@@ -468,7 +470,7 @@ ${testSource}
           disabled={
             !(!!testSource && (editorState & EditorState.WorkerActive) === 0)
           }
-          style={{ backgroundColor: "#EBEBEB", color: "#ED9410" }}
+          style={{ backgroundColor: "#EBEBEB", color: "#FF7518" }}
           data-cy="test-btn"
         >
           <FontAwesomeIcon icon={faEye} />

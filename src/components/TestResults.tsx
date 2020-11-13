@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
-import {
-  Button,
-  Chip,
-  Paper,
-  Typography,
-  FormControlLabel,
-  Checkbox,
-  Grid,
-} from "@material-ui/core"
+import { Chip, Paper, Typography, Grid } from "@material-ui/core"
 import { TestResultObject } from "../types"
 import { removeFalseIsNotTrue } from "../services/test_parsing"
 
 type TestResultsProps = {
   results: TestResultObject
+  showAllTests: boolean
 }
 type TestResultProps = {
   testName: string
@@ -88,16 +81,10 @@ const Points: React.FunctionComponent<PointsProps> = ({ points }) => {
 
 const TestResults: React.FunctionComponent<TestResultsProps> = ({
   results,
+  showAllTests,
 }) => {
-  const [t] = useTranslation()
-  const [showAll, setShowAll] = useState(false)
-
-  useEffect(() => {
-    setShowAll(results.allTestsPassed ?? false)
-  }, [results])
-
   const showResults = () => {
-    if (!showAll) {
+    if (!showAllTests) {
       const failedTest = results.testCases.find(
         (result) => result.passed === false,
       )
@@ -139,19 +126,6 @@ const TestResults: React.FunctionComponent<TestResultsProps> = ({
       <Grid item xs={12}>
         {showResults()}
       </Grid>
-      <Paper style={{ paddingLeft: "13px" }}>
-        <FormControlLabel
-          label={t("showAll")}
-          control={
-            <Checkbox
-              checked={showAll}
-              onChange={() => setShowAll(!showAll)}
-              color="primary"
-              data-cy="show-all-results-checkbox"
-            />
-          }
-        />
-      </Paper>
     </Grid>
   )
 }

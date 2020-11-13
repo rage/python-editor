@@ -1,17 +1,27 @@
 import React, { useState, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
-import { Button, Input, Paper, Typography } from "@material-ui/core"
+import { Button, Input, makeStyles, Paper, Typography } from "@material-ui/core"
 
 type HelpProps = {
   getPasteUrl: () => Promise<string>
   pasteDisabled?: boolean
 }
 
+const useStyles = makeStyles({
+  blueButton: {
+    "&:hover": {
+      backgroundColor: "#0275d8",
+    },
+  },
+})
+
 const StyledButton = styled((props) => (
   <Button variant="contained" {...props} />
 ))`
   margin: 0.7rem !important;
+  background-color: #0275d8;
+  color: #fff;
 `
 
 const StyledInput = styled((props) => <Input {...props} />)`
@@ -33,6 +43,7 @@ const Help: React.FunctionComponent<HelpProps> = ({
   const [pasteUrl, setPasteUrl] = useState<string | undefined>()
   const [showHelp, setShowHelp] = useState(false)
   const [t] = useTranslation()
+  const classes = useStyles()
 
   const pasteHandler = async () => {
     getPasteUrl()
@@ -61,6 +72,7 @@ const Help: React.FunctionComponent<HelpProps> = ({
           disabled={pasteDisabled}
           onClick={() => setShowHelp(true)}
           data-cy="need-help-btn"
+          className={classes.blueButton}
         >
           {t("needHelp")}
         </StyledButton>
@@ -80,7 +92,11 @@ const Help: React.FunctionComponent<HelpProps> = ({
             readOnly
           />
           {document.queryCommandSupported("copy") && (
-            <StyledButton data-cy="copy-text-btn" onClick={copyToClipboard}>
+            <StyledButton
+              className={classes.blueButton}
+              data-cy="copy-text-btn"
+              onClick={copyToClipboard}
+            >
               {t("button.copy")}
             </StyledButton>
           )}
@@ -92,6 +108,7 @@ const Help: React.FunctionComponent<HelpProps> = ({
         </div>
       )}
       <StyledButton
+        className={classes.blueButton}
         onClick={pasteHandler}
         disabled={rePasteDisabled}
         data-cy="send-to-paste-btn"

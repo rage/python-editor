@@ -3,17 +3,21 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { TestResultObject } from "../types"
+import Help from "./Help"
 import {
   OutputBody,
   OutputBox,
-  OutputHeaderButton,
+  OutputButton,
   OutputHeaderColor,
   OutputHeaderText,
-  OutputHeaderWithPercentage,
+  OutputFooterWithPercentage,
+  OutputHeader,
 } from "./OutputBox"
 import TestResults from "./TestResults"
 
 interface SubmissionOutputProps {
+  getPasteLink: () => Promise<string>
+  pasteDisabled: boolean
   onClose: () => void
   outputHeight?: string
   submitting: boolean
@@ -23,7 +27,13 @@ interface SubmissionOutputProps {
 const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
   props,
 ) => {
-  const { onClose, submitting, testResults } = props
+  const {
+    getPasteLink,
+    onClose,
+    submitting,
+    testResults,
+    pasteDisabled,
+  } = props
   const [percentage, setPercentage] = useState(0)
   const [t] = useTranslation()
 
@@ -41,7 +51,6 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
     }
   }, [submitting])
 
-  // Do not modify, this is optimized.
   const fakePercentage = (progress: number) => {
     const fake = progress / 100
     return Math.min(
@@ -52,13 +61,28 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
 
   return (
     <OutputBox>
-      <OutputHeaderWithPercentage
-        color={OutputHeaderColor.Blue}
+      <OutputHeader title={t("outputTitle")} color={OutputHeaderColor.Gray}>
+        <Help getPasteUrl={getPasteLink} pasteDisabled={pasteDisabled} />
+        <OutputButton
+          label={t("button.close")}
+          onClick={onClose}
+          dataCy="close-btn"
+        />
+      </OutputHeader>
+      <OutputBody>
+        <TestResults
+          results={testResults}
+          showAllTests={testResults.allTestsPassed ?? false}
+        />
+      </OutputBody>
+      <OutputFooterWithPercentage
+        color={OutputHeaderColor.Gray}
         percentage={submitting ? fakePercentage(percentage) : percentage}
         percentageTitle={
           submitting ? t("submittingToServer") : t("testsPassed")
         }
         title={submitting ? t("outputTitle") : t("testResults")}
+        showAll={testResults.allTestsPassed ?? false}
       >
         {submitting && (
           <>
@@ -66,15 +90,7 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
             <OutputHeaderText>{t("submitting")}</OutputHeaderText>
           </>
         )}
-        <OutputHeaderButton
-          label={t("button.close")}
-          onClick={onClose}
-          dataCy="close-btn"
-        />
-      </OutputHeaderWithPercentage>
-      <OutputBody>
-        <TestResults results={testResults} />
-      </OutputBody>
+      </OutputFooterWithPercentage>
     </OutputBox>
   )
 }

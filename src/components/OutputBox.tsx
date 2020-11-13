@@ -1,11 +1,18 @@
 import React from "react"
 import styled from "styled-components"
-import { Button, Grid, Typography } from "@material-ui/core"
+import {
+  Button,
+  Grid,
+  Typography,
+  FormControlLabel,
+  Checkbox,
+} from "@material-ui/core"
 import TestProgressBar from "./TestProgressBar"
+import { useTranslation } from "react-i18next"
 
 enum OutputHeaderColor {
-  Blue = "#2196f3",
-  Orange = "#FF9800",
+  Orange = "#FF7518",
+  Gray = "#E8E8E8",
 }
 
 const StyledOutputTitle = styled(({ backgroundColor, ...props }) => (
@@ -19,18 +26,16 @@ const StyledOutputTitle = styled(({ backgroundColor, ...props }) => (
   />
 ))`
   background-color: ${({ backgroundColor }) => backgroundColor};
-  color: white;
+  color: black;
   border-radius: 3px 3px 0 0;
   padding: 5px;
 `
 
 const OutputTitleText = styled(Typography)`
-  && {
-    font-size: 1 rem;
-    display: inline-block;
-    padding: 5px;
-    color: white;
-  }
+  display: inline-block;
+  padding: 5px;
+  margin-left: 10px;
+  color: black;
 `
 
 const StyledOutputContent = styled(Grid)`
@@ -48,31 +53,29 @@ const OutputBox: React.FunctionComponent = (props) => (
   </Grid>
 )
 
-interface OutputHeaderButtonProps {
+interface OutputButtonProps {
   dataCy?: string
   disabled?: boolean
   label: string
   onClick?: () => void
+  className?: string
 }
 
-const OutputHeaderButton: React.FunctionComponent<OutputHeaderButtonProps> = (
-  props,
-) => (
+const OutputButton: React.FunctionComponent<OutputButtonProps> = (props) => (
   <MarginedButton
     disabled={props.disabled}
     onClick={props.onClick}
     variant="contained"
     data-cy={props.dataCy}
+    className={props.className}
   >
     {props.label}
   </MarginedButton>
 )
 
 const OutputHeaderText = styled(Typography)`
-  && {
-    margin: 0 10px 0 10px;
-    color: white;
-  }
+  margin: 0 10px 0 10px;
+  color: black;
 `
 
 const OutputBody: React.FunctionComponent<{}> = (props) => (
@@ -90,7 +93,7 @@ const OutputHeader: React.FunctionComponent<OutputHeaderProps> = (props) => {
   return (
     <StyledOutputTitle backgroundColor={color}>
       <Grid item xs={2}>
-        <OutputTitleText>{title}</OutputTitleText>
+        <OutputTitleText variant="h6">{title}</OutputTitleText>
       </Grid>
       <Grid container item xs={6} alignItems="center" justify="flex-end">
         {children}
@@ -98,38 +101,61 @@ const OutputHeader: React.FunctionComponent<OutputHeaderProps> = (props) => {
     </StyledOutputTitle>
   )
 }
-
-interface OutputHeaderWithPercentageProps extends OutputHeaderProps {
+interface OutputFooterWithPercentageProps extends OutputHeaderProps {
   percentage: number
   percentageTitle: string
+  showAll?: boolean
+  setShowAll?: (showAll: boolean) => void
 }
 
-const OutputHeaderWithPercentage: React.FunctionComponent<OutputHeaderWithPercentageProps> = (
+const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercentageProps> = (
   props,
 ) => {
-  const { children, color, percentage, percentageTitle, title } = props
+  const {
+    children,
+    color,
+    percentage,
+    percentageTitle,
+    title,
+    showAll,
+    setShowAll,
+  } = props
+  const [t] = useTranslation()
 
   return (
     <StyledOutputTitle backgroundColor={color}>
+      <Grid style={{ borderRight: "solid 1px black" }} item xs={2}>
+        <FormControlLabel
+          label={t("showAll")}
+          style={{ paddingLeft: "5px" }}
+          control={
+            <Checkbox
+              checked={showAll}
+              onChange={() => setShowAll?.(!showAll)}
+              color="primary"
+              data-cy="show-all-results-checkbox"
+            />
+          }
+        />
+      </Grid>
       <Grid item xs={2}>
         <OutputTitleText>{title}</OutputTitleText>
       </Grid>
       <Grid item xs={5}>
         <TestProgressBar percentage={percentage} title={percentageTitle} />
       </Grid>
-      <Grid container item xs={4} alignItems="center" justify="flex-end">
+      <Grid container item xs={3} alignItems="center" justify="flex-end">
         {children}
       </Grid>
     </StyledOutputTitle>
   )
 }
-
 export {
   OutputBox,
   OutputBody,
   OutputHeader,
-  OutputHeaderButton,
+  OutputButton,
   OutputHeaderColor,
   OutputHeaderText,
-  OutputHeaderWithPercentage,
+  OutputFooterWithPercentage,
 }

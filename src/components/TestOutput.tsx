@@ -1,4 +1,5 @@
-import React from "react"
+import { makeStyles } from "@material-ui/styles"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { TestResultObject } from "../types"
@@ -6,13 +7,23 @@ import Help from "./Help"
 import {
   OutputBox,
   OutputBody,
-  OutputHeaderButton,
+  OutputButton,
   OutputHeaderColor,
-  OutputHeaderWithPercentage,
+  OutputFooterWithPercentage,
+  OutputHeader,
 } from "./OutputBox"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
+const useStyles = makeStyles({
+  blueButton: {
+    backgroundColor: "#0275d8",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#0275d8",
+    },
+  },
+})
 interface TestOutputProps {
   getPasteLink: () => Promise<string>
   onClose: () => void
@@ -31,38 +42,49 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
   testResults,
 }) => {
   const [t] = useTranslation()
+  const [showAllTestResults, setShowAllTestResults] = useState(false)
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
+  const classes = useStyles()
 
-  const percentage =
+  const percentage = Math.round(
     (100 * testResults.testCases.filter((x) => x.passed).length) /
-    testResults.testCases.length
+      testResults.testCases.length,
+  )
 
   return (
     <OutputBox>
-      <OutputHeaderWithPercentage
-        color={OutputHeaderColor.Blue}
-        percentage={percentage}
-        percentageTitle={t("testsPassed")}
-        title={t("testResults")}
-      >
-        <OutputHeaderButton
-          disabled={submitDisabled}
-          label={t("button.submit")}
-          onClick={onSubmit}
-          dataCy="submit-btn"
-        />
-        <OutputHeaderButton
+      <OutputHeader title={t("outputTitle")} color={OutputHeaderColor.Gray}>
+        <Help getPasteUrl={getPasteLink} pasteDisabled={submitDisabled} />
+        <OutputButton
           label={t("button.close")}
           onClick={onClose}
           dataCy="close-btn"
         />
-      </OutputHeaderWithPercentage>
+      </OutputHeader>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
-          <Help getPasteUrl={getPasteLink} pasteDisabled={submitDisabled} />
-          <TestResults results={testResults} />
+          <TestResults
+            results={testResults}
+            showAllTests={showAllTestResults}
+          />
         </ScrollBox>
       </OutputBody>
+      <OutputFooterWithPercentage
+        color={OutputHeaderColor.Gray}
+        percentage={percentage}
+        percentageTitle={t("testsPassed")}
+        title={t("testResults")}
+        showAll={showAllTestResults}
+        setShowAll={setShowAllTestResults}
+      >
+        <OutputButton
+          disabled={submitDisabled}
+          label={t("button.submit")}
+          onClick={onSubmit}
+          dataCy="submit-btn"
+          className={classes.blueButton}
+        />
+      </OutputFooterWithPercentage>
     </OutputBox>
   )
 }
