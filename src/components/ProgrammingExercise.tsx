@@ -6,6 +6,7 @@ import {
   Select,
   Snackbar,
   Grid,
+  Button,
 } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
@@ -27,6 +28,8 @@ import { createWebEditorModuleSource } from "../services/patch_exercise"
 import EditorOutput from "./EditorOutput"
 import TestOutput from "./TestOutput"
 import SubmissionOutput from "./SubmissionOutput"
+import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -43,7 +46,6 @@ type ProgrammingExerciseProps = {
   submitDisabled: boolean
   editorHeight?: string
   outputHeight?: string
-  outputPosition?: string
   ready?: boolean
   solutionUrl?: string
 }
@@ -55,6 +57,10 @@ const StyledOutput = styled(Grid)`
   overflow: auto;
   white-space: pre-wrap;
 `
+
+const StyledButton = styled((props) => (
+  <Button variant="contained" {...props} />
+))``
 
 const defaultFile: FileEntry = {
   fullName: "",
@@ -73,7 +79,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitDisabled,
   editorHeight,
   outputHeight,
-  outputPosition = "absolute",
   ready = true,
   solutionUrl,
 }) => {
@@ -395,23 +400,9 @@ ${testSource}
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
-      {outputPosition === "absolute" ? (
-        <PyEditorButtons
-          allowRun={
-            workerAvailable && (editorState & EditorState.WorkerActive) === 0
-          }
-          allowTest={
-            !!testSource && (editorState & EditorState.WorkerActive) === 0
-          }
-          editorState={editorState}
-          handleRun={handleRun}
-          handleStop={stopWorker}
-          handleTests={handleTests}
-          solutionUrl={solutionUrl}
-        />
-      ) : (
-        <PyEditorButtons editorState={editorState} solutionUrl={solutionUrl} />
-      )}
+      {
+        // Insert model solution buttons here
+      }
       <PyEditor
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
@@ -420,29 +411,30 @@ ${testSource}
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
         }
       />
-      {outputPosition === "relative" ? (
-        <PyEditorButtons
-          allowRun={
-            workerAvailable && (editorState & EditorState.WorkerActive) === 0
-          }
-          allowTest={
-            !!testSource && (editorState & EditorState.WorkerActive) === 0
-          }
-          editorState={editorState}
-          handleRun={handleRun}
-          handleStop={stopWorker}
-          handleTests={handleTests}
-        />
-      ) : null}
+
+      <PyEditorButtons
+        allowRun={
+          workerAvailable && (editorState & EditorState.WorkerActive) === 0
+        }
+        allowTest={
+          !!testSource && (editorState & EditorState.WorkerActive) === 0
+        }
+        editorState={editorState}
+        handleRun={handleRun}
+        handleStop={stopWorker}
+        handleTests={handleTests}
+      />
+
       <AnimatedOutputBox
         isRunning={(editorState & EditorState.WorkerActive) > 0}
         outputHeight={outputHeight}
-        outputPosition={outputPosition}
         ref={outputBoxRef}
       >
         {mapStateToOutput()}
       </AnimatedOutputBox>
+
       {debug && <div>{EditorState[editorState]}</div>}
+
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}

@@ -27,7 +27,6 @@ type ProgrammingExerciseLoaderProps = {
   token: string
   height?: string
   outputHeight?: string
-  outputPosition?: string
   language: Language
 }
 
@@ -51,7 +50,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   token,
   height,
   outputHeight,
-  outputPosition,
   language = "en",
 }) => {
   const time = useTime(10000)
@@ -302,7 +300,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         submitDisabled={exerciseDetails?.expired || !signedIn}
         editorHeight={height}
         outputHeight={outputHeight}
-        outputPosition={outputPosition}
         ready={ready}
         solutionUrl={
           exerciseDetails?.completed || exerciseDetails?.expired

@@ -26,7 +26,7 @@ const App = () => {
   const exercise = useInput("exercise", "")
   const token = useInput("token", "")
   const [language, setLanguage] = useState("en")
-  const [position, setPosition] = useState("absolute")
+  const [position, setPosition] = useState("relative")
   const [height, setHeight] = useState("400px")
   const [outputHeight, setOutputHeight] = useState("250px")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
@@ -56,7 +56,6 @@ const App = () => {
         height={height}
         outputHeight={outputHeight}
         language={language}
-        outputPosition={position}
       />
     )
   }
@@ -98,21 +97,6 @@ const App = () => {
               select
             >
               {["en", "fi"].map((item) => (
-                <MenuItem key={item} value={item}>
-                  {item}
-                </MenuItem>
-              ))}
-            </StyledTextField>
-          </Grid>
-          <Grid item xs={6}>
-            <StyledTextField
-              value={position}
-              onChange={(event) => setPosition(event.target.value)}
-              label="Position"
-              data-cy="position-input"
-              select
-            >
-              {["absolute", "relative"].map((item) => (
                 <MenuItem key={item} value={item}>
                   {item}
                 </MenuItem>

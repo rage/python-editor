@@ -31,6 +31,10 @@ const PyEditorButtons: React.FunctionComponent<PyEditorButtonsProps> = ({
 }) => {
   const [t] = useTranslation()
 
+  // return (
+
+  // )
+
   return (
     <>
       {(editorState & EditorState.WorkerActive) === 0 && handleRun ? (

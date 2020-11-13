@@ -5,15 +5,16 @@ import React from "react"
 import styled from "styled-components"
 
 const WarningBox = styled(Grid)`
-  background-color: #ff9800;
-  color: white;
-  border-radius: 3px 3px 0 0;
-  padding: 8px;
-  font-size: 1.25rem;
+  background-color: #e8e8e8;
+  color: #ff9800;
+  border-radius: 3px 3px;
+  padding: 12px;
+  font-size: 1rem;
 `
 
 const Content = styled.span`
   margin-left: 10px;
+  color: black;
 `
 
 type NotificationProps = {
