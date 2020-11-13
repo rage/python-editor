@@ -42,7 +42,9 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
   testResults,
 }) => {
   const [t] = useTranslation()
-  const [showAllTestResults, setShowAllTestResults] = useState(false)
+  const [showAllTestResults, setShowAllTestResults] = useState(
+    testResults.allTestsPassed,
+  )
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
   const classes = useStyles()
 
@@ -65,7 +67,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
           <TestResults
             results={testResults}
-            showAllTests={showAllTestResults}
+            showAllTests={showAllTestResults ?? false}
           />
         </ScrollBox>
       </OutputBody>
