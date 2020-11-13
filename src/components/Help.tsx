@@ -1,7 +1,16 @@
-import React, { useState, useRef } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import styled from "styled-components"
-import { Button, Input, makeStyles, Paper, Typography } from "@material-ui/core"
+import {
+  Button,
+  Input,
+  makeStyles,
+  Paper,
+  Typography,
+  Tooltip,
+  withStyles,
+} from "@material-ui/core"
+import ClickAwayListener from "@material-ui/core/ClickAwayListener"
 
 type HelpProps = {
   getPasteUrl: () => Promise<string>
@@ -10,28 +19,31 @@ type HelpProps = {
 
 const useStyles = makeStyles({
   blueButton: {
+    margin: "5px",
+    backgroundColor: "#0275d8",
+    color: "#FFF",
     "&:hover": {
       backgroundColor: "#0275d8",
     },
   },
 })
 
-const StyledButton = styled((props) => (
-  <Button variant="contained" {...props} />
-))`
-  margin: 0.7rem !important;
-  background-color: #0275d8;
-  color: #fff;
-`
+const HtmlTooltip = withStyles((theme) => ({
+  tooltip: {
+    backgroundColor: "#D3D3D3",
+    color: "black",
+    minWidth: 500,
+    maxWidth: 700,
+    fontSize: theme.typography.pxToRem(12),
+  },
+  arrow: {
+    color: "#D3D3D3",
+  },
+}))(Tooltip)
 
 const StyledInput = styled((props) => <Input {...props} />)`
   margin: 1rem;
   width: 60%;
-`
-
-const StyledPaper = styled(({ ...props }) => <Paper {...props} />)`
-  margin: 5px;
-  padding: 10px;
 `
 
 const Help: React.FunctionComponent<HelpProps> = ({
@@ -41,9 +53,20 @@ const Help: React.FunctionComponent<HelpProps> = ({
   const [copySuccess, setCopySuccess] = useState(false)
   const [rePasteDisabled, setRePasteDisabled] = useState(false)
   const [pasteUrl, setPasteUrl] = useState<string | undefined>()
+  const [open, setOpen] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [t] = useTranslation()
   const classes = useStyles()
+
+  const handleOpenTooltip = () => {
+    setOpen(true)
+    setShowHelp(true)
+  }
+
+  const handleCloseTooltip = () => {
+    setOpen(false)
+    setShowHelp(false)
+  }
 
   const pasteHandler = async () => {
     getPasteUrl()
@@ -65,57 +88,75 @@ const Help: React.FunctionComponent<HelpProps> = ({
     }
   }
 
-  if (!showHelp) {
+  const showHelpTooltip = () => {
     return (
-      <div style={{ textAlign: "right" }}>
-        <StyledButton
-          disabled={pasteDisabled}
-          onClick={() => setShowHelp(true)}
-          data-cy="need-help-btn"
+      <div style={{ margin: "10px" }}>
+        <Typography>{t("tmcPasteDescription")}</Typography>
+        {pasteUrl && (
+          <div>
+            <StyledInput
+              id="textField"
+              value={pasteUrl}
+              data-cy="paste-input"
+              readOnly
+            />
+            {document.queryCommandSupported("copy") && (
+              <Button
+                className={classes.blueButton}
+                data-cy="copy-text-btn"
+                onClick={copyToClipboard}
+              >
+                {t("button.copy")}
+              </Button>
+            )}
+            {copySuccess && (
+              <span style={{ paddingLeft: "3px" }}>
+                {t("copiedConfirmation")}
+              </span>
+            )}
+          </div>
+        )}
+        <Button
           className={classes.blueButton}
+          onClick={pasteHandler}
+          disabled={rePasteDisabled}
+          data-cy="send-to-paste-btn"
         >
-          {t("needHelp")}
-        </StyledButton>
+          {t("sendToTmcPaste")}
+        </Button>
       </div>
     )
   }
 
   return (
-    <StyledPaper>
-      <Typography>{t("tmcPasteDescription")}</Typography>
-      {pasteUrl && (
-        <div>
-          <StyledInput
-            id="textField"
-            value={pasteUrl}
-            data-cy="paste-input"
-            readOnly
-          />
-          {document.queryCommandSupported("copy") && (
-            <StyledButton
-              className={classes.blueButton}
-              data-cy="copy-text-btn"
-              onClick={copyToClipboard}
-            >
-              {t("button.copy")}
-            </StyledButton>
-          )}
-          {copySuccess && (
-            <span style={{ paddingLeft: "3px" }}>
-              {t("copiedConfirmation")}
-            </span>
-          )}
-        </div>
-      )}
-      <StyledButton
-        className={classes.blueButton}
-        onClick={pasteHandler}
-        disabled={rePasteDisabled}
-        data-cy="send-to-paste-btn"
-      >
-        {t("sendToTmcPaste")}
-      </StyledButton>
-    </StyledPaper>
+    <ClickAwayListener onClickAway={handleCloseTooltip}>
+      <div>
+        <HtmlTooltip
+          PopperProps={{
+            disablePortal: false,
+          }}
+          onClose={handleCloseTooltip}
+          open={open}
+          interactive
+          disableFocusListener
+          disableHoverListener
+          disableTouchListener
+          placement="bottom-end"
+          title={showHelpTooltip()}
+          arrow
+        >
+          <Button
+            variant="contained"
+            disabled={pasteDisabled}
+            onClick={showHelp ? handleCloseTooltip : handleOpenTooltip}
+            data-cy="need-help-btn"
+            className={classes.blueButton}
+          >
+            {t("needHelp")}
+          </Button>
+        </HtmlTooltip>
+      </div>
+    </ClickAwayListener>
   )
 }
 

@@ -453,7 +453,7 @@ ${testSource}
             data-cy="run-btn"
           >
             <FontAwesomeIcon icon={faPlay} />
-            <span className={classes.whiteText}>Run</span>
+            <span className={classes.whiteText}>{t("runButtonText")}</span>
           </StyledButton>
         ) : (
           <StyledButton
@@ -462,7 +462,7 @@ ${testSource}
             data-cy="stop-btn"
           >
             <FontAwesomeIcon icon={faStop} />
-            <span className={classes.whiteText}>Stop</span>
+            <span className={classes.whiteText}>{t("stopButtonText")}</span>
           </StyledButton>
         )}
         <StyledButton
@@ -474,7 +474,7 @@ ${testSource}
           data-cy="test-btn"
         >
           <FontAwesomeIcon icon={faEye} />
-          <span style={{ paddingLeft: "5px" }}>Test</span>
+          <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
         </StyledButton>
       </div>
 

@@ -43,8 +43,8 @@ const StyledOutputContent = styled(Grid)`
   display: table-cell;
 `
 
-const MarginedButton = styled(Button)`
-  margin: 3px !important;
+const StyledButton = styled(Button)`
+  margin: 5px !important;
 `
 
 const OutputBox: React.FunctionComponent = (props) => (
@@ -62,7 +62,7 @@ interface OutputButtonProps {
 }
 
 const OutputButton: React.FunctionComponent<OutputButtonProps> = (props) => (
-  <MarginedButton
+  <StyledButton
     disabled={props.disabled}
     onClick={props.onClick}
     variant="contained"
@@ -70,7 +70,7 @@ const OutputButton: React.FunctionComponent<OutputButtonProps> = (props) => (
     className={props.className}
   >
     {props.label}
-  </MarginedButton>
+  </StyledButton>
 )
 
 const OutputHeaderText = styled(Typography)`
