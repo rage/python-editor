@@ -345,6 +345,7 @@ ${testSource}
             testResults={testResults ?? { points: [], testCases: [] }}
             getPasteLink={handlePasteSubmit}
             pasteDisabled={submitDisabled}
+            outputHeight={outputHeight}
           />
         )
       default:

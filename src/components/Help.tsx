@@ -5,7 +5,6 @@ import {
   Button,
   Input,
   makeStyles,
-  Paper,
   Typography,
   Tooltip,
   withStyles,
@@ -24,6 +23,17 @@ const useStyles = makeStyles({
     color: "#FFF",
     "&:hover": {
       backgroundColor: "#0275d8",
+    },
+  },
+  darkButton: {
+    margin: "5px",
+    backgroundColor: "#696969",
+    color: "#FFF",
+    "&:hover": {
+      backgroundColor: "#808080",
+    },
+    "&:disabled": {
+      backgroundColor: "#A9A9A9",
     },
   },
 })
@@ -53,19 +63,22 @@ const Help: React.FunctionComponent<HelpProps> = ({
   const [copySuccess, setCopySuccess] = useState(false)
   const [rePasteDisabled, setRePasteDisabled] = useState(false)
   const [pasteUrl, setPasteUrl] = useState<string | undefined>()
-  const [open, setOpen] = useState(false)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [t] = useTranslation()
   const classes = useStyles()
 
   const handleOpenTooltip = () => {
-    setOpen(true)
+    setTooltipOpen(true)
     setShowHelp(true)
   }
 
   const handleCloseTooltip = () => {
-    setOpen(false)
+    setTooltipOpen(false)
     setShowHelp(false)
+    setRePasteDisabled(false)
+    setPasteUrl(undefined)
+    setCopySuccess(false)
   }
 
   const pasteHandler = async () => {
@@ -117,7 +130,7 @@ const Help: React.FunctionComponent<HelpProps> = ({
           </div>
         )}
         <Button
-          className={classes.blueButton}
+          className={classes.darkButton}
           onClick={pasteHandler}
           disabled={rePasteDisabled}
           data-cy="send-to-paste-btn"
@@ -136,7 +149,7 @@ const Help: React.FunctionComponent<HelpProps> = ({
             disablePortal: false,
           }}
           onClose={handleCloseTooltip}
-          open={open}
+          open={tooltipOpen}
           interactive
           disableFocusListener
           disableHoverListener

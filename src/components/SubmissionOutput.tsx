@@ -1,5 +1,5 @@
 import { CircularProgress } from "@material-ui/core"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { TestResultObject } from "../types"
@@ -13,6 +13,7 @@ import {
   OutputFooterWithPercentage,
   OutputHeader,
 } from "./OutputBox"
+import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
 interface SubmissionOutputProps {
@@ -33,31 +34,16 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
     submitting,
     testResults,
     pasteDisabled,
+    outputHeight,
   } = props
-  const [percentage, setPercentage] = useState(0)
   const [t] = useTranslation()
+  const [showAllTests, setShowAllTests] = useState(testResults.allTestsPassed)
 
-  useEffect(() => {
-    if (submitting) {
-      setPercentage(10 + 30 * Math.random())
-      setTimeout(() => {
-        setPercentage((prev) => Math.min(prev + 10, 99))
-      }, 2000)
-    } else {
-      setPercentage(
-        (100 * testResults.testCases.filter((x) => x.passed).length) /
-          testResults.testCases.length,
-      )
-    }
-  }, [submitting])
-
-  const fakePercentage = (progress: number) => {
-    const fake = progress / 100
-    return Math.min(
-      Math.round(300 * Math.pow(fake, 2) - 200 * Math.pow(fake, 3)),
-      99,
-    )
-  }
+  const percentage = Math.round(
+    (100 * testResults.testCases.filter((x) => x.passed).length) /
+      testResults.testCases.length,
+  )
+  const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
   return (
     <OutputBox>
@@ -70,19 +56,22 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
         />
       </OutputHeader>
       <OutputBody>
-        <TestResults
-          results={testResults}
-          showAllTests={testResults.allTestsPassed ?? false}
-        />
+        <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
+          <TestResults
+            results={testResults}
+            showAllTests={showAllTests ?? false}
+          />
+        </ScrollBox>
       </OutputBody>
       <OutputFooterWithPercentage
         color={OutputHeaderColor.Gray}
-        percentage={submitting ? fakePercentage(percentage) : percentage}
+        percentage={percentage}
         percentageTitle={
           submitting ? t("submittingToServer") : t("testsPassed")
         }
         title={submitting ? t("outputTitle") : t("testResults")}
-        showAll={testResults.allTestsPassed ?? false}
+        showAll={showAllTests}
+        setShowAll={setShowAllTests}
       >
         {submitting && (
           <>
