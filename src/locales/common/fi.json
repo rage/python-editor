@@ -21,6 +21,7 @@
   "malformedExerciseTemplate": "Väärän muotoinen tehtäväpohja",
   "modelSolution": "Mallivastaus",
   "needHelp": "Tarvitsetko apua?",
+  "noExerciseFilesFound": "Tehtävätiedostoa ei löytynyt tehtäväpohjasta.",
   "outputTitle": "Tuloste",
   "running": "Suoritetaan",
   "pleaseGiveFeedback": "Voit halutessasi antaa tehtävästä palautetta auttaaksesi kurssin kehittämisessä.",

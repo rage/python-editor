@@ -1,6 +1,87 @@
+import { TFunction } from "i18next"
 import { Base64 } from "js-base64"
-import { FileEntry } from "../components/ProgrammingExerciseLoader"
+import JSZip, { JSZipObject } from "jszip"
+import { FileEntry } from "../types"
 import { resolveImports } from "./import_parsing"
+
+interface Configuration {
+  t: TFunction
+}
+
+interface Exercise {
+  problems?: string[]
+  srcFiles: FileEntry[]
+  testSource: string
+}
+
+const extractExerciseArchive = async (
+  zip: JSZip,
+  configuration: Configuration,
+): Promise<Exercise> => {
+  const { t } = configuration
+  const rootFiles = await getFileEntries(zip)
+  const srcFiles = await getFileEntries(zip, "src")
+  const testFiles = await getFileEntries(zip, "test")
+  const tmcFiles = await getFileEntries(zip, "tmc")
+  const problems: string[] = []
+
+  const fileSorter = (files: FileEntry[]): FileEntry[] =>
+    files.sort((a, b) => a.shortName.localeCompare(b.shortName))
+  const template =
+    srcFiles.length > 0 ? fileSorter(srcFiles) : fileSorter(rootFiles)
+  if (template.length === 0) {
+    problems.push(t("noExerciseFilesFound"))
+  }
+
+  let testSource: string | undefined
+  try {
+    testSource = inlineAndPatchTestSources(testFiles, tmcFiles)
+  } catch (e) {
+    problems.push(e)
+  }
+
+  return {
+    problems,
+    srcFiles: template ?? [],
+    testSource: testSource ?? "",
+  }
+}
+
+const getFileEntries = (
+  zip: JSZip,
+  directory?: string,
+  main?: string,
+): Promise<FileEntry[]> => {
+  const fileSelector: RegExp = directory
+    ? RegExp(`${directory}/\\w*\\.py$`)
+    : /^\w+\/\w+\/\w*\.py$/
+  const files = orderFiles(zip.file(fileSelector), main)
+  return Promise.all(files.map((f: JSZipObject) => createEntry(f)))
+}
+
+const createEntry = async (f: JSZipObject): Promise<FileEntry> => {
+  const content = await f.async("string")
+  const fullName: string = f.name
+  const matches = fullName.match(/(\w+\.py)/)
+  let shortName: string | null = null
+  if (matches) {
+    shortName = matches[0]
+    return { fullName, shortName, originalContent: content, content }
+  }
+  return { fullName: "", shortName: "", originalContent: "", content: "" }
+}
+
+const orderFiles = (files: JSZipObject[], main?: string) => {
+  if (main) {
+    const mainIndex = files.findIndex((file: any) => file.name.includes(main))
+    if (mainIndex > -1) {
+      const mainEntry = files.splice(mainIndex, 1)[0]
+      files.unshift(mainEntry)
+      return files
+    }
+  }
+  return files
+}
 
 /**
  * Creates python source code for webeditor utility module.
@@ -254,4 +335,4 @@ const countIndentationDepth = (line: string): number => {
   return line.search(/\S/)
 }
 
-export { createWebEditorModuleSource, inlineAndPatchTestSources }
+export { createWebEditorModuleSource, extractExerciseArchive }

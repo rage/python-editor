@@ -13,6 +13,18 @@ export enum EditorState {
   WorkerActive = ExecutingCode | WaitingInput | Testing,
 }
 
+export interface FileEntry {
+  fullName: string
+  shortName: string
+  originalContent: string
+  content: string
+}
+
+export interface ExerciseTemplate {
+  template: string
+  testSource: string
+}
+
 export type ExerciseDetails = {
   id: number
   availablePoints?: number

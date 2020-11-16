@@ -12,12 +12,12 @@ import {
 import PyEditor from "./PyEditor"
 import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
 import { v4 as uuid } from "uuid"
-import { FileEntry } from "./ProgrammingExerciseLoader"
 import {
   OutputObject,
   TestResultObject,
   FeedBackAnswer,
   EditorState,
+  FileEntry,
 } from "../types"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
