@@ -1,30 +1,32 @@
 import React from "react"
 import styled from "styled-components"
-import { Typography } from "@material-ui/core"
+import { LinearProgress, Typography, withStyles } from "@material-ui/core"
 
 type TestProgressBarProps = {
   percentage: number
   title: string
 }
 
+const BorderLinearProgress = withStyles((theme) => ({
+  root: {
+    height: 25,
+    borderRadius: 10,
+  },
+  colorPrimary: {
+    borderRadius: 10,
+  },
+  bar: {
+    borderRadius: 10,
+    backgroundColor: "#0275d8",
+  },
+}))(LinearProgress)
+
 const ProgressBarBackground = styled.div`
-  background-color: #b6bce2;
   width: 100%;
   height: 25px;
   overflow: hidden;
   text-align: center;
   position: relative;
-  border-radius: 1px;
-`
-
-interface ProgressBarProps {
-  value: number
-}
-
-const ProgressBar = styled.div<ProgressBarProps>`
-  background-color: #3f51b5;
-  width: ${(props) => (props.value ? props.value : 0)}%;
-  height: 25px;
 `
 
 const ProgressBarText = styled(Typography)`
@@ -35,13 +37,6 @@ const ProgressBarText = styled(Typography)`
   position: absolute;
 `
 
-const ProgressBarTitle = styled(Typography)`
-  && {
-    text-align: center;
-    color: white;
-  }
-`
-
 const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
   percentage,
   title,
@@ -50,10 +45,9 @@ const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
 
   return (
     <>
-      <ProgressBarTitle>{title}</ProgressBarTitle>
       <ProgressBarBackground>
-        <ProgressBarText variant="button">{percentage}%</ProgressBarText>
-        <ProgressBar value={percentage} />
+        <ProgressBarText variant="button">{percentage} %</ProgressBarText>
+        <BorderLinearProgress variant="determinate" value={percentage} />
       </ProgressBarBackground>
     </>
   )

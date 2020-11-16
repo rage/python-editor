@@ -6,6 +6,8 @@ import {
   Select,
   Snackbar,
   Grid,
+  Button,
+  makeStyles,
 } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
@@ -21,12 +23,14 @@ import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { useWorker } from "../hooks/getWorker"
-import PyEditorButtons from "./PyEditorButtons"
 import { parseTestCases } from "../services/test_parsing"
 import { createWebEditorModuleSource } from "../services/patch_exercise"
 import EditorOutput from "./EditorOutput"
 import TestOutput from "./TestOutput"
 import SubmissionOutput from "./SubmissionOutput"
+import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faEye } from "@fortawesome/free-regular-svg-icons"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -43,10 +47,28 @@ type ProgrammingExerciseProps = {
   submitDisabled: boolean
   editorHeight?: string
   outputHeight?: string
-  outputPosition?: string
   ready?: boolean
   solutionUrl?: string
 }
+
+const useStyles = makeStyles({
+  runButton: {
+    "&:hover": {
+      backgroundColor: "#0275d8",
+      color: "#228B22",
+    },
+  },
+  stopButton: {
+    "&:hover": {
+      backgroundColor: "#0275d8",
+      color: "#F44141",
+    },
+  },
+  whiteText: {
+    color: "#FFF",
+    paddingLeft: "5px",
+  },
+})
 
 const StyledOutput = styled(Grid)`
   padding: 5px;
@@ -54,6 +76,14 @@ const StyledOutput = styled(Grid)`
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
+`
+
+const StyledButton = styled((props) => (
+  <Button variant="contained" {...props} />
+))`
+  margin: 0.5em;
+  background-color: #0275d8;
+  color: #fff;
 `
 
 const defaultFile: FileEntry = {
@@ -73,9 +103,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitDisabled,
   editorHeight,
   outputHeight,
-  outputPosition = "absolute",
   ready = true,
-  solutionUrl,
 }) => {
   const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
@@ -91,6 +119,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [worker] = useWorker()
   const outputBoxRef = React.createRef<AnimatedOutputBoxRef>()
   const [editorState, setEditorState] = useState(EditorState.Initializing)
+  const classes = useStyles()
 
   function handleRun(code?: string) {
     if (workerAvailable) {
@@ -314,6 +343,9 @@ ${testSource}
             onClose={closeOutput}
             submitting={editorState === EditorState.Submitting}
             testResults={testResults ?? { points: [], testCases: [] }}
+            getPasteLink={handlePasteSubmit}
+            pasteDisabled={submitDisabled}
+            outputHeight={outputHeight}
           />
         )
       default:
@@ -353,6 +385,7 @@ ${testSource}
           </StyledOutput>
         </OverlayBox>
       )}
+
       {editorState === EditorState.ShowPassedFeedbackForm && (
         <FeedbackForm
           awardedPoints={testResults?.points}
@@ -368,6 +401,7 @@ ${testSource}
           feedbackQuestions={testResults?.feedbackQuestions}
         />
       )}
+
       {files.length > 1 && (
         <>
           <InputLabel id="label">{t("selectFile")}</InputLabel>
@@ -390,28 +424,13 @@ ${testSource}
           </Select>
         </>
       )}
+
       {!ready && (
         <OverlayCenterWrapper>
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
-      {outputPosition === "absolute" ? (
-        <PyEditorButtons
-          allowRun={
-            workerAvailable && (editorState & EditorState.WorkerActive) === 0
-          }
-          allowTest={
-            !!testSource && (editorState & EditorState.WorkerActive) === 0
-          }
-          editorState={editorState}
-          handleRun={handleRun}
-          handleStop={stopWorker}
-          handleTests={handleTests}
-          solutionUrl={solutionUrl}
-        />
-      ) : (
-        <PyEditorButtons editorState={editorState} solutionUrl={solutionUrl} />
-      )}
+
       <PyEditor
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
@@ -420,29 +439,56 @@ ${testSource}
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
         }
       />
-      {outputPosition === "relative" ? (
-        <PyEditorButtons
-          allowRun={
-            workerAvailable && (editorState & EditorState.WorkerActive) === 0
+
+      <div style={{ padding: "0.6em 0em" }}>
+        {(editorState & EditorState.WorkerActive) === 0 ? (
+          <StyledButton
+            onClick={() => handleRun()}
+            className={classes.runButton}
+            disabled={
+              !(
+                workerAvailable &&
+                (editorState & EditorState.WorkerActive) === 0
+              )
+            }
+            data-cy="run-btn"
+          >
+            <FontAwesomeIcon icon={faPlay} />
+            <span className={classes.whiteText}>{t("runButtonText")}</span>
+          </StyledButton>
+        ) : (
+          <StyledButton
+            className={classes.stopButton}
+            onClick={() => stopWorker()}
+            data-cy="stop-btn"
+          >
+            <FontAwesomeIcon icon={faStop} />
+            <span className={classes.whiteText}>{t("stopButtonText")}</span>
+          </StyledButton>
+        )}
+        <StyledButton
+          onClick={() => handleTests()}
+          disabled={
+            !(!!testSource && (editorState & EditorState.WorkerActive) === 0)
           }
-          allowTest={
-            !!testSource && (editorState & EditorState.WorkerActive) === 0
-          }
-          editorState={editorState}
-          handleRun={handleRun}
-          handleStop={stopWorker}
-          handleTests={handleTests}
-        />
-      ) : null}
+          style={{ backgroundColor: "#EBEBEB", color: "#FF7518" }}
+          data-cy="test-btn"
+        >
+          <FontAwesomeIcon icon={faEye} />
+          <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
+        </StyledButton>
+      </div>
+
       <AnimatedOutputBox
         isRunning={(editorState & EditorState.WorkerActive) > 0}
         outputHeight={outputHeight}
-        outputPosition={outputPosition}
         ref={outputBoxRef}
       >
         {mapStateToOutput()}
       </AnimatedOutputBox>
+
       {debug && <div>{EditorState[editorState]}</div>}
+
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}

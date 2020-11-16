@@ -17,6 +17,8 @@ import {
 } from "../services/programming_exercise"
 import { inlineAndPatchTestSources } from "../services/patch_exercise"
 import Notification from "./Notification"
+import styled from "styled-components"
+import { Button, Grid } from "@material-ui/core"
 
 type ProgrammingExerciseLoaderProps = {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
@@ -27,7 +29,6 @@ type ProgrammingExerciseLoaderProps = {
   token: string
   height?: string
   outputHeight?: string
-  outputPosition?: string
   language: Language
 }
 
@@ -37,6 +38,12 @@ type FileEntry = {
   originalContent: string
   content: string
 }
+
+const ModelSolutionButton = styled((props) => (
+  <Button variant="contained" {...props} />
+))`
+  float: right;
+`
 
 /*  Loads the ProgrammingExercise from the server. Then returns a ProgrammingExercise component
     with the initial editor text set to the contents of the first
@@ -51,7 +58,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   token,
   height,
   outputHeight,
-  outputPosition,
   language = "en",
 }) => {
   const time = useTime(10000)
@@ -273,6 +279,22 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
 
   return (
     <div>
+      {(exerciseDetails?.completed || exerciseDetails?.expired) && (
+        <Grid container direction="row" justify="space-between">
+          <Grid item xs={12}>
+            <ModelSolutionButton
+              onClick={() =>
+                window.open(
+                  `https://tmc.mooc.fi/exercises/${exerciseDetails.id}/solution`,
+                  "_blank",
+                )
+              }
+            >
+              {t("modelSolution")}
+            </ModelSolutionButton>
+          </Grid>
+        </Grid>
+      )}
       {!signedIn && (
         <Notification style="warning">
           {t("signInToSubmitExercise")}
@@ -302,13 +324,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         submitDisabled={exerciseDetails?.expired || !signedIn}
         editorHeight={height}
         outputHeight={outputHeight}
-        outputPosition={outputPosition}
         ready={ready}
-        solutionUrl={
-          exerciseDetails?.completed || exerciseDetails?.expired
-            ? `https://tmc.mooc.fi/exercises/${exerciseDetails.id}/solution`
-            : undefined
-        }
       />
     </div>
   )

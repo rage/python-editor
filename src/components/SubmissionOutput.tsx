@@ -1,19 +1,24 @@
 import { CircularProgress } from "@material-ui/core"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { TestResultObject } from "../types"
+import Help from "./Help"
 import {
   OutputBody,
   OutputBox,
-  OutputHeaderButton,
+  OutputButton,
   OutputHeaderColor,
   OutputHeaderText,
-  OutputHeaderWithPercentage,
+  OutputFooterWithPercentage,
+  OutputHeader,
 } from "./OutputBox"
+import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
 interface SubmissionOutputProps {
+  getPasteLink: () => Promise<string>
+  pasteDisabled: boolean
   onClose: () => void
   outputHeight?: string
   submitting: boolean
@@ -23,42 +28,50 @@ interface SubmissionOutputProps {
 const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
   props,
 ) => {
-  const { onClose, submitting, testResults } = props
-  const [percentage, setPercentage] = useState(0)
+  const {
+    getPasteLink,
+    onClose,
+    submitting,
+    testResults,
+    pasteDisabled,
+    outputHeight,
+  } = props
   const [t] = useTranslation()
+  const [showAllTests, setShowAllTests] = useState(testResults.allTestsPassed)
 
-  useEffect(() => {
-    if (submitting) {
-      setPercentage(10 + 30 * Math.random())
-      setTimeout(() => {
-        setPercentage((prev) => Math.min(prev + 10, 99))
-      }, 2000)
-    } else {
-      setPercentage(
-        (100 * testResults.testCases.filter((x) => x.passed).length) /
-          testResults.testCases.length,
-      )
-    }
-  }, [submitting])
-
-  // Do not modify, this is optimized.
-  const fakePercentage = (progress: number) => {
-    const fake = progress / 100
-    return Math.min(
-      Math.round(300 * Math.pow(fake, 2) - 200 * Math.pow(fake, 3)),
-      99,
-    )
-  }
+  const percentage = Math.round(
+    (100 * testResults.testCases.filter((x) => x.passed).length) /
+      testResults.testCases.length,
+  )
+  const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
   return (
     <OutputBox>
-      <OutputHeaderWithPercentage
-        color={OutputHeaderColor.Blue}
-        percentage={submitting ? fakePercentage(percentage) : percentage}
+      <OutputHeader title={t("outputTitle")} color={OutputHeaderColor.Gray}>
+        <Help getPasteUrl={getPasteLink} pasteDisabled={pasteDisabled} />
+        <OutputButton
+          label={t("button.close")}
+          onClick={onClose}
+          dataCy="close-btn"
+        />
+      </OutputHeader>
+      <OutputBody>
+        <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
+          <TestResults
+            results={testResults}
+            showAllTests={showAllTests ?? false}
+          />
+        </ScrollBox>
+      </OutputBody>
+      <OutputFooterWithPercentage
+        color={OutputHeaderColor.Gray}
+        percentage={percentage}
         percentageTitle={
           submitting ? t("submittingToServer") : t("testsPassed")
         }
         title={submitting ? t("outputTitle") : t("testResults")}
+        showAll={showAllTests}
+        setShowAll={setShowAllTests}
       >
         {submitting && (
           <>
@@ -66,15 +79,7 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
             <OutputHeaderText>{t("submitting")}</OutputHeaderText>
           </>
         )}
-        <OutputHeaderButton
-          label={t("button.close")}
-          onClick={onClose}
-          dataCy="close-btn"
-        />
-      </OutputHeaderWithPercentage>
-      <OutputBody>
-        <TestResults results={testResults} />
-      </OutputBody>
+      </OutputFooterWithPercentage>
     </OutputBox>
   )
 }

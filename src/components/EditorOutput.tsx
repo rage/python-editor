@@ -1,7 +1,7 @@
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { CircularProgress } from "@material-ui/core"
-import React, { useState } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 
 import { EditorState, OutputObject } from "../types"
@@ -11,13 +11,11 @@ import {
   OutputBody,
   OutputBox,
   OutputHeader,
-  OutputHeaderButton,
+  OutputButton,
   OutputHeaderColor,
   OutputHeaderText,
 } from "./OutputBox"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
-
-const { Blue, Orange } = OutputHeaderColor
 
 interface EditorOutputProps {
   editorState: EditorState
@@ -67,10 +65,14 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
     <OutputBox>
       <OutputHeader
         title={t("outputTitle")}
-        color={waitingInput ? Orange : Blue}
+        color={waitingInput ? OutputHeaderColor.Orange : OutputHeaderColor.Gray}
       >
         {getStatus()}
-        <OutputHeaderButton
+        <Help
+          getPasteUrl={getPasteLink}
+          pasteDisabled={running || pasteDisabled}
+        />
+        <OutputButton
           label={t("button.close")}
           onClick={onClose}
           dataCy="close-btn"
@@ -78,10 +80,6 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
       </OutputHeader>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
-          <Help
-            getPasteUrl={getPasteLink}
-            pasteDisabled={running || pasteDisabled}
-          />
           <Console
             inputRequested={waitingInput}
             outputContent={outputContent}

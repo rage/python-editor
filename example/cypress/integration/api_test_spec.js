@@ -38,6 +38,8 @@ describe("API Endpoint tests #1", () => {
       url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
       response: "fx:osa01-01_hymio.zip,binary",
     }).as("getExercise")
+    // Wait for the Pyodide from download.mooc.fi
+    cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExercise")
   })
@@ -69,8 +71,7 @@ describe("API Endpoint tests #1", () => {
       "'hello from python' != ':-)'",
     )
     cy.get("[data-cy=submit-btn]").click()
-    cy.contains("Submitting to server")
-    cy.contains("0%")
+    cy.contains("Submitting")
     cy.contains("FAIL: HymioTest: test_print_hymio")
   })
 
@@ -113,10 +114,8 @@ describe("API Endpoint tests #1", () => {
     })
     cy.contains("PASS")
     cy.get("[data-cy=submit-btn]").click()
-    cy.contains("Submitting to server")
+    cy.contains("Submitting")
     cy.wait(250)
-    cy.contains("Tests passed")
-    cy.contains("100%")
     cy.contains("Points awarded: 1.1")
     cy.contains("Question A")
     cy.contains("Question B")

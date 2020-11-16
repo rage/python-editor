@@ -8,3 +8,4 @@ DevProfile
 **/cypress/screenshots
 **/constants/*JsSource.ts
 .cache
+debug.log

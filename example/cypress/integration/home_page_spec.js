@@ -100,6 +100,7 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(program)
+      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("hello from python")
     })
@@ -112,6 +113,7 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(program)
+      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=close-btn").click()
       cy.contains("hello from python").should("not.exist")
@@ -134,7 +136,8 @@ describe("The Playground", () => {
 
   describe("Input tests", () => {
     const inputProgram = 'input("Enter a word:")'
-    beforeEach(() => {
+
+    it("displays input prompt & waiting indication in title", () => {
       cy.visit("/")
       cy.get(".monaco-editor")
         .click()
@@ -142,24 +145,25 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
+      cy.wait(15000)
       cy.get("[data-cy=run-btn]").click()
-    })
-
-    it("displays input prompt", () => {
       cy.get("[data-cy=output-container]").contains("Enter a word:")
-    })
-
-    it("displays waiting indication in title", () => {
-      cy.contains("Waiting for input")
-    })
-
-    it("displays input field with label", () => {
       cy.get("[data-cy=user-input-field]").contains(
         'Enter input and press "Enter"',
       )
+      cy.contains("Waiting for input")
     })
 
     it("can enter input value and add it to output", () => {
+      cy.visit("/")
+      cy.get(".monaco-editor")
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(inputProgram)
+      cy.wait(12000)
+      cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=user-input-field]")
         .find("input")
         .type("cat")
@@ -168,6 +172,15 @@ describe("The Playground", () => {
     })
 
     it("hides input field and changes title after entering input", () => {
+      cy.visit("/")
+      cy.get(".monaco-editor")
+        .click()
+        .focused()
+        .type("{ctrl}{end}")
+        .type("{shift}{ctrl}{home}{backspace}")
+        .type(inputProgram)
+      cy.wait(12000)
+      cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=user-input-field]")
         .find("input")
         .type("cat")
