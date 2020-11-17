@@ -61,7 +61,7 @@ type ProgrammingExerciseProps = {
 const useStyles = makeStyles({
   problemsButton: {
     backgroundColor: "#BF0000",
-    marginLeft: "5px !important",
+    marginLeft: "10px !important",
   },
   runButton: {
     backgroundColor: "#0275d8",
@@ -82,7 +82,7 @@ const useStyles = makeStyles({
   testButton: {
     backgroundColor: "#EBEBEB",
     color: "#FF7518",
-    marginLeft: "5px !important",
+    marginLeft: "10px !important",
     "&:hover": {
       backgroundColor: "#D5D5D5",
       color: "#FF7518",
@@ -519,7 +519,7 @@ ${testSource}
         <StyledButton
           onClick={() => handleTests()}
           disabled={!(!!testSource && pyEditorButtonsDisabled)}
-          style={{ backgroundColor: "#EBEBEB", color: "#FF7518" }}
+          className={classes.testButton}
           data-cy="test-btn"
         >
           <FontAwesomeIcon icon={faEye} />
