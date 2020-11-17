@@ -10,7 +10,7 @@ import {
 import TestProgressBar from "./TestProgressBar"
 import { useTranslation } from "react-i18next"
 
-enum OutputHeaderColor {
+enum OutputColor {
   Orange = "rgb(255, 128, 0)",
   Gray = "#E8E8E8",
 }
@@ -83,7 +83,7 @@ const OutputBody: React.FunctionComponent<{}> = (props) => (
 )
 
 interface OutputHeaderProps {
-  color: OutputHeaderColor
+  color: OutputColor
   title: string
 }
 
@@ -102,24 +102,20 @@ const OutputHeader: React.FunctionComponent<OutputHeaderProps> = (props) => {
   )
 }
 interface OutputFooterWithPercentageProps {
-  color: OutputHeaderColor
+  color: OutputColor
   percentage: number
-  percentageTitle: string
-  showAll?: boolean
-  setShowAll?: (showAll: boolean) => void
+  showAll: boolean
+  setShowAll: (showAll: boolean) => void
+}
+
+interface OutputFooterProps {
+  color: OutputColor
 }
 
 const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercentageProps> = (
   props,
 ) => {
-  const {
-    children,
-    color,
-    percentage,
-    percentageTitle,
-    showAll,
-    setShowAll,
-  } = props
+  const { children, color, percentage, showAll, setShowAll } = props
   const [t] = useTranslation()
 
   return (
@@ -139,7 +135,7 @@ const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercen
         />
       </Grid>
       <Grid item xs={6}>
-        <TestProgressBar percentage={percentage} title={percentageTitle} />
+        <TestProgressBar percentage={percentage} />
       </Grid>
       <Grid container item xs={3} alignItems="center" justify="flex-end">
         {children}
@@ -147,12 +143,42 @@ const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercen
     </StyledOutputTitle>
   )
 }
+
+const OutputFooter: React.FunctionComponent<OutputFooterProps> = (props) => {
+  const { children, color } = props
+  const [t] = useTranslation()
+
+  return (
+    <StyledOutputTitle backgroundColor={color}>
+      <Grid style={{ borderRight: "solid 1px lightgray" }} item xs={3}>
+        <FormControlLabel
+          label={t("showAll")}
+          style={{ paddingLeft: "5px" }}
+          control={
+            <Checkbox
+              checked={false}
+              disabled={true}
+              color="primary"
+              data-cy="show-all-results-checkbox"
+            />
+          }
+        />
+      </Grid>
+      <Grid item xs={5}></Grid>
+      <Grid container item xs={4} alignItems="center" justify="flex-end">
+        {children}
+      </Grid>
+    </StyledOutputTitle>
+  )
+}
+
 export {
   OutputBox,
   OutputBody,
   OutputHeader,
   OutputButton,
-  OutputHeaderColor,
+  OutputColor,
   OutputHeaderText,
+  OutputFooter,
   OutputFooterWithPercentage,
 }

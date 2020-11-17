@@ -4,7 +4,6 @@ import { LinearProgress, Typography, withStyles } from "@material-ui/core"
 
 type TestProgressBarProps = {
   percentage: number
-  title: string
 }
 
 const BorderLinearProgress = withStyles((theme) => ({
@@ -39,7 +38,6 @@ const ProgressBarText = styled(Typography)`
 
 const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
   percentage,
-  title,
 }) => {
   if (!percentage && percentage !== 0) return null
 

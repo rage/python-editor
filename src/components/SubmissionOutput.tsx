@@ -8,7 +8,7 @@ import {
   OutputBody,
   OutputBox,
   OutputButton,
-  OutputHeaderColor,
+  OutputColor,
   OutputHeaderText,
   OutputFooterWithPercentage,
   OutputHeader,
@@ -21,7 +21,6 @@ interface SubmissionOutputProps {
   pasteDisabled: boolean
   onClose: () => void
   outputHeight?: string
-  submitting: boolean
   testResults: TestResultObject
 }
 
@@ -31,13 +30,14 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
   const {
     getPasteLink,
     onClose,
-    submitting,
     testResults,
     pasteDisabled,
     outputHeight,
   } = props
   const [t] = useTranslation()
-  const [showAllTests, setShowAllTests] = useState(testResults.allTestsPassed)
+  const [showAllTests, setShowAllTests] = useState(
+    testResults.allTestsPassed ?? false,
+  )
 
   const percentage = Math.round(
     (100 * testResults.testCases.filter((x) => x.passed).length) /
@@ -47,7 +47,7 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
 
   return (
     <OutputBox>
-      <OutputHeader title={t("testResults")} color={OutputHeaderColor.Gray}>
+      <OutputHeader title={t("submissionResult")} color={OutputColor.Gray}>
         <Help getPasteUrl={getPasteLink} pasteDisabled={pasteDisabled} />
         <OutputButton
           label={t("button.close")}
@@ -64,21 +64,11 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
         </ScrollBox>
       </OutputBody>
       <OutputFooterWithPercentage
-        color={OutputHeaderColor.Gray}
+        color={OutputColor.Gray}
         percentage={percentage}
-        percentageTitle={
-          submitting ? t("submittingToServer") : t("testsPassed")
-        }
         showAll={showAllTests}
         setShowAll={setShowAllTests}
-      >
-        {submitting && (
-          <>
-            <CircularProgress size={25} color="inherit" disableShrink />
-            <OutputHeaderText>{t("submitting")}</OutputHeaderText>
-          </>
-        )}
-      </OutputFooterWithPercentage>
+      />
     </OutputBox>
   )
 }

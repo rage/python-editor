@@ -36,6 +36,7 @@
   "signInToSubmitExercise": "Kirjaudu sisään palauttaaksesi tehtävän",
   "stopButtonText": "PYSÄYTÄ",
   "submissionProcessFailed": "Tehtävän lähettäminen epäonnistui",
+  "submissionResult": "Arviointi",
   "submissionTookTooLong": "Tehtävän lähettäminen kesti liian kauan.\nVarmistathan, että koodissasi ei ole ikuista silmukkaa.",
   "submitting": "Lähetetään",
   "submittingToServer": "Lähetetään palvelimelle",

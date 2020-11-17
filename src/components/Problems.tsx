@@ -5,7 +5,7 @@ import {
   OutputBox,
   OutputButton,
   OutputHeader,
-  OutputHeaderColor,
+  OutputColor,
 } from "./OutputBox"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 
@@ -25,7 +25,7 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
 
   return (
     <OutputBox>
-      <OutputHeader title={t("problemsTitle")} color={OutputHeaderColor.Gray}>
+      <OutputHeader title={t("problemsTitle")} color={OutputColor.Gray}>
         <OutputButton
           label={t("button.close")}
           onClick={onClose}

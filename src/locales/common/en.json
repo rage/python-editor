@@ -36,6 +36,7 @@
   "signInToSubmitExercise": "Sign in to submit exercise",
   "stopButtonText": "STOP",
   "submissionProcessFailed": "Submission process failed",
+  "submissionResult": "Assessment",
   "submissionTookTooLong": "Submission was taking a really long time.\nPlease make sure your code doesn't have an infinite loop.",
   "submitting": "Submitting",
   "submittingToServer": "Submitting to server",

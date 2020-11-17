@@ -8,7 +8,7 @@ import {
   OutputBox,
   OutputBody,
   OutputButton,
-  OutputHeaderColor,
+  OutputColor,
   OutputFooterWithPercentage,
   OutputHeader,
 } from "./OutputBox"
@@ -42,7 +42,9 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
   testResults,
 }) => {
   const [t] = useTranslation()
-  const [showAllTests, setShowAllTests] = useState(testResults.allTestsPassed)
+  const [showAllTests, setShowAllTests] = useState(
+    testResults.allTestsPassed ?? false,
+  )
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
   const classes = useStyles()
 
@@ -53,7 +55,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
 
   return (
     <OutputBox>
-      <OutputHeader title={t("testResults")} color={OutputHeaderColor.Gray}>
+      <OutputHeader title={t("testResults")} color={OutputColor.Gray}>
         <Help getPasteUrl={getPasteLink} pasteDisabled={submitDisabled} />
         <OutputButton
           label={t("button.close")}
@@ -70,9 +72,8 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
         </ScrollBox>
       </OutputBody>
       <OutputFooterWithPercentage
-        color={OutputHeaderColor.Gray}
+        color={OutputColor.Gray}
         percentage={percentage}
-        percentageTitle={t("testsPassed")}
         showAll={showAllTests}
         setShowAll={setShowAllTests}
       >

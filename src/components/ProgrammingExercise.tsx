@@ -36,6 +36,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEye } from "@fortawesome/free-regular-svg-icons"
+import SubmittingOutput from "./SubmittingOutput"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -250,10 +251,8 @@ ${testSource}
 
   const handleSubmit = () => {
     setStateForSelectedFile()
-    setEditorState(
-      // paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
-      EditorState.Submitting,
-    )
+    setEditorState(EditorState.Submitting)
+    setTestResults(undefined)
   }
 
   const handlePasteSubmit = () => {
@@ -374,17 +373,23 @@ ${testSource}
             testResults={testResults ?? { points: [], testCases: [] }}
           />
         )
-      case EditorState.Submitting:
       case EditorState.ShowPassedFeedbackForm:
       case EditorState.ShowSubmissionResults:
         return (
           <SubmissionOutput
             onClose={closeOutput}
-            submitting={editorState === EditorState.Submitting}
             testResults={testResults ?? { points: [], testCases: [] }}
             getPasteLink={handlePasteSubmit}
             pasteDisabled={submitDisabled}
             outputHeight={outputHeight}
+          />
+        )
+      case EditorState.Submitting:
+        return (
+          <SubmittingOutput
+            onClose={closeOutput}
+            getPasteLink={handlePasteSubmit}
+            pasteDisabled={true}
           />
         )
       case EditorState.ShowProblems:
@@ -412,6 +417,9 @@ ${testSource}
 
   const ieOrEdge =
     window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
+
+  const pyEditorButtonsDisabled =
+    (editorState & (EditorState.WorkerActive | EditorState.Submitting)) === 0
 
   return (
     <div
@@ -492,12 +500,7 @@ ${testSource}
           <StyledButton
             onClick={() => handleRun()}
             className={classes.runButton}
-            disabled={
-              !(
-                workerAvailable &&
-                (editorState & EditorState.WorkerActive) === 0
-              )
-            }
+            disabled={!(workerAvailable && pyEditorButtonsDisabled)}
             data-cy="run-btn"
           >
             <FontAwesomeIcon icon={faPlay} />
@@ -515,9 +518,7 @@ ${testSource}
         )}
         <StyledButton
           onClick={() => handleTests()}
-          disabled={
-            !(!!testSource && (editorState & EditorState.WorkerActive) === 0)
-          }
+          disabled={!(!!testSource && pyEditorButtonsDisabled)}
           style={{ backgroundColor: "#EBEBEB", color: "#FF7518" }}
           data-cy="test-btn"
         >

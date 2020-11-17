@@ -12,7 +12,7 @@ import {
   OutputBox,
   OutputHeader,
   OutputButton,
-  OutputHeaderColor,
+  OutputColor,
   OutputHeaderText,
 } from "./OutputBox"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
@@ -68,7 +68,7 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
     <OutputBox>
       <OutputHeader
         title={t("outputTitle")}
-        color={waitingInput ? OutputHeaderColor.Orange : OutputHeaderColor.Gray}
+        color={waitingInput ? OutputColor.Orange : OutputColor.Gray}
       >
         {getStatus()}
         <Help
