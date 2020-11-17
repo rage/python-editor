@@ -39,6 +39,7 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
   const [t] = useTranslation()
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
+  const initializing = editorState === EditorState.WorkerInitializing
   const running = (editorState & EditorState.WorkerActive) !== 0
   const waitingInput = editorState === EditorState.WaitingInput
 
@@ -54,7 +55,9 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
       return (
         <>
           <CircularProgress size={25} color="inherit" disableShrink />
-          <OutputHeaderText>{t("running")}</OutputHeaderText>
+          <OutputHeaderText>
+            {initializing ? t("initializing") : t("running")}
+          </OutputHeaderText>
         </>
       )
     }

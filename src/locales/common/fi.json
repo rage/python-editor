@@ -18,6 +18,7 @@
   "feedbackTitle": "Tehtävä suoritettu, onneksi olkoon!",
   "incompatibleExerciseTemplate": "Yhteensopimaton tehtäväpohja.",
   "infiniteLoopMessage": "Varmista, että koodissasi ei ole ikuista silmukkaa.",
+  "initializing": "Alustetaan",
   "malformedExerciseTemplate": "Väärän muotoinen tehtäväpohja",
   "modelSolution": "Mallivastaus",
   "needHelp": "Tarvitsetko apua?",
