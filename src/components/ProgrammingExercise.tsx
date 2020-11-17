@@ -106,8 +106,6 @@ const StyledButton = styled((props) => (
   <Button variant="contained" {...props} />
 ))`
   margin: 0.5em;
-  background-color: #0275d8;
-  color: #fff;
 `
 
 const defaultFile: FileEntry = {

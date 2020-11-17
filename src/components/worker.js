@@ -196,10 +196,8 @@ exec(code)
     .then(() => {
       pyodide
         .loadPackage()
-        .then(() => {
-          postMessage({ type: "start_run" })
-          pyodide.runPythonAsync(parsedCode)
-        })
+        .then(() => postMessage({ type: "start_run" }))
+        .then(() => pyodide.runPythonAsync(parsedCode))
         .catch((e) => {
           printBuffer = []
           printBuffer.push({
@@ -235,10 +233,8 @@ function test({ code, debug }) {
     .then(() => {
       pyodide
         .loadPackage()
-        .then(() => {
-          postMessage({ type: "start_test" })
-          pyodide.runPythonAsync(code)
-        })
+        .then(() => postMessage({ type: "start_test" }))
+        .then(() => pyodide.runPythonAsync(code))
         .then(() => {
           console.log("running pyodide completed")
           postMessage({
