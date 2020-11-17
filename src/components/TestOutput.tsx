@@ -53,7 +53,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
 
   return (
     <OutputBox>
-      <OutputHeader title={t("outputTitle")} color={OutputHeaderColor.Gray}>
+      <OutputHeader title={t("testResults")} color={OutputHeaderColor.Gray}>
         <Help getPasteUrl={getPasteLink} pasteDisabled={submitDisabled} />
         <OutputButton
           label={t("button.close")}
@@ -73,7 +73,6 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
         color={OutputHeaderColor.Gray}
         percentage={percentage}
         percentageTitle={t("testsPassed")}
-        title={t("testResults")}
         showAll={showAllTests}
         setShowAll={setShowAllTests}
       >

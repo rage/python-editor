@@ -71,6 +71,8 @@ const useStyles = makeStyles({
     },
   },
   stopButton: {
+    backgroundColor: "#0275d8",
+    color: "#FFF",
     "&:hover": {
       backgroundColor: "#0275d8",
       color: "#F44141",

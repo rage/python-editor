@@ -44,12 +44,12 @@ const TestProgressBar: React.FunctionComponent<TestProgressBarProps> = ({
   if (!percentage && percentage !== 0) return null
 
   return (
-    <>
+    <div style={{ marginLeft: "10px" }}>
       <ProgressBarBackground>
         <ProgressBarText variant="button">{percentage} %</ProgressBarText>
         <BorderLinearProgress variant="determinate" value={percentage} />
       </ProgressBarBackground>
-    </>
+    </div>
   )
 }
 

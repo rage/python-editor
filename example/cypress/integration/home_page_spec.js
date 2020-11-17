@@ -128,6 +128,7 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(infiniteProgram)
+      cy.wait(10000)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("Running")
       cy.get("[data-cy=ouput-title-stop-btn]").should("not.be.disabled")

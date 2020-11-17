@@ -47,7 +47,7 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
 
   return (
     <OutputBox>
-      <OutputHeader title={t("outputTitle")} color={OutputHeaderColor.Gray}>
+      <OutputHeader title={t("testResults")} color={OutputHeaderColor.Gray}>
         <Help getPasteUrl={getPasteLink} pasteDisabled={pasteDisabled} />
         <OutputButton
           label={t("button.close")}
@@ -69,7 +69,6 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
         percentageTitle={
           submitting ? t("submittingToServer") : t("testsPassed")
         }
-        title={submitting ? t("outputTitle") : t("testResults")}
         showAll={showAllTests}
         setShowAll={setShowAllTests}
       >
