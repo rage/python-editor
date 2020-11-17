@@ -18,6 +18,7 @@
   "feedbackTitle": "Exercise completed, congratulations!",
   "incompatibleExerciseTemplate": "Incompatible exercise template.",
   "infiniteLoopMessage": "Make sure you don't have an infinite loop in your code.",
+  "initializing": "Initializing",
   "malformedExerciseTemplate": "Malformed exercise template",
   "modelSolution": "Model solution",
   "needHelp": "Need help?",

@@ -11,7 +11,8 @@ export enum EditorState {
   Submitting = 1 << 9,
   Testing = 1 << 10,
   WaitingInput = 1 << 11,
-  WorkerActive = ExecutingCode | WaitingInput | Testing,
+  WorkerInitializing = 1 << 12,
+  WorkerActive = ExecutingCode | Testing | WaitingInput | WorkerInitializing,
 }
 
 export interface FileEntry {

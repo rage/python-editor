@@ -71,6 +71,8 @@ const useStyles = makeStyles({
     },
   },
   stopButton: {
+    backgroundColor: "#0275d8",
+    color: "#FFF",
     "&:hover": {
       backgroundColor: "#0275d8",
       color: "#F44141",
@@ -148,7 +150,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
-      setEditorState(EditorState.ExecutingCode)
+      setEditorState(EditorState.WorkerInitializing)
       worker.postMessage({
         type: "run",
         msg: {
@@ -170,7 +172,7 @@ ${testSource}
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
-      setEditorState(EditorState.Testing)
+      setEditorState(EditorState.WorkerInitializing)
       worker.postMessage({ type: "run_tests", msg: { code: testCode, debug } })
     } else {
       console.log("Worker is busy")
@@ -179,40 +181,55 @@ ${testSource}
 
   worker.setMessageListener((e: any) => {
     let { type, msg } = e.data
-    if (type === "print") {
-      setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
-    } else if (type === "input_required") {
-      setEditorState(EditorState.WaitingInput)
-    } else if (type === "error") {
-      console.error(msg)
-      setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
-      setWorkerAvailable(true)
-    } else if (type === "ready") {
-      setWorkerAvailable(true)
-    } else if (type === "print_batch") {
-      if (editorState === EditorState.ExecutingCode) {
-        const prints = msg.map((text: string) => ({
-          id: uuid(),
-          type: "output",
-          text,
-        }))
-        setOutput((prevState) => prevState.concat(prints))
-      }
-    } else if (type === "print_done") {
-      setEditorState((previous) => {
-        if (previous === EditorState.Testing) {
-          return EditorState.ShowTestResults
+    switch (type) {
+      case "print":
+        setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
+        break
+      case "input_required":
+        setEditorState(EditorState.WaitingInput)
+        break
+      case "error":
+        console.error(msg)
+        setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
+        setWorkerAvailable(true)
+        break
+      case "ready":
+        setWorkerAvailable(true)
+        break
+      case "print_batch":
+        if (editorState === EditorState.ExecutingCode) {
+          const prints = msg.map((text: string) => ({
+            id: uuid(),
+            type: "output",
+            text,
+          }))
+          setOutput((prevState) => prevState.concat(prints))
         }
-        return EditorState.Idle
-      })
-    } else if (type === "test_results") {
-      const testCases = parseTestCases(msg)
-      setOutput([])
-      setTestResults({
-        allTestsPassed: testCases.every((x) => x.passed),
-        points: [],
-        testCases,
-      })
+        break
+      case "print_done":
+        setEditorState((previous) => {
+          if (previous === EditorState.Testing) {
+            return EditorState.ShowTestResults
+          }
+          return EditorState.Idle
+        })
+        break
+      case "test_results": {
+        const testCases = parseTestCases(msg)
+        setOutput([])
+        setTestResults({
+          allTestsPassed: testCases.every((x) => x.passed),
+          points: [],
+          testCases,
+        })
+        break
+      }
+      case "start_run":
+        setEditorState(EditorState.ExecutingCode)
+        break
+      case "start_test":
+        setEditorState(EditorState.Testing)
+        break
     }
   })
 

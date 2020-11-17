@@ -92,16 +92,17 @@ const OutputHeader: React.FunctionComponent<OutputHeaderProps> = (props) => {
 
   return (
     <StyledOutputTitle backgroundColor={color}>
-      <Grid item xs={2}>
+      <Grid item xs={4}>
         <OutputTitleText variant="h6">{title}</OutputTitleText>
       </Grid>
-      <Grid container item xs={10} alignItems="center" justify="flex-end">
+      <Grid container item xs={8} alignItems="center" justify="flex-end">
         {children}
       </Grid>
     </StyledOutputTitle>
   )
 }
-interface OutputFooterWithPercentageProps extends OutputHeaderProps {
+interface OutputFooterWithPercentageProps {
+  color: OutputHeaderColor
   percentage: number
   percentageTitle: string
   showAll?: boolean
@@ -116,7 +117,6 @@ const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercen
     color,
     percentage,
     percentageTitle,
-    title,
     showAll,
     setShowAll,
   } = props
@@ -124,7 +124,7 @@ const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercen
 
   return (
     <StyledOutputTitle backgroundColor={color}>
-      <Grid style={{ borderRight: "solid 1px lightgray" }} item xs={2}>
+      <Grid style={{ borderRight: "solid 1px lightgray" }} item xs={3}>
         <FormControlLabel
           label={t("showAll")}
           style={{ paddingLeft: "5px" }}
@@ -138,10 +138,7 @@ const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercen
           }
         />
       </Grid>
-      <Grid item xs={2}>
-        <OutputTitleText>{title}</OutputTitleText>
-      </Grid>
-      <Grid item xs={5}>
+      <Grid item xs={6}>
         <TestProgressBar percentage={percentage} title={percentageTitle} />
       </Grid>
       <Grid container item xs={3} alignItems="center" justify="flex-end">
