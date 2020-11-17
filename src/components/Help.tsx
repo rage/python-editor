@@ -42,8 +42,8 @@ const HtmlTooltip = withStyles((theme) => ({
   tooltip: {
     backgroundColor: "#D3D3D3",
     color: "black",
-    minWidth: 500,
-    maxWidth: 700,
+    minWidth: 400,
+    maxWidth: 600,
     fontSize: theme.typography.pxToRem(12),
   },
   arrow: {

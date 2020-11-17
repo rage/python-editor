@@ -59,12 +59,12 @@ type ProgrammingExerciseProps = {
 
 const useStyles = makeStyles({
   problemsButton: {
-    "&:holver": {
-      backgroundColor: "#0275d8",
-      color: "#BF0000",
-    },
+    backgroundColor: "#BF0000",
+    marginLeft: "5px",
   },
   runButton: {
+    backgroundColor: "#0275d8",
+    color: "#FFF",
     "&:hover": {
       backgroundColor: "#0275d8",
       color: "#228B22",
@@ -74,6 +74,15 @@ const useStyles = makeStyles({
     "&:hover": {
       backgroundColor: "#0275d8",
       color: "#F44141",
+    },
+  },
+  testButton: {
+    backgroundColor: "#EBEBEB",
+    color: "#FF7518",
+    marginLeft: "5px",
+    "&:hover": {
+      backgroundColor: "#D5D5D5",
+      color: "#FF7518",
     },
   },
   whiteText: {
@@ -505,14 +514,13 @@ ${testSource}
               outputBoxRef.current?.open()
             }}
             disabled={(editorState & EditorState.WorkerActive) > 0}
-            style={{ backgroundColor: "#BF0000" }}
+            className={classes.problemsButton}
             data-cy="problems-btn"
           >
             <FontAwesomeIcon icon={faExclamationCircle} />
-            <span
-              style={{ paddingLeft: "5px" }}
-              className={classes.problemsButton}
-            >{`${t("problemsTitle")} (${problems.length})`}</span>
+            <span className={classes.whiteText}>{`${t("problemsTitle")} (${
+              problems.length
+            })`}</span>
           </StyledButton>
         )}
       </div>
