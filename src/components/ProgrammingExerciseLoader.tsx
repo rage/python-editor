@@ -94,7 +94,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
 
     const template = await extractExerciseArchive(downloadResult.val, apiConfig)
     if (template.problems?.length) {
-      setIncompatibleMessage(template.problems.join(", "))
+      setIncompatibleMessage(template.problems.join(" "))
       return
     }
     setTestSource(template.testSource)

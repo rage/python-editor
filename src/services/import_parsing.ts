@@ -1,4 +1,4 @@
-import { FileEntry } from "../components/ProgrammingExerciseLoader"
+import { FileEntry } from "../types"
 
 type PythonImportAll = {
   pkg: string

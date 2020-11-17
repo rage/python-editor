@@ -11,6 +11,7 @@ interface Configuration {
 interface Exercise {
   problems?: string[]
   srcFiles: FileEntry[]
+  successful: boolean
   testSource: string
 }
 
@@ -24,26 +25,29 @@ const extractExerciseArchive = async (
   const testFiles = await getFileEntries(zip, "test")
   const tmcFiles = await getFileEntries(zip, "tmc")
   const problems: string[] = []
+  let successful = true
 
   const fileSorter = (files: FileEntry[]): FileEntry[] =>
     files.sort((a, b) => a.shortName.localeCompare(b.shortName))
-  const template =
+  const pickedSrcFiles =
     srcFiles.length > 0 ? fileSorter(srcFiles) : fileSorter(rootFiles)
-  if (template.length === 0) {
+  if (pickedSrcFiles.length === 0) {
     problems.push(t("noExerciseFilesFound"))
   }
 
-  let testSource: string | undefined
+  let testSource = ""
   try {
     testSource = inlineAndPatchTestSources(testFiles, tmcFiles)
   } catch (e) {
-    problems.push(e)
+    problems.push(...e)
+    successful = false
   }
 
   return {
     problems,
-    srcFiles: template ?? [],
-    testSource: testSource ?? "",
+    srcFiles: pickedSrcFiles,
+    successful,
+    testSource,
   }
 }
 
@@ -303,7 +307,7 @@ const patchTmcUtilsPy = (source: string): string => {
   !reloadModuleFound &&
     missing.push("Expected to find function `reload_module` from tmc/utils.py.")
   if (missing.length > 0) {
-    throw missing.join(" ")
+    throw missing
   }
 
   return lines.join("\n")
