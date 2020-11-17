@@ -60,7 +60,7 @@ type ProgrammingExerciseProps = {
 const useStyles = makeStyles({
   problemsButton: {
     backgroundColor: "#BF0000",
-    marginLeft: "5px",
+    marginLeft: "5px !important",
   },
   runButton: {
     backgroundColor: "#0275d8",
@@ -79,7 +79,7 @@ const useStyles = makeStyles({
   testButton: {
     backgroundColor: "#EBEBEB",
     color: "#FF7518",
-    marginLeft: "5px",
+    marginLeft: "5px !important",
     "&:hover": {
       backgroundColor: "#D5D5D5",
       color: "#FF7518",
