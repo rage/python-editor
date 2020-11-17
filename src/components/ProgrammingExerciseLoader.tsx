@@ -59,11 +59,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const time = useTime(10000)
   const [t, i18n] = useTranslation()
   const [ready, setReady] = useState(false)
+  const [problems, setProblems] = useState<string[] | undefined>(undefined)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testSource, setTestSource] = useState<string | undefined>()
-  const [incompatibleMessage, setIncompatibleMessage] = useState<
-    string | undefined
-  >()
   const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
@@ -93,10 +91,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
 
     const template = await extractExerciseArchive(downloadResult.val, apiConfig)
-    if (template.problems?.length) {
-      setIncompatibleMessage(template.problems.join(" "))
-      return
-    }
+    setProblems(template.problems)
     setTestSource(template.testSource)
 
     const detailsResult = await getExerciseDetails(
@@ -247,25 +242,19 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
           {t("signInToSubmitExercise")}
         </Notification>
       )}
-      {incompatibleMessage && (
-        <Notification style="warning">
-          {`${t("incompatibleExerciseTemplate")}. ${t(
-            "pleaseReportFollowingErrorToCourseInstructor",
-          )}: ${incompatibleMessage}`}
-        </Notification>
-      )}
       {exerciseDetails?.expired && (
         <Notification style="warning">{t("deadlineExpired")}</Notification>
       )}
       <ProgrammingExercise
         debug={debug}
         initialFiles={srcFiles}
-        testSource={testSource}
+        problems={problems}
         submitFeedback={(testResults, feedback) => {
           if (testResults.feedbackAnswerUrl && feedback.length > 0) {
             postExerciseFeedback(testResults, feedback, apiConfig)
           }
         }}
+        testSource={testSource}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
         submitDisabled={exerciseDetails?.expired || !signedIn}

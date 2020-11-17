@@ -5,11 +5,12 @@ export enum EditorState {
   RunAborted = 1 << 3,
   ShowHelp = 1 << 4,
   ShowPassedFeedbackForm = 1 << 5,
-  ShowSubmissionResults = 1 << 6,
-  ShowTestResults = 1 << 7,
-  Submitting = 1 << 8,
-  Testing = 1 << 9,
-  WaitingInput = 1 << 10,
+  ShowProblems = 1 << 6,
+  ShowSubmissionResults = 1 << 7,
+  ShowTestResults = 1 << 8,
+  Submitting = 1 << 9,
+  Testing = 1 << 10,
+  WaitingInput = 1 << 11,
   WorkerActive = ExecutingCode | WaitingInput | Testing,
 }
 
