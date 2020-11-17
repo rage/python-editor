@@ -56,6 +56,7 @@ interface AnimatedOutputBoxProps {
 
 type AnimatedOutputBoxRef = {
   close(): void
+  open(): void
 }
 
 const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
@@ -68,6 +69,11 @@ const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
       setOpen(false)
     }
 
+    const openFn = () => {
+      setOpen(true)
+      setRender(true)
+    }
+
     useEffect(() => {
       if (isRunning && !render) {
         setRender(true)
@@ -76,12 +82,11 @@ const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
     }, [isRunning])
 
     useImperativeHandle(ref, () => {
-      return { close }
+      return { close, open: openFn }
     })
 
     const onAnimationEnd = () => {
       if (!open) {
-        // clearOutput()
         setRender(false)
       }
     }

@@ -12,12 +12,12 @@ import {
 import PyEditor from "./PyEditor"
 import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
 import { v4 as uuid } from "uuid"
-import { FileEntry } from "./ProgrammingExerciseLoader"
 import {
   OutputObject,
   TestResultObject,
   FeedBackAnswer,
   EditorState,
+  FileEntry,
 } from "../types"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
@@ -28,7 +28,12 @@ import { createWebEditorModuleSource } from "../services/patch_exercise"
 import EditorOutput from "./EditorOutput"
 import TestOutput from "./TestOutput"
 import SubmissionOutput from "./SubmissionOutput"
-import { faPlay, faStop } from "@fortawesome/free-solid-svg-icons"
+import Problems from "./Problems"
+import {
+  faExclamationCircle,
+  faPlay,
+  faStop,
+} from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEye } from "@fortawesome/free-regular-svg-icons"
 
@@ -43,8 +48,9 @@ type ProgrammingExerciseProps = {
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   debug?: boolean
   initialFiles: Array<FileEntry>
-  testSource?: string
+  problems?: string[]
   submitDisabled: boolean
+  testSource?: string
   editorHeight?: string
   outputHeight?: string
   ready?: boolean
@@ -52,6 +58,12 @@ type ProgrammingExerciseProps = {
 }
 
 const useStyles = makeStyles({
+  problemsButton: {
+    "&:holver": {
+      backgroundColor: "#0275d8",
+      color: "#BF0000",
+    },
+  },
   runButton: {
     "&:hover": {
       backgroundColor: "#0275d8",
@@ -99,6 +111,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitToPaste,
   debug,
   initialFiles,
+  problems,
   testSource,
   submitDisabled,
   editorHeight,
@@ -348,6 +361,14 @@ ${testSource}
             outputHeight={outputHeight}
           />
         )
+      case EditorState.ShowProblems:
+        return (
+          <Problems
+            onClose={closeOutput}
+            problems={problems ?? []}
+            outputHeight={outputHeight}
+          />
+        )
       default:
         return (
           <EditorOutput
@@ -477,6 +498,23 @@ ${testSource}
           <FontAwesomeIcon icon={faEye} />
           <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
         </StyledButton>
+        {problems && problems.length > 0 && (
+          <StyledButton
+            onClick={() => {
+              setEditorState(EditorState.ShowProblems)
+              outputBoxRef.current?.open()
+            }}
+            disabled={(editorState & EditorState.WorkerActive) > 0}
+            style={{ backgroundColor: "#BF0000" }}
+            data-cy="problems-btn"
+          >
+            <FontAwesomeIcon icon={faExclamationCircle} />
+            <span
+              style={{ paddingLeft: "5px" }}
+              className={classes.problemsButton}
+            >{`${t("problemsTitle")} (${problems.length})`}</span>
+          </StyledButton>
+        )}
       </div>
 
       <AnimatedOutputBox

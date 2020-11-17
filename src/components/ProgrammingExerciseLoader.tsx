@@ -1,11 +1,14 @@
-import JSZip, { JSZipObject } from "jszip"
 import { DateTime } from "luxon"
 import React, { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { Result } from "ts-results"
 
 import { useTime } from "../hooks/customHooks"
-import { TestResultObject, Language, ExerciseDetails } from "../types"
+import {
+  TestResultObject,
+  Language,
+  ExerciseDetails,
+  FileEntry,
+} from "../types"
 import { ProgrammingExercise, defaultFile } from "./ProgrammingExercise"
 import {
   getExerciseDetails,
@@ -15,7 +18,7 @@ import {
   postExerciseSubmission,
   getLatestSubmissionZip,
 } from "../services/programming_exercise"
-import { inlineAndPatchTestSources } from "../services/patch_exercise"
+import { extractExerciseArchive } from "../services/patch_exercise"
 import Notification from "./Notification"
 import styled from "styled-components"
 import { Button, Grid } from "@material-ui/core"
@@ -30,13 +33,6 @@ type ProgrammingExerciseLoaderProps = {
   height?: string
   outputHeight?: string
   language: Language
-}
-
-type FileEntry = {
-  fullName: string
-  shortName: string
-  originalContent: string
-  content: string
 }
 
 const ModelSolutionButton = styled((props) => (
@@ -63,39 +59,14 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const time = useTime(10000)
   const [t, i18n] = useTranslation()
   const [ready, setReady] = useState(false)
+  const [problems, setProblems] = useState<string[] | undefined>(undefined)
   const [srcFiles, setSrcFiles] = useState([defaultFile])
   const [testSource, setTestSource] = useState<string | undefined>()
-  const [incompatibleMessage, setIncompatibleMessage] = useState<
-    string | undefined
-  >()
   const [signedIn, setSignedIn] = useState(false)
   const [exerciseDetails, setExerciseDetails] = useState<
     ExerciseDetails | undefined
   >()
   const apiConfig = { t, token }
-  const mainSourceFile = "__main__.py"
-
-  const getFileEntries = (
-    zip: JSZip,
-    directory: string,
-    main: string | null,
-  ): Promise<Array<FileEntry>> => {
-    const fileSelector: RegExp = RegExp(`${directory}/\\w*\\.py$`)
-    const files = orderFiles(zip.file(fileSelector), main)
-    return Promise.all(files.map((f: JSZipObject) => createEntry(f)))
-  }
-
-  const orderFiles = (files: JSZipObject[], main: string | null) => {
-    if (main) {
-      const mainIndex = files.findIndex((file: any) => file.name.includes(main))
-      if (mainIndex > -1) {
-        const mainEntry = files.splice(mainIndex, 1)[0]
-        files.unshift(mainEntry)
-        return files
-      }
-    }
-    return files
-  }
 
   const loadExercises = async (hasToken: boolean) => {
     const wrapError = (status: number, message: string) => [
@@ -119,24 +90,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       return
     }
 
-    const zip = downloadResult.val
-    const unzipResult = Result.all(
-      await Result.wrapAsync(() => getFileEntries(zip, "src", mainSourceFile)),
-      await Result.wrapAsync(() => getFileEntries(zip, "test", mainSourceFile)),
-      await Result.wrapAsync(() => getFileEntries(zip, "tmc", mainSourceFile)),
-    )
-    if (unzipResult.err) {
-      setSrcFiles(wrapError(418, t("malformedExerciseTemplate")))
-      return
-    }
-
-    const [src, test, tmc] = unzipResult.val
-    try {
-      const inlined = inlineAndPatchTestSources(test, tmc)
-      setTestSource(inlined)
-    } catch (e) {
-      setIncompatibleMessage(e)
-    }
+    const template = await extractExerciseArchive(downloadResult.val, apiConfig)
+    setProblems(template.problems)
+    setTestSource(template.testSource)
 
     const detailsResult = await getExerciseDetails(
       organization,
@@ -153,7 +109,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     setExerciseDetails(detailsResult.val)
 
     if (!hasToken) {
-      setSrcFiles(src)
+      setSrcFiles(template.srcFiles)
       return
     }
 
@@ -163,32 +119,18 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         apiConfig,
       )
       if (submissionResult.ok && submissionResult.val) {
-        const fileEntries = await getFileEntries(
+        const submission = await extractExerciseArchive(
           submissionResult.val,
-          "src",
-          mainSourceFile,
+          apiConfig,
         )
-        if (fileEntries.length > 0) {
-          setSrcFiles(fileEntries)
-          return
+        if (submission.srcFiles.length > 0) {
+          setSrcFiles(submission.srcFiles)
         }
       }
-      setSrcFiles(src)
+      setSrcFiles(template.srcFiles)
     } catch (e) {
-      setSrcFiles(src)
+      setSrcFiles(template.srcFiles)
     }
-  }
-
-  const createEntry = async (f: JSZipObject): Promise<FileEntry> => {
-    const content = await f.async("string")
-    const fullName: string = f.name
-    const matches = fullName.match(/(\w+\.py)/)
-    let shortName: string | null = null
-    if (matches) {
-      shortName = matches[0]
-      return { fullName, shortName, originalContent: content, content }
-    }
-    return { fullName: "", shortName: "", originalContent: "", content: "" }
   }
 
   const submitAndWaitResult = async (files: Array<FileEntry>) => {
@@ -300,25 +242,19 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
           {t("signInToSubmitExercise")}
         </Notification>
       )}
-      {incompatibleMessage && (
-        <Notification style="warning">
-          {`${t("incompatibleExerciseTemplate")}. ${t(
-            "pleaseReportFollowingErrorToCourseInstructor",
-          )}: ${incompatibleMessage}`}
-        </Notification>
-      )}
       {exerciseDetails?.expired && (
         <Notification style="warning">{t("deadlineExpired")}</Notification>
       )}
       <ProgrammingExercise
         debug={debug}
         initialFiles={srcFiles}
-        testSource={testSource}
+        problems={problems}
         submitFeedback={(testResults, feedback) => {
           if (testResults.feedbackAnswerUrl && feedback.length > 0) {
             postExerciseFeedback(testResults, feedback, apiConfig)
           }
         }}
+        testSource={testSource}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
         submitDisabled={exerciseDetails?.expired || !signedIn}
@@ -330,4 +266,4 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   )
 }
 
-export { ProgrammingExerciseLoader, ProgrammingExerciseLoaderProps, FileEntry }
+export { ProgrammingExerciseLoader, ProgrammingExerciseLoaderProps }

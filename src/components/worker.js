@@ -95,6 +95,7 @@ function run({ code, debug }) {
   // https://github.com/akloster/aioweb-demo/blob/master/src/main.py
   code = `\
 async def execute():
+    __name__ = "__main__"
 ${code
   .replace(/"""/g, '\\"\\"\\"')
   .split("\n")
