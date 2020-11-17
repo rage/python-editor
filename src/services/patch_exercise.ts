@@ -154,6 +154,12 @@ ${patchTestSource(test, "PythonEditorTest", testFiles)}
 testOutput = ""
 from tmc_runner import TMCTestRunner
 from tmc_result import results
+from tmc_webeditor import code
+
+import inspect
+def getsource(module):
+    return code
+inspect.getsource = getsource
 
 test_suite = unittest.TestLoader().loadTestsFromTestCase(PythonEditorTest)
 with io.StringIO() as buf:
@@ -274,7 +280,12 @@ const patchTmcUtilsPy = (source: string): string => {
     return load_module("editorcontent")
 `
 
-  let lines = source.split("\n")
+  let lines = [
+    "import inspect",
+    "def getsource(module):",
+    "    return code",
+    "inspect.getsource = getsource",
+  ].concat(source.split("\n"))
   let i = 0
 
   while (i < lines.length) {
