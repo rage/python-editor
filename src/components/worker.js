@@ -218,7 +218,7 @@ exec(code)
 }
 
 function lineOffsetReplacer(m, number, o, s) {
-  return "line " + (parseInt(number) - 1).toString()
+  return "line " + (parseInt(number) - 2).toString()
 }
 
 function fixLineNumberOffset(msg) {
