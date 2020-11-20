@@ -22,7 +22,7 @@ import {
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
-import { useWorker } from "../hooks/getWorker"
+import { useWorker } from "../hooks/useWorker"
 import { parseTestCases } from "../services/test_parsing"
 import { createWebEditorModuleSource } from "../services/patch_exercise"
 import EditorOutput from "./EditorOutput"
@@ -139,7 +139,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
     NodeJS.Timeout | undefined
   >()
-  const [worker] = useWorker()
+  const [worker] = useWorker({ debug })
   const outputBoxRef = React.createRef<AnimatedOutputBoxRef>()
   const [editorState, setEditorState] = useState(EditorState.Initializing)
   const classes = useStyles()
@@ -191,6 +191,7 @@ ${testSource}
         console.error(msg)
         setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
         setWorkerAvailable(true)
+        worker.recycle()
         break
       case "ready":
         setWorkerAvailable(true)
@@ -217,6 +218,7 @@ ${testSource}
               return EditorState.Idle
           }
         })
+        worker.recycle()
         break
       case "test_results": {
         const testCases = parseTestCases(msg)

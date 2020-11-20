@@ -26,7 +26,6 @@ const App = () => {
   const exercise = useInput("exercise", "")
   const token = useInput("token", "")
   const [language, setLanguage] = useState("en")
-  const [position, setPosition] = useState("relative")
   const [height, setHeight] = useState("400px")
   const [outputHeight, setOutputHeight] = useState("250px")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
