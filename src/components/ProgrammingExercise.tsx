@@ -207,10 +207,15 @@ ${testSource}
         break
       case "print_done":
         setEditorState((previous) => {
-          if (previous === EditorState.Testing) {
-            return EditorState.ShowTestResults
+          switch (previous) {
+            case EditorState.Testing:
+              if (testResults?.allTestsPassed) {
+                handleSubmit()
+              }
+              return EditorState.ShowTestResults
+            default:
+              return EditorState.Idle
           }
-          return EditorState.Idle
         })
         break
       case "test_results": {
@@ -293,6 +298,7 @@ ${testSource}
   }, [initialFiles])
 
   useEffect(() => {
+    debug && console.log(EditorState[editorState])
     switch (editorState) {
       case EditorState.Submitting:
         submitProgrammingExercise(files).then((data) => {
