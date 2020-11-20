@@ -112,9 +112,9 @@ describe("API Endpoint tests #1", () => {
       url: "/api/v8/core/submissions/123123",
       response: "@resultSubmissionPass",
     })
-    cy.contains("PASS")
-    cy.get("[data-cy=submit-btn]").click()
-    cy.contains("Submitting")
+    // cy.contains("PASS")
+    // cy.get("[data-cy=submit-btn]").click()
+    // cy.contains("Submitting")
     cy.wait(250)
     cy.contains("Points awarded: 1.1")
     cy.contains("Question A")
