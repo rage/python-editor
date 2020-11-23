@@ -40,7 +40,7 @@ const useWorker = ({ debug }: WorkerProps) => {
 
   const createWorker = () => {
     debug && console.log("Workerpool length is", workerPool.length)
-    const w = workerPool.shift()
+    const w = workerPool.pop()
     if (workerPool.length === 0) {
       debug && console.log("Creating another worker")
       workerPool.push(new Worker(blobObject))
@@ -75,9 +75,9 @@ const useWorker = ({ debug }: WorkerProps) => {
   }
 
   const recycle = () => {
-    debug && console.log("Recycling worker")
     if (worker) {
-      workerPool.unshift(worker)
+      workerPool.push(worker)
+      debug && console.log("Recycling worker, pool size:", workerPool.length)
     }
     setWorker(undefined)
   }
