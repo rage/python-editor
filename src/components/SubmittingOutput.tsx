@@ -1,4 +1,4 @@
-import { CircularProgress, Grid, makeStyles } from "@material-ui/core"
+import { LinearProgress, makeStyles } from "@material-ui/core"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
@@ -49,10 +49,10 @@ const SubmittingOutput: React.FunctionComponent<SubmissionOutputProps> = (
       </OutputHeader>
       <OutputBody>
         <div style={{ textAlign: "center", margin: "10px 0px" }}>
-          <CircularProgress size={30} color="inherit" disableShrink />
           <OutputHeaderText variant="h5">
             {t("submittingToServer")}
           </OutputHeaderText>
+          <LinearProgress style={{ width: "42%", margin: "0 auto" }} />
         </div>
       </OutputBody>
       <OutputFooter color={OutputColor.Gray}>

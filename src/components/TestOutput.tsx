@@ -61,7 +61,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
       testResults.testCases.length,
   )
 
-  const submitButton = (
+  const SubmitButton: React.FunctionComponent = () => (
     <OutputButton
       disabled={submitDisabled}
       label={t("button.submit")}
@@ -88,7 +88,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
               <Paper className={classes.allTestsPassedPaper}>
                 <h2>{t("allTestsPassed")}</h2>
                 <p>{t("rememberToSubmitToServer")}</p>
-                {submitButton}
+                <SubmitButton />
               </Paper>
             )}
           </TestResults>
@@ -101,7 +101,7 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
         setShowAll={setShowAllTests}
         showAllDisabled={testResults.testCases.length === 1}
       >
-        {!testResults.allTestsPassed && submitButton}
+        {!testResults.allTestsPassed && <SubmitButton />}
       </OutputFooterWithPercentage>
     </OutputBox>
   )
