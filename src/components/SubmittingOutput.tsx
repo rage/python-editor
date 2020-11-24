@@ -1,6 +1,7 @@
-import { LinearProgress, makeStyles } from "@material-ui/core"
+import { LinearProgress } from "@material-ui/core"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import useStyles from "../hooks/useStyles"
 
 import Help from "./Help"
 import {
@@ -18,16 +19,6 @@ interface SubmissionOutputProps {
   pasteDisabled: boolean
   onClose: () => void
 }
-
-const useStyles = makeStyles({
-  blueButton: {
-    backgroundColor: "#0275d8",
-    color: "white",
-    "&:hover": {
-      backgroundColor: "#0275d8",
-    },
-  },
-})
 
 const SubmittingOutput: React.FunctionComponent<SubmissionOutputProps> = (
   props,

@@ -4,39 +4,17 @@ import styled from "styled-components"
 import {
   Button,
   Input,
-  makeStyles,
   Typography,
   Tooltip,
   withStyles,
 } from "@material-ui/core"
 import ClickAwayListener from "@material-ui/core/ClickAwayListener"
+import useStyles from "../hooks/useStyles"
 
 type HelpProps = {
   getPasteUrl: () => Promise<string>
   pasteDisabled?: boolean
 }
-
-const useStyles = makeStyles({
-  blueButton: {
-    margin: "5px",
-    backgroundColor: "#0275d8",
-    color: "#FFF",
-    "&:hover": {
-      backgroundColor: "#0275d8",
-    },
-  },
-  darkButton: {
-    margin: "5px",
-    backgroundColor: "#696969",
-    color: "#FFF",
-    "&:hover": {
-      backgroundColor: "#808080",
-    },
-    "&:disabled": {
-      backgroundColor: "#A9A9A9",
-    },
-  },
-})
 
 const HtmlTooltip = withStyles((theme) => ({
   tooltip: {

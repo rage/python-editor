@@ -1,7 +1,7 @@
-import { Button, Paper } from "@material-ui/core"
-import { makeStyles } from "@material-ui/styles"
+import { Paper } from "@material-ui/core"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
+import useStyles from "../hooks/useStyles"
 
 import { TestResultObject } from "../types"
 import Help from "./Help"
@@ -15,24 +15,6 @@ import {
 } from "./OutputBox"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
-
-const useStyles = makeStyles({
-  blueButton: {
-    backgroundColor: "#0275d8",
-    color: "white",
-    "&:hover": {
-      backgroundColor: "#0275d8",
-    },
-  },
-  allTestsPassedPaper: {
-    borderLeft: "10px solid #4caf50",
-    margin: "5px",
-    padding: "10px",
-    "& h2": {
-      color: "#4caf50",
-    },
-  },
-})
 
 interface TestOutputProps {
   getPasteLink: () => Promise<string>

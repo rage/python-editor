@@ -7,7 +7,6 @@ import {
   Snackbar,
   Grid,
   Button,
-  makeStyles,
 } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
@@ -37,6 +36,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEye } from "@fortawesome/free-regular-svg-icons"
 import SubmittingOutput from "./SubmittingOutput"
+import useStyles from "../hooks/useStyles"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -57,42 +57,6 @@ type ProgrammingExerciseProps = {
   ready?: boolean
   solutionUrl?: string
 }
-
-const useStyles = makeStyles({
-  problemsButton: {
-    backgroundColor: "#BF0000",
-    marginLeft: "10px !important",
-  },
-  runButton: {
-    backgroundColor: "#0275d8",
-    color: "#FFF",
-    "&:hover": {
-      backgroundColor: "#0275d8",
-      color: "#228B22",
-    },
-  },
-  stopButton: {
-    backgroundColor: "#0275d8",
-    color: "#FFF",
-    "&:hover": {
-      backgroundColor: "#0275d8",
-      color: "#F44141",
-    },
-  },
-  testButton: {
-    backgroundColor: "#EBEBEB",
-    color: "#FF7518",
-    marginLeft: "10px !important",
-    "&:hover": {
-      backgroundColor: "#D5D5D5",
-      color: "#FF7518",
-    },
-  },
-  whiteText: {
-    color: "#FFF",
-    paddingLeft: "5px",
-  },
-})
 
 const StyledOutput = styled(Grid)`
   padding: 5px;
@@ -381,6 +345,7 @@ ${testSource}
         return (
           <SubmissionOutput
             onClose={closeOutput}
+            onSubmit={() => handleSubmit()}
             testResults={testResults ?? { points: [], testCases: [] }}
             getPasteLink={handlePasteSubmit}
             pasteDisabled={submitDisabled}
