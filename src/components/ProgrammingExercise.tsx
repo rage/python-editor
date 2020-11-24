@@ -210,9 +210,6 @@ ${testSource}
         setEditorState((previous) => {
           switch (previous) {
             case EditorState.Testing:
-              if (testResults?.allTestsPassed) {
-                handleSubmit()
-              }
               return EditorState.ShowTestResults
             default:
               return EditorState.Idle

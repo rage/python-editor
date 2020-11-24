@@ -106,6 +106,7 @@ interface OutputFooterWithPercentageProps {
   percentage: number
   showAll: boolean
   setShowAll: (showAll: boolean) => void
+  showAllDisabled: boolean
 }
 
 interface OutputFooterProps {
@@ -115,7 +116,14 @@ interface OutputFooterProps {
 const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercentageProps> = (
   props,
 ) => {
-  const { children, color, percentage, showAll, setShowAll } = props
+  const {
+    children,
+    color,
+    percentage,
+    showAll,
+    setShowAll,
+    showAllDisabled,
+  } = props
   const [t] = useTranslation()
 
   return (
@@ -127,6 +135,7 @@ const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercen
           control={
             <Checkbox
               checked={showAll}
+              disabled={showAllDisabled}
               onChange={() => setShowAll?.(!showAll)}
               color="primary"
               data-cy="show-all-results-checkbox"

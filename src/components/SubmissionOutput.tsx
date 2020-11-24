@@ -13,6 +13,7 @@ import {
   OutputFooterWithPercentage,
   OutputHeader,
 } from "./OutputBox"
+import Points from "./Points"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
@@ -35,9 +36,7 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
     outputHeight,
   } = props
   const [t] = useTranslation()
-  const [showAllTests, setShowAllTests] = useState(
-    testResults.allTestsPassed ?? false,
-  )
+  const [showAllTests, setShowAllTests] = useState(false)
 
   const percentage = Math.round(
     (100 * testResults.testCases.filter((x) => x.passed).length) /
@@ -57,10 +56,11 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
       </OutputHeader>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
-          <TestResults
-            results={testResults}
-            showAllTests={showAllTests ?? false}
-          />
+          <TestResults results={testResults} showAllTests={showAllTests}>
+            {testResults.points.length > 0 && (
+              <Points points={testResults.points} />
+            )}
+          </TestResults>
         </ScrollBox>
       </OutputBody>
       <OutputFooterWithPercentage
@@ -68,6 +68,10 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
         percentage={percentage}
         showAll={showAllTests}
         setShowAll={setShowAllTests}
+        showAllDisabled={
+          testResults.testCases.length === 1 &&
+          (!testResults.allTestsPassed ?? false)
+        }
       />
     </OutputBox>
   )
