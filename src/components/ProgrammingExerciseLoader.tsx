@@ -32,7 +32,7 @@ type ProgrammingExerciseLoaderProps = {
   token: string
   height?: string
   outputHeight?: string
-  language: Language
+  language?: Language
 }
 
 const ModelSolutionButton = styled((props) => (
