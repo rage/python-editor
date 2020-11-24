@@ -1,6 +1,7 @@
-import { CircularProgress, Grid, makeStyles } from "@material-ui/core"
+import { LinearProgress } from "@material-ui/core"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import useStyles from "../hooks/useStyles"
 
 import Help from "./Help"
 import {
@@ -18,16 +19,6 @@ interface SubmissionOutputProps {
   pasteDisabled: boolean
   onClose: () => void
 }
-
-const useStyles = makeStyles({
-  blueButton: {
-    backgroundColor: "#0275d8",
-    color: "white",
-    "&:hover": {
-      backgroundColor: "#0275d8",
-    },
-  },
-})
 
 const SubmittingOutput: React.FunctionComponent<SubmissionOutputProps> = (
   props,
@@ -49,10 +40,10 @@ const SubmittingOutput: React.FunctionComponent<SubmissionOutputProps> = (
       </OutputHeader>
       <OutputBody>
         <div style={{ textAlign: "center", margin: "10px 0px" }}>
-          <CircularProgress size={30} color="inherit" disableShrink />
           <OutputHeaderText variant="h5">
             {t("submittingToServer")}
           </OutputHeaderText>
+          <LinearProgress style={{ width: "42%", margin: "0 auto" }} />
         </div>
       </OutputBody>
       <OutputFooter color={OutputColor.Gray}>

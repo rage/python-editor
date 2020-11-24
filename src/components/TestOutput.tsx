@@ -1,6 +1,7 @@
-import { makeStyles } from "@material-ui/styles"
+import { Paper } from "@material-ui/core"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
+import useStyles from "../hooks/useStyles"
 
 import { TestResultObject } from "../types"
 import Help from "./Help"
@@ -15,15 +16,6 @@ import {
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
-const useStyles = makeStyles({
-  blueButton: {
-    backgroundColor: "#0275d8",
-    color: "white",
-    "&:hover": {
-      backgroundColor: "#0275d8",
-    },
-  },
-})
 interface TestOutputProps {
   getPasteLink: () => Promise<string>
   onClose: () => void
@@ -42,15 +34,23 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
   testResults,
 }) => {
   const [t] = useTranslation()
-  const [showAllTests, setShowAllTests] = useState(
-    testResults.allTestsPassed ?? false,
-  )
+  const [showAllTests, setShowAllTests] = useState(false)
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
   const classes = useStyles()
 
   const percentage = Math.round(
     (100 * testResults.testCases.filter((x) => x.passed).length) /
       testResults.testCases.length,
+  )
+
+  const SubmitButton: React.FunctionComponent = () => (
+    <OutputButton
+      disabled={submitDisabled}
+      label={t("button.submit")}
+      onClick={onSubmit}
+      dataCy="submit-btn"
+      className={classes.blueButton}
+    />
   )
 
   return (
@@ -65,10 +65,15 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
       </OutputHeader>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
-          <TestResults
-            results={testResults}
-            showAllTests={showAllTests ?? false}
-          />
+          <TestResults results={testResults} showAllTests={showAllTests}>
+            {testResults.allTestsPassed && (
+              <Paper className={classes.allTestsPassedPaper}>
+                <h2>{t("allTestsPassed")}</h2>
+                <p>{t("rememberToSubmitToServer")}</p>
+                <SubmitButton />
+              </Paper>
+            )}
+          </TestResults>
         </ScrollBox>
       </OutputBody>
       <OutputFooterWithPercentage
@@ -76,14 +81,9 @@ const TestOutput: React.FunctionComponent<TestOutputProps> = ({
         percentage={percentage}
         showAll={showAllTests}
         setShowAll={setShowAllTests}
+        showAllDisabled={testResults.testCases.length === 1}
       >
-        <OutputButton
-          disabled={submitDisabled}
-          label={t("button.submit")}
-          onClick={onSubmit}
-          dataCy="submit-btn"
-          className={classes.blueButton}
-        />
+        {!testResults.allTestsPassed && <SubmitButton />}
       </OutputFooterWithPercentage>
     </OutputBox>
   )

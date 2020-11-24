@@ -1,6 +1,6 @@
-import { CircularProgress } from "@material-ui/core"
 import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
+import useStyles from "../hooks/useStyles"
 
 import { TestResultObject } from "../types"
 import Help from "./Help"
@@ -9,10 +9,10 @@ import {
   OutputBox,
   OutputButton,
   OutputColor,
-  OutputHeaderText,
   OutputFooterWithPercentage,
   OutputHeader,
 } from "./OutputBox"
+import Points from "./Points"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
@@ -20,6 +20,7 @@ interface SubmissionOutputProps {
   getPasteLink: () => Promise<string>
   pasteDisabled: boolean
   onClose: () => void
+  onSubmit: () => void
   outputHeight?: string
   testResults: TestResultObject
 }
@@ -30,14 +31,14 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
   const {
     getPasteLink,
     onClose,
+    onSubmit,
     testResults,
     pasteDisabled,
     outputHeight,
   } = props
   const [t] = useTranslation()
-  const [showAllTests, setShowAllTests] = useState(
-    testResults.allTestsPassed ?? false,
-  )
+  const [showAllTests, setShowAllTests] = useState(false)
+  const classes = useStyles()
 
   const percentage = Math.round(
     (100 * testResults.testCases.filter((x) => x.passed).length) /
@@ -57,10 +58,11 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
       </OutputHeader>
       <OutputBody>
         <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
-          <TestResults
-            results={testResults}
-            showAllTests={showAllTests ?? false}
-          />
+          <TestResults results={testResults} showAllTests={showAllTests}>
+            {testResults.points.length > 0 && (
+              <Points points={testResults.points} />
+            )}
+          </TestResults>
         </ScrollBox>
       </OutputBody>
       <OutputFooterWithPercentage
@@ -68,7 +70,21 @@ const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
         percentage={percentage}
         showAll={showAllTests}
         setShowAll={setShowAllTests}
-      />
+        showAllDisabled={
+          testResults.testCases.length === 1 &&
+          (!testResults.allTestsPassed ?? false)
+        }
+      >
+        {!testResults.allTestsPassed && (
+          <OutputButton
+            disabled={false}
+            label={t("button.submit")}
+            onClick={onSubmit}
+            dataCy="submit-btn"
+            className={classes.blueButton}
+          />
+        )}
+      </OutputFooterWithPercentage>
     </OutputBox>
   )
 }
