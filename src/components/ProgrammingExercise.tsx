@@ -88,6 +88,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   problems,
   testSource,
   submitDisabled,
+  solutionUrl,
   editorHeight,
   outputHeight,
   ready = true,
@@ -174,6 +175,9 @@ ${testSource}
         setEditorState((previous) => {
           switch (previous) {
             case EditorState.Testing:
+              if (testResults?.allTestsPassed) {
+                handleSubmit()
+              }
               return EditorState.ShowTestResults
             default:
               return EditorState.Idle
@@ -493,6 +497,11 @@ ${testSource}
           <FontAwesomeIcon icon={faEye} />
           <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
         </StyledButton>
+        {solutionUrl && (
+          <StyledButton onClick={() => window.open(solutionUrl, "_blank")}>
+            {t("modelSolution")}
+          </StyledButton>
+        )}
         {problems && problems.length > 0 && (
           <StyledButton
             onClick={() => {
