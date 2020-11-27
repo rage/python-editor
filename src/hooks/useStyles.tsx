@@ -30,6 +30,13 @@ const useStyles = makeStyles({
       color: "#FF7518",
     },
   },
+  normalButton: {
+    backgroundColor: "#EBEBEB",
+    marginLeft: "10px !important",
+    "&:hover": {
+      backgroundColor: "#D5D5D5",
+    },
+  },
   blueButton: {
     margin: "5px",
     backgroundColor: "#0275d8",

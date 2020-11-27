@@ -498,7 +498,10 @@ ${testSource}
           <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
         </StyledButton>
         {solutionUrl && (
-          <StyledButton onClick={() => window.open(solutionUrl, "_blank")}>
+          <StyledButton
+            className={classes.normalButton}
+            onClick={() => window.open(solutionUrl, "_blank")}
+          >
             {t("modelSolution")}
           </StyledButton>
         )}
