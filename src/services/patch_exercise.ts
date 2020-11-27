@@ -39,7 +39,7 @@ const extractExerciseArchive = async (
   try {
     testSource = inlineAndPatchTestSources(testFiles, tmcFiles)
   } catch (e) {
-    problems.push(...e)
+    Array.isArray(e) ? problems.push(...e) : problems.push(e)
     successful = false
   }
 
