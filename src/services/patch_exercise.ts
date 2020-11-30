@@ -87,6 +87,11 @@ const orderFiles = (files: JSZipObject[], main?: string) => {
   return files
 }
 
+const stringifyPythonCode = (code: string): string => {
+  const escaped = code.replace(/\\/g, "\\\\").replace(/"""/g, '\\"\\"\\"')
+  return `"""\n${escaped}\n"""`
+}
+
 /**
  * Creates python source code for webeditor utility module.
  *
@@ -123,31 +128,25 @@ from types import ModuleType
 
 _stdout_pointer = 0
 
-def __decode(code_b64):
-    return base64.b64decode(code_b64).decode("utf-8")
-
 def __wrap_import(module_name, code):
     mod = ModuleType(module_name)
     sys.modules[module_name] = mod
     exec(code, mod.__dict__)
 
 __wrap_import("tmc_webeditor", __webeditor_module_source)
-__wrap_import("tmc_points", __decode("${patchAndEncodeTmcFile(
-    tmcPoints,
-    tmcFiles,
-  )}"))
-__wrap_import("tmc_result", __decode("${patchAndEncodeTmcFile(
-    tmcResult,
-    tmcFiles,
-  )}"))
-__wrap_import("tmc_runner", __decode("${patchAndEncodeTmcFile(
-    tmcRunner,
-    tmcFiles,
-  )}"))
-__wrap_import("tmc_utils", __decode("${patchAndEncodeTmcFile(
-    tmcUtils,
-    tmcFiles,
-  )}"))
+
+__wrap_import("tmc_points", ${stringifyPythonCode(
+    patchTmcFile(tmcPoints, tmcFiles),
+  )})
+__wrap_import("tmc_result", ${stringifyPythonCode(
+    patchTmcFile(tmcResult, tmcFiles),
+  )})
+__wrap_import("tmc_runner", ${stringifyPythonCode(
+    patchTmcFile(tmcRunner, tmcFiles),
+  )})
+__wrap_import("tmc_utils", ${stringifyPythonCode(
+    patchTmcFile(tmcUtils, tmcFiles),
+  )})
 
 ${patchTestSource(test, "PythonEditorTest", testFiles)}
 
@@ -242,18 +241,14 @@ const removeRelativeTmcImports = (source: string): string => {
     .join("\n")
 }
 
-const patchAndEncodeTmcFile = (
-  file: FileEntry,
-  tmcFiles: FileEntry[],
-): string => {
+const patchTmcFile = (file: FileEntry, tmcFiles: FileEntry[]): string => {
   let content = removeRelativeTmcImports(file.content)
   switch (file.shortName) {
     case "utils.py":
       content = patchTmcUtilsPy(content)
       break
   }
-  const wrapped = resolveImports({ ...file, content }, tmcFiles)
-  return Base64.encode(wrapped)
+  return resolveImports({ ...file, content }, tmcFiles)
 }
 
 const patchTmcUtilsPy = (source: string): string => {
