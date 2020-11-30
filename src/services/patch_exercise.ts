@@ -117,6 +117,12 @@ const inlineAndPatchTestSources = (
   tmcFiles: FileEntry[],
 ): string => {
   const test = findMainTestFile(testFiles)
+  const tmcHmacWriter = findFileByShortName("hmac_writer.py", tmcFiles, {
+    content: "# old template",
+    fullName: "",
+    originalContent: "",
+    shortName: "hmac_writer.py",
+  })
   const tmcPoints = findFileByShortName("points.py", tmcFiles)
   const tmcResult = findFileByShortName("result.py", tmcFiles)
   const tmcRunner = findFileByShortName("runner.py", tmcFiles)
@@ -135,6 +141,9 @@ def __wrap_import(module_name, code):
 
 __wrap_import("tmc_webeditor", __webeditor_module_source)
 
+__wrap_import("tmc_hmac_writer", ${stringifyPythonCode(
+    patchTmcFile(tmcHmacWriter, tmcFiles),
+  )})
 __wrap_import("tmc_points", ${stringifyPythonCode(
     patchTmcFile(tmcPoints, tmcFiles),
   )})
@@ -152,7 +161,6 @@ ${patchTestSource(test, "PythonEditorTest", testFiles)}
 
 testOutput = ""
 from tmc_runner import TMCTestRunner
-from tmc_result import results
 from tmc_webeditor import code
 
 import inspect
@@ -164,17 +172,27 @@ test_suite = unittest.TestLoader().loadTestsFromTestCase(PythonEditorTest)
 with io.StringIO() as buf:
     with contextlib.redirect_stdout(buf):
         TMCTestRunner(stream=buf).run(test_suite)
+    from tmc_result import results
     testOutput = json.dumps(results, ensure_ascii=False)
+    print(testOutput)
 `
 
   //console.log(testCode)
   return testCode
 }
 
-const findFileByShortName = (name: string, files: FileEntry[]): FileEntry => {
+const findFileByShortName = (
+  name: string,
+  files: FileEntry[],
+  defaultFile?: FileEntry,
+): FileEntry => {
   const file = files.find((file) => file.shortName === name)
 
   if (!file) {
+    if (defaultFile) {
+      return defaultFile
+    }
+
     throw `Expected to find file "${name}"`
   }
 
@@ -232,6 +250,12 @@ const removeRelativeTmcImports = (source: string): string => {
       }
 
       match = line.match(/^from \.(\w+) import ([\w,\s]+)/)
+      if (match) {
+        return `from tmc_${match[1]} import ${match[2]}`
+      }
+
+      // from tmc.hmac_writer import write_hmac
+      match = line.match(/from tmc\.(\w+) import ([\w,\s]+)/)
       if (match) {
         return `from tmc_${match[1]} import ${match[2]}`
       }
