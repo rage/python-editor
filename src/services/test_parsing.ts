@@ -19,8 +19,15 @@ const parseTestCases = (
 }
 
 const removeFalseIsNotTrue = (input: string): string => {
-  const match = input.match(/^False is not true : ([\s\S]+)/i)
-  return match ? match[1] : input
+  const matchFalse = input.match(/^False is not true : ([\s\S]+)/i)
+  const matchTrue = input.match(/^True is not false : ([\s\S]+)/i)
+  if (matchFalse) {
+    return matchFalse[1]
+  } else if (matchTrue) {
+    return matchTrue[1]
+  } else {
+    return input
+  }
 }
 
 export { removeFalseIsNotTrue, parseTestCases }
