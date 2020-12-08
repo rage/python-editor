@@ -175,7 +175,7 @@ ${testSource}
         setEditorState((previous) => {
           switch (previous) {
             case EditorState.Testing:
-              if (testResults?.allTestsPassed) {
+              if (testResults?.allTestsPassed && !submitDisabled) {
                 handleSubmit()
               }
               return EditorState.ShowTestResults
