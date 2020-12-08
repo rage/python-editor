@@ -6,28 +6,37 @@ import {
   Select,
   Snackbar,
   Grid,
+  Button,
 } from "@material-ui/core"
 import PyEditor from "./PyEditor"
 import AnimatedOutputBox, { AnimatedOutputBoxRef } from "./AnimatedOutputBox"
 import { v4 as uuid } from "uuid"
-import { FileEntry } from "./ProgrammingExerciseLoader"
 import {
   OutputObject,
   TestResultObject,
   FeedBackAnswer,
   EditorState,
+  FileEntry,
 } from "../types"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
-import { useWorker } from "../hooks/getWorker"
-import Notification from "./Notification"
-import PyEditorButtons from "./PyEditorButtons"
+import { useWorker } from "../hooks/useWorker"
 import { parseTestCases } from "../services/test_parsing"
 import { createWebEditorModuleSource } from "../services/patch_exercise"
 import EditorOutput from "./EditorOutput"
 import TestOutput from "./TestOutput"
 import SubmissionOutput from "./SubmissionOutput"
+import Problems from "./Problems"
+import {
+  faExclamationCircle,
+  faPlay,
+  faStop,
+} from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faEye } from "@fortawesome/free-regular-svg-icons"
+import SubmittingOutput from "./SubmittingOutput"
+import useStyles from "../hooks/useStyles"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -38,14 +47,14 @@ type ProgrammingExerciseProps = {
     files: Array<FileEntry>,
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
+  debug?: boolean
   initialFiles: Array<FileEntry>
+  problems?: string[]
+  submitDisabled: boolean
   testSource?: string
-  signedIn: boolean
   editorHeight?: string
   outputHeight?: string
-  outputPosition?: string
   ready?: boolean
-  expired?: boolean
   solutionUrl?: string
 }
 
@@ -55,6 +64,12 @@ const StyledOutput = styled(Grid)`
   min-height: 100px;
   overflow: auto;
   white-space: pre-wrap;
+`
+
+const StyledButton = styled((props) => (
+  <Button variant="contained" {...props} />
+))`
+  margin: 0.5em;
 `
 
 const defaultFile: FileEntry = {
@@ -68,15 +83,15 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitFeedback,
   submitProgrammingExercise,
   submitToPaste,
+  debug,
   initialFiles,
+  problems,
   testSource,
-  signedIn,
+  submitDisabled,
+  solutionUrl,
   editorHeight,
   outputHeight,
-  outputPosition = "absolute",
   ready = true,
-  expired,
-  solutionUrl,
 }) => {
   const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
@@ -89,19 +104,23 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
     NodeJS.Timeout | undefined
   >()
-  const [worker] = useWorker()
+  const [worker] = useWorker({ debug })
   const outputBoxRef = React.createRef<AnimatedOutputBoxRef>()
   const [editorState, setEditorState] = useState(EditorState.Initializing)
+  const classes = useStyles()
 
   function handleRun(code?: string) {
     if (workerAvailable) {
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
-      setEditorState(EditorState.ExecutingCode)
+      setEditorState(EditorState.WorkerInitializing)
       worker.postMessage({
         type: "run",
-        msg: code ? code : editorValue,
+        msg: {
+          code: code ?? editorValue,
+          debug,
+        },
       })
     } else {
       console.log("Worker is busy")
@@ -110,15 +129,15 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   function handleTests(code?: string) {
     if (workerAvailable) {
-      const msg = `
+      const testCode = `
 __webeditor_module_source = ${createWebEditorModuleSource(code ?? editorValue)}
 ${testSource}
 `
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
-      setEditorState(EditorState.Testing)
-      worker.postMessage({ type: "run_tests", msg })
+      setEditorState(EditorState.WorkerInitializing)
+      worker.postMessage({ type: "run_tests", msg: { code: testCode, debug } })
     } else {
       console.log("Worker is busy")
     }
@@ -126,40 +145,62 @@ ${testSource}
 
   worker.setMessageListener((e: any) => {
     let { type, msg } = e.data
-    if (type === "print") {
-      setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
-    } else if (type === "input_required") {
-      setEditorState(EditorState.WaitingInput)
-    } else if (type === "error") {
-      console.error(msg)
-      setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
-      setWorkerAvailable(true)
-    } else if (type === "ready") {
-      setWorkerAvailable(true)
-    } else if (type === "print_batch") {
-      if (editorState === EditorState.ExecutingCode) {
-        const prints = msg.map((text: string) => ({
-          id: uuid(),
-          type: "output",
-          text,
-        }))
-        setOutput((prevState) => prevState.concat(prints))
-      }
-    } else if (type === "print_done") {
-      setEditorState((previous) => {
-        if (previous === EditorState.Testing) {
-          return EditorState.ShowTestResults
+    switch (type) {
+      case "print":
+        setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
+        break
+      case "input_required":
+        setEditorState(EditorState.WaitingInput)
+        break
+      case "error":
+        console.error(msg)
+        setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
+        setWorkerAvailable(true)
+        worker.recycle()
+        break
+      case "ready":
+        setWorkerAvailable(true)
+        break
+      case "print_batch":
+        if (editorState === EditorState.ExecutingCode) {
+          const prints = msg.map((text: string) => ({
+            id: uuid(),
+            type: "output",
+            text,
+          }))
+          setOutput((prevState) => prevState.concat(prints))
         }
-        return EditorState.Idle
-      })
-    } else if (type === "test_results") {
-      const testCases = parseTestCases(msg)
-      setOutput([])
-      setTestResults({
-        allTestsPassed: testCases.every((x) => x.passed),
-        points: [],
-        testCases,
-      })
+        break
+      case "print_done":
+        setEditorState((previous) => {
+          switch (previous) {
+            case EditorState.Testing:
+              if (testResults?.allTestsPassed && !submitDisabled) {
+                handleSubmit()
+              }
+              return EditorState.ShowTestResults
+            default:
+              return EditorState.Idle
+          }
+        })
+        worker.recycle()
+        break
+      case "test_results": {
+        const testCases = parseTestCases(msg)
+        setOutput([])
+        setTestResults({
+          allTestsPassed: testCases.every((x) => x.passed),
+          points: [],
+          testCases,
+        })
+        break
+      }
+      case "start_run":
+        setEditorState(EditorState.ExecutingCode)
+        break
+      case "start_test":
+        setEditorState(EditorState.Testing)
+        break
     }
   })
 
@@ -180,10 +221,8 @@ ${testSource}
 
   const handleSubmit = () => {
     setStateForSelectedFile()
-    setEditorState(
-      // paste ? EditorState.SubmittingToPaste : EditorState.Submitting,
-      EditorState.Submitting,
-    )
+    setEditorState(EditorState.Submitting)
+    setTestResults(undefined)
   }
 
   const handlePasteSubmit = () => {
@@ -226,6 +265,7 @@ ${testSource}
   }, [initialFiles])
 
   useEffect(() => {
+    debug && console.log(EditorState[editorState])
     switch (editorState) {
       case EditorState.Submitting:
         submitProgrammingExercise(files).then((data) => {
@@ -296,20 +336,40 @@ ${testSource}
       case EditorState.ShowTestResults:
         return (
           <TestOutput
+            getPasteLink={handlePasteSubmit}
             onClose={closeOutput}
             outputHeight={outputHeight}
             onSubmit={() => handleSubmit()}
+            submitDisabled={submitDisabled}
             testResults={testResults ?? { points: [], testCases: [] }}
           />
         )
-      case EditorState.Submitting:
       case EditorState.ShowPassedFeedbackForm:
       case EditorState.ShowSubmissionResults:
         return (
           <SubmissionOutput
             onClose={closeOutput}
-            submitting={editorState === EditorState.Submitting}
+            onSubmit={() => handleSubmit()}
             testResults={testResults ?? { points: [], testCases: [] }}
+            getPasteLink={handlePasteSubmit}
+            pasteDisabled={submitDisabled}
+            outputHeight={outputHeight}
+          />
+        )
+      case EditorState.Submitting:
+        return (
+          <SubmittingOutput
+            onClose={closeOutput}
+            getPasteLink={handlePasteSubmit}
+            pasteDisabled={true}
+          />
+        )
+      case EditorState.ShowProblems:
+        return (
+          <Problems
+            onClose={closeOutput}
+            problems={problems ?? []}
+            outputHeight={outputHeight}
           />
         )
       default:
@@ -320,7 +380,7 @@ ${testSource}
             onClose={closeOutput}
             outputContent={output}
             outputHeight={outputHeight}
-            pasteDisabled={!signedIn || expired}
+            pasteDisabled={submitDisabled}
             sendInput={sendInput}
           />
         )
@@ -329,6 +389,9 @@ ${testSource}
 
   const ieOrEdge =
     window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
+
+  const pyEditorButtonsDisabled =
+    (editorState & (EditorState.WorkerActive | EditorState.Submitting)) === 0
 
   return (
     <div
@@ -349,6 +412,7 @@ ${testSource}
           </StyledOutput>
         </OverlayBox>
       )}
+
       {editorState === EditorState.ShowPassedFeedbackForm && (
         <FeedbackForm
           awardedPoints={testResults?.points}
@@ -364,6 +428,7 @@ ${testSource}
           feedbackQuestions={testResults?.feedbackQuestions}
         />
       )}
+
       {files.length > 1 && (
         <>
           <InputLabel id="label">{t("selectFile")}</InputLabel>
@@ -386,32 +451,13 @@ ${testSource}
           </Select>
         </>
       )}
+
       {!ready && (
         <OverlayCenterWrapper>
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
-      {outputPosition === "absolute" ? (
-        <PyEditorButtons
-          allowRun={
-            workerAvailable && (editorState & EditorState.WorkerActive) === 0
-          }
-          allowTest={
-            !!testSource && (editorState & EditorState.WorkerActive) === 0
-          }
-          editorState={editorState}
-          handleRun={handleRun}
-          handleStop={stopWorker}
-          handleTests={handleTests}
-          solutionUrl={solutionUrl}
-        />
-      ) : (
-        <PyEditorButtons editorState={editorState} solutionUrl={solutionUrl} />
-      )}
-      {!signedIn && (
-        <Notification style="warning" text={t("signInToSubmitExercise")} />
-      )}
-      {expired && <Notification style="warning" text={t("deadlineExpired")} />}
+
       <PyEditor
         editorValue={editorValue}
         setEditorValue={(value) => setEditorValue(value)}
@@ -420,29 +466,73 @@ ${testSource}
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
         }
       />
-      {outputPosition === "relative" ? (
-        <PyEditorButtons
-          allowRun={
-            workerAvailable && (editorState & EditorState.WorkerActive) === 0
-          }
-          allowTest={
-            !!testSource && (editorState & EditorState.WorkerActive) === 0
-          }
-          editorState={editorState}
-          handleRun={handleRun}
-          handleStop={stopWorker}
-          handleTests={handleTests}
-        />
-      ) : null}
+
+      <div style={{ padding: "0.6em 0em" }}>
+        {(editorState & EditorState.WorkerActive) === 0 ? (
+          <StyledButton
+            onClick={() => handleRun()}
+            className={classes.runButton}
+            disabled={!(workerAvailable && pyEditorButtonsDisabled)}
+            data-cy="run-btn"
+          >
+            <FontAwesomeIcon icon={faPlay} />
+            <span className={classes.whiteText}>{t("runButtonText")}</span>
+          </StyledButton>
+        ) : (
+          <StyledButton
+            className={classes.stopButton}
+            onClick={() => stopWorker()}
+            data-cy="stop-btn"
+          >
+            <FontAwesomeIcon icon={faStop} />
+            <span className={classes.whiteText}>{t("stopButtonText")}</span>
+          </StyledButton>
+        )}
+        <StyledButton
+          onClick={() => handleTests()}
+          disabled={!(!!testSource && pyEditorButtonsDisabled)}
+          className={classes.testButton}
+          data-cy="test-btn"
+        >
+          <FontAwesomeIcon icon={faEye} />
+          <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
+        </StyledButton>
+        {solutionUrl && (
+          <StyledButton
+            className={classes.normalButton}
+            onClick={() => window.open(solutionUrl, "_blank")}
+          >
+            {t("modelSolution")}
+          </StyledButton>
+        )}
+        {problems && problems.length > 0 && (
+          <StyledButton
+            onClick={() => {
+              setEditorState(EditorState.ShowProblems)
+              outputBoxRef.current?.open()
+            }}
+            disabled={(editorState & EditorState.WorkerActive) > 0}
+            className={classes.problemsButton}
+            data-cy="problems-btn"
+          >
+            <FontAwesomeIcon icon={faExclamationCircle} />
+            <span className={classes.whiteText}>{`${t("problemsTitle")} (${
+              problems.length
+            })`}</span>
+          </StyledButton>
+        )}
+      </div>
+
       <AnimatedOutputBox
         isRunning={(editorState & EditorState.WorkerActive) > 0}
         outputHeight={outputHeight}
-        outputPosition={outputPosition}
         ref={outputBoxRef}
       >
         {mapStateToOutput()}
       </AnimatedOutputBox>
-      <div>{EditorState[editorState]}</div>
+
+      {debug && <div>{EditorState[editorState]}</div>}
+
       <Snackbar
         open={openNotification}
         autoHideDuration={5000}

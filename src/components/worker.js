@@ -90,11 +90,12 @@ function exit() {
   running = false
 }
 
-function run(code) {
+function run({ code, debug }) {
   // Async function workaround for input by Andreas Klostermann
   // https://github.com/akloster/aioweb-demo/blob/master/src/main.py
   code = `\
 async def execute():
+    __name__ = "__main__"
 ${code
   .replace(/"""/g, '\\"\\"\\"')
   .split("\n")
@@ -188,11 +189,14 @@ tree = optimizer.visit(tree)
 code = compile(tree, "<string>", "exec")
 exec(code)
 `
-
+  if (debug) {
+    console.log(parsedCode)
+  }
   languagePluginLoader
     .then(() => {
       pyodide
         .loadPackage()
+        .then(() => postMessage({ type: "start_run" }))
         .then(() => pyodide.runPythonAsync(parsedCode))
         .catch((e) => {
           printBuffer = []
@@ -214,18 +218,22 @@ exec(code)
 }
 
 function lineOffsetReplacer(m, number, o, s) {
-  return "line " + (parseInt(number) - 1).toString()
+  return "line " + (parseInt(number) - 2).toString()
 }
 
 function fixLineNumberOffset(msg) {
   return msg.replace(/line\s(\d+)/g, lineOffsetReplacer)
 }
 
-function test(code) {
+function test({ code, debug }) {
+  if (debug) {
+    console.log(code)
+  }
   languagePluginLoader
     .then(() => {
       pyodide
         .loadPackage()
+        .then(() => postMessage({ type: "start_test" }))
         .then(() => pyodide.runPythonAsync(code))
         .then(() => {
           console.log("running pyodide completed")

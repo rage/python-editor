@@ -1,7 +1,7 @@
 import { faExclamation } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { CircularProgress, Grid } from "@material-ui/core"
-import React, { useState } from "react"
+import { CircularProgress } from "@material-ui/core"
+import React from "react"
 import { useTranslation } from "react-i18next"
 
 import { EditorState, OutputObject } from "../types"
@@ -9,14 +9,13 @@ import Console from "./Console"
 import Help from "./Help"
 import {
   OutputBody,
+  OutputBox,
   OutputHeader,
-  OutputHeaderButton,
-  OutputHeaderColor,
+  OutputButton,
+  OutputColor,
   OutputHeaderText,
 } from "./OutputBox"
 import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
-
-const { Blue, Orange } = OutputHeaderColor
 
 interface EditorOutputProps {
   editorState: EditorState
@@ -28,21 +27,19 @@ interface EditorOutputProps {
   sendInput: (input: string) => void
 }
 
-const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
-  const {
-    editorState,
-    getPasteLink,
-    onClose,
-    outputContent,
-    outputHeight,
-    pasteDisabled,
-    sendInput,
-  } = props
+const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({
+  editorState,
+  getPasteLink,
+  onClose,
+  outputContent,
+  outputHeight,
+  pasteDisabled,
+  sendInput,
+}) => {
   const [t] = useTranslation()
-  const [showHelp, setShowHelp] = useState(false)
   const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
-  const hasErrors = outputContent.some((item: any) => item.type === "error")
+  const initializing = editorState === EditorState.WorkerInitializing
   const running = (editorState & EditorState.WorkerActive) !== 0
   const waitingInput = editorState === EditorState.WaitingInput
 
@@ -58,7 +55,9 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
       return (
         <>
           <CircularProgress size={25} color="inherit" disableShrink />
-          <OutputHeaderText>{t("running")}</OutputHeaderText>
+          <OutputHeaderText>
+            {initializing ? t("initializing") : t("running")}
+          </OutputHeaderText>
         </>
       )
     }
@@ -66,21 +65,17 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
   }
 
   return (
-    <Grid container direction="column">
+    <OutputBox>
       <OutputHeader
         title={t("outputTitle")}
-        color={waitingInput ? Orange : Blue}
+        color={waitingInput ? OutputColor.Orange : OutputColor.Gray}
       >
         {getStatus()}
-        {hasErrors && (
-          <OutputHeaderButton
-            disabled={pasteDisabled}
-            label={t("needHelp")}
-            onClick={() => setShowHelp(true)}
-            dataCy="need-help-btn"
-          />
-        )}
-        <OutputHeaderButton
+        <Help
+          getPasteUrl={getPasteLink}
+          pasteDisabled={running || pasteDisabled}
+        />
+        <OutputButton
           label={t("button.close")}
           onClick={onClose}
           dataCy="close-btn"
@@ -94,10 +89,9 @@ const EditorOutput: React.FunctionComponent<EditorOutputProps> = (props) => {
             scrollToBottom={() => scrollBoxRef.current?.scrollToBottom()}
             sendInput={sendInput}
           />
-          {showHelp && <Help getPasteUrl={getPasteLink} />}
         </ScrollBox>
       </OutputBody>
-    </Grid>
+    </OutputBox>
   )
 }
 

@@ -1,80 +1,90 @@
-import { CircularProgress } from "@material-ui/core"
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
+import useStyles from "../hooks/useStyles"
 
 import { TestResultObject } from "../types"
+import Help from "./Help"
 import {
   OutputBody,
   OutputBox,
-  OutputHeaderButton,
-  OutputHeaderColor,
-  OutputHeaderText,
-  OutputHeaderWithPercentage,
+  OutputButton,
+  OutputColor,
+  OutputFooterWithPercentage,
+  OutputHeader,
 } from "./OutputBox"
+import Points from "./Points"
+import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 import TestResults from "./TestResults"
 
 interface SubmissionOutputProps {
+  getPasteLink: () => Promise<string>
+  pasteDisabled: boolean
   onClose: () => void
+  onSubmit: () => void
   outputHeight?: string
-  submitting: boolean
   testResults: TestResultObject
 }
 
 const SubmissionOutput: React.FunctionComponent<SubmissionOutputProps> = (
   props,
 ) => {
-  const { onClose, submitting, testResults } = props
-  const [percentage, setPercentage] = useState(0)
+  const {
+    getPasteLink,
+    onClose,
+    onSubmit,
+    testResults,
+    pasteDisabled,
+    outputHeight,
+  } = props
   const [t] = useTranslation()
+  const [showAllTests, setShowAllTests] = useState(false)
+  const classes = useStyles()
 
-  useEffect(() => {
-    if (submitting) {
-      setPercentage(10 + 30 * Math.random())
-      setTimeout(() => {
-        setPercentage((prev) => Math.min(prev + 10, 99))
-      }, 2000)
-    } else {
-      setPercentage(
-        (100 * testResults.testCases.filter((x) => x.passed).length) /
-          testResults.testCases.length,
-      )
-    }
-  }, [submitting])
-
-  // Do not modify, this is optimized.
-  const fakePercentage = (progress: number) => {
-    const fake = progress / 100
-    return Math.min(
-      Math.round(300 * Math.pow(fake, 2) - 200 * Math.pow(fake, 3)),
-      99,
-    )
-  }
+  const percentage = Math.round(
+    (100 * testResults.testCases.filter((x) => x.passed).length) /
+      testResults.testCases.length,
+  )
+  const scrollBoxRef = React.createRef<ScrollBoxRef>()
 
   return (
     <OutputBox>
-      <OutputHeaderWithPercentage
-        color={OutputHeaderColor.Blue}
-        percentage={submitting ? fakePercentage(percentage) : percentage}
-        percentageTitle={
-          submitting ? t("submittingToServer") : t("testsPassed")
-        }
-        title={submitting ? t("outputTitle") : t("testResults")}
-      >
-        {submitting && (
-          <>
-            <CircularProgress size={25} color="inherit" disableShrink />
-            <OutputHeaderText>{t("submitting")}</OutputHeaderText>
-          </>
-        )}
-        <OutputHeaderButton
+      <OutputHeader title={t("submissionResult")} color={OutputColor.Gray}>
+        <Help getPasteUrl={getPasteLink} pasteDisabled={pasteDisabled} />
+        <OutputButton
           label={t("button.close")}
           onClick={onClose}
           dataCy="close-btn"
         />
-      </OutputHeaderWithPercentage>
+      </OutputHeader>
       <OutputBody>
-        <TestResults results={testResults} />
+        <ScrollBox maxHeight={outputHeight} ref={scrollBoxRef}>
+          <TestResults results={testResults} showAllTests={showAllTests}>
+            {testResults.points.length > 0 && (
+              <Points points={testResults.points} />
+            )}
+          </TestResults>
+        </ScrollBox>
       </OutputBody>
+      <OutputFooterWithPercentage
+        color={OutputColor.Gray}
+        percentage={percentage}
+        showAll={showAllTests}
+        setShowAll={setShowAllTests}
+        showAllDisabled={
+          testResults.testCases.length === 1 &&
+          (!testResults.allTestsPassed ?? false)
+        }
+      >
+        {!testResults.allTestsPassed && (
+          <OutputButton
+            disabled={false}
+            label={t("button.submit")}
+            onClick={onSubmit}
+            dataCy="submit-btn"
+            className={classes.blueButton}
+          />
+        )}
+      </OutputFooterWithPercentage>
     </OutputBox>
   )
 }

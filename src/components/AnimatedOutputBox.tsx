@@ -2,9 +2,9 @@ import React, { useEffect, useImperativeHandle, useState } from "react"
 import styled, { keyframes } from "styled-components"
 import { Paper } from "@material-ui/core"
 
-const ContainerBox = styled.div<{ position: string }>`
+const ContainerBox = styled.div`
   overflow: hidden;
-  position: ${(props) => props.position};
+  position: relative;
   width: 100%;
   bottom: 0;
   min-height: 100px;
@@ -52,21 +52,26 @@ interface AnimatedOutputBoxProps {
   children?: any
   isRunning: boolean
   outputHeight?: string
-  outputPosition: string
 }
 
 type AnimatedOutputBoxRef = {
   close(): void
+  open(): void
 }
 
 const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
   (props, ref) => {
     const [open, setOpen] = useState(false)
     const [render, setRender] = useState(false)
-    const { isRunning, outputHeight, outputPosition } = props
+    const { isRunning, outputHeight } = props
 
     const close = () => {
       setOpen(false)
+    }
+
+    const openFn = () => {
+      setOpen(true)
+      setRender(true)
     }
 
     useEffect(() => {
@@ -77,12 +82,11 @@ const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
     }, [isRunning])
 
     useImperativeHandle(ref, () => {
-      return { close }
+      return { close, open: openFn }
     })
 
     const onAnimationEnd = () => {
       if (!open) {
-        // clearOutput()
         setRender(false)
       }
     }
@@ -90,7 +94,7 @@ const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
     if (!render) return null
 
     return (
-      <ContainerBox position={outputPosition} data-cy="output-container">
+      <ContainerBox data-cy="output-container">
         <AnimatedOutputBox
           animatefrom={outputHeight}
           open={open}

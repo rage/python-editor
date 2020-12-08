@@ -5,12 +5,26 @@ export enum EditorState {
   RunAborted = 1 << 3,
   ShowHelp = 1 << 4,
   ShowPassedFeedbackForm = 1 << 5,
-  ShowSubmissionResults = 1 << 6,
-  ShowTestResults = 1 << 7,
-  Submitting = 1 << 8,
-  Testing = 1 << 9,
-  WaitingInput = 1 << 10,
-  WorkerActive = ExecutingCode | WaitingInput | Testing,
+  ShowProblems = 1 << 6,
+  ShowSubmissionResults = 1 << 7,
+  ShowTestResults = 1 << 8,
+  Submitting = 1 << 9,
+  Testing = 1 << 10,
+  WaitingInput = 1 << 11,
+  WorkerInitializing = 1 << 12,
+  WorkerActive = ExecutingCode | Testing | WaitingInput | WorkerInitializing,
+}
+
+export interface FileEntry {
+  fullName: string
+  shortName: string
+  originalContent: string
+  content: string
+}
+
+export interface ExerciseTemplate {
+  template: string
+  testSource: string
 }
 
 export type ExerciseDetails = {

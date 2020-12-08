@@ -23,13 +23,7 @@ const StyledOutput = styled(Grid)`
 
 const HeaderWrapper = styled.div`
   padding: 1px 25px;
-  background: rgb(39, 139, 82);
-  background: linear-gradient(
-    180deg,
-    rgba(39, 139, 82, 1) 0%,
-    rgba(19, 181, 89, 1) 50%,
-    rgba(15, 201, 96, 1) 100%
-  );
+  background: #4caf50;
   font-family: Roboto Slab, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
     Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
     Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
@@ -256,7 +250,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
             data-cy="yes-feedback"
             type="submit"
           >
-            {t("button.submit")}
+            {t("button.send")}
           </StyledButton>
         )}
         <StyledButton onClick={onClose} data-cy="no-feedback">
