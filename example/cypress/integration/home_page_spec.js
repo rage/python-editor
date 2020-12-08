@@ -133,7 +133,7 @@ describe("The Playground", () => {
         .type(infiniteProgram)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("Running")
-      cy.get("[data-cy=ouput-title-stop-btn]").should("not.be.disabled")
+      cy.get("[data-cy=stop-btn]").should("not.be.disabled")
     })
   })
 
