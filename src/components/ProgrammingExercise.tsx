@@ -99,7 +99,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [files, setFiles] = useState([defaultFile])
   const [selectedFile, setSelectedFile] = useState(defaultFile)
-  const [editorValue, setEditorValue] = useState("")
   const [openNotification, setOpenNotification] = useState(false)
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
     NodeJS.Timeout | undefined
@@ -118,7 +117,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       worker.postMessage({
         type: "run",
         msg: {
-          code: code ?? editorValue,
+          code: code ?? selectedFile.content,
           debug,
         },
       })
@@ -130,7 +129,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   function handleTests(code?: string) {
     if (workerAvailable) {
       const testCode = `
-__webeditor_module_source = ${createWebEditorModuleSource(code ?? editorValue)}
+__webeditor_module_source = ${createWebEditorModuleSource(
+        code ?? selectedFile.content,
+      )}
 ${testSource}
 `
       setOutput([])
@@ -141,6 +142,11 @@ ${testSource}
     } else {
       console.log("Worker is busy")
     }
+  }
+
+  const handleSubmit = () => {
+    setEditorState(EditorState.Submitting)
+    setTestResults(undefined)
   }
 
   worker.setMessageListener((e: any) => {
@@ -214,49 +220,24 @@ ${testSource}
     }
   }
 
-  const handleChange = (e: any) => {
-    setStateForSelectedFile()
-    changeFile(e.target.value, files)
-  }
-
-  const handleSubmit = () => {
-    setStateForSelectedFile()
-    setEditorState(EditorState.Submitting)
-    setTestResults(undefined)
-  }
-
-  const handlePasteSubmit = () => {
-    return submitToPaste(
-      files.map((x) =>
-        x.shortName === selectedFile.shortName
-          ? { ...x, content: editorValue }
-          : x,
-      ),
-    )
-  }
-
-  const setStateForSelectedFile = () => {
-    setFiles((prev: any) =>
-      prev.map((file: any) =>
-        file.shortName === selectedFile.shortName
-          ? { ...file, content: editorValue }
-          : file,
-      ),
-    )
-  }
-
   const changeFile = (shortName: string, fileList: Array<object>) => {
     setSelectedFile(getFileByShortName(shortName, fileList))
-    setEditorValue(getContentByShortName(shortName, fileList))
-  }
-
-  const getContentByShortName = (name: string, fileSet: Array<any>) => {
-    return getFileByShortName(name, fileSet).content
   }
 
   const getFileByShortName = (name: string, fileSet: Array<any>) => {
     let firstMatch = fileSet.filter(({ shortName }) => shortName === name)[0]
     return firstMatch
+  }
+
+  const setSelectedFileContent = (newContent: string) => {
+    selectedFile.content = newContent
+    setFiles((prev: FileEntry[]) =>
+      prev.map((file: FileEntry) =>
+        file.shortName === selectedFile.shortName
+          ? { ...file, content: selectedFile.content }
+          : file,
+      ),
+    )
   }
 
   useEffect(() => {
@@ -336,7 +317,7 @@ ${testSource}
       case EditorState.ShowTestResults:
         return (
           <TestOutput
-            getPasteLink={handlePasteSubmit}
+            getPasteLink={() => submitToPaste(files)}
             onClose={closeOutput}
             outputHeight={outputHeight}
             onSubmit={() => handleSubmit()}
@@ -351,7 +332,7 @@ ${testSource}
             onClose={closeOutput}
             onSubmit={() => handleSubmit()}
             testResults={testResults ?? { points: [], testCases: [] }}
-            getPasteLink={handlePasteSubmit}
+            getPasteLink={() => submitToPaste(files)}
             pasteDisabled={submitDisabled}
             outputHeight={outputHeight}
           />
@@ -360,7 +341,7 @@ ${testSource}
         return (
           <SubmittingOutput
             onClose={closeOutput}
-            getPasteLink={handlePasteSubmit}
+            getPasteLink={() => submitToPaste(files)}
             pasteDisabled={true}
           />
         )
@@ -376,7 +357,7 @@ ${testSource}
         return (
           <EditorOutput
             editorState={editorState}
-            getPasteLink={handlePasteSubmit}
+            getPasteLink={() => submitToPaste(files)}
             onClose={closeOutput}
             outputContent={output}
             outputHeight={outputHeight}
@@ -436,7 +417,7 @@ ${testSource}
             labelId="label"
             native
             value={selectedFile.shortName}
-            onChange={handleChange}
+            onChange={(e: any) => changeFile(e.target.value, files)}
             data-cy="select-file"
           >
             {
@@ -459,8 +440,8 @@ ${testSource}
       )}
 
       <PyEditor
-        editorValue={editorValue}
-        setEditorValue={(value) => setEditorValue(value)}
+        editorValue={selectedFile.content}
+        setEditorValue={(value) => setSelectedFileContent(value)}
         editorHeight={editorHeight}
         setIsEditorReady={(isReady) =>
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
