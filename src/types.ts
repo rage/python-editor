@@ -37,6 +37,16 @@ export type ExerciseDetails = {
   softDeadline?: string
 }
 
+export type SubmissionDetails = {
+  id: number
+  createdAtMillis: number
+}
+
+export type LocalStorageContent = {
+  content: string
+  createdAtMillis: number
+}
+
 export type FeedBackAnswer = {
   questionId: number
   answer: string | number

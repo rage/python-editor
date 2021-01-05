@@ -231,6 +231,10 @@ ${testSource}
 
   const setSelectedFileContent = (newContent: string) => {
     selectedFile.content = newContent
+    localStorage.setItem(
+      selectedFile.fullName,
+      JSON.stringify({ createdAtMillis: Date.now(), content: newContent }),
+    )
     setFiles((prev: FileEntry[]) =>
       prev.map((file: FileEntry) =>
         file.shortName === selectedFile.shortName
