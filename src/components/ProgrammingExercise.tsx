@@ -37,6 +37,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faEye } from "@fortawesome/free-regular-svg-icons"
 import SubmittingOutput from "./SubmittingOutput"
 import useStyles from "../hooks/useStyles"
+import AlertDialog from "./AlertDialog"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -47,6 +48,7 @@ type ProgrammingExerciseProps = {
     files: Array<FileEntry>,
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
+  resetExercise: () => void
   debug?: boolean
   initialFiles: Array<FileEntry>
   problems?: string[]
@@ -89,6 +91,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   testSource,
   submitDisabled,
   solutionUrl,
+  resetExercise,
   editorHeight,
   outputHeight,
   ready = true,
@@ -482,6 +485,7 @@ ${testSource}
           <FontAwesomeIcon icon={faEye} />
           <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
         </StyledButton>
+        <AlertDialog resetExercise={resetExercise} />
         {solutionUrl && (
           <StyledButton
             className={classes.normalButton}

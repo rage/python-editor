@@ -225,6 +225,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       .mapErr((x) => Promise.reject(x.message)).val
   }
 
+  const reserExerciseToOriginalContent = () => {
+    srcFiles.forEach((file) => {
+      file.content = file.originalContent
+    })
+  }
+
   useEffect(() => {
     if (
       exerciseDetails &&
@@ -276,6 +282,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
         submitDisabled={exerciseDetails?.expired || !signedIn}
+        resetExercise={reserExerciseToOriginalContent}
         editorHeight={height}
         outputHeight={outputHeight}
         solutionUrl={
