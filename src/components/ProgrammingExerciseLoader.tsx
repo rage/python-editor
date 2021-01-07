@@ -8,6 +8,7 @@ import {
   Language,
   ExerciseDetails,
   FileEntry,
+  LocalStorageContent,
 } from "../types"
 import { ProgrammingExercise, defaultFile } from "./ProgrammingExercise"
 import {
@@ -17,6 +18,7 @@ import {
   postExerciseFeedback,
   postExerciseSubmission,
   getLatestSubmissionZip,
+  getLatestSubmissionDetails,
 } from "../services/programming_exercise"
 import { extractExerciseArchive } from "../services/patch_exercise"
 import Notification from "./Notification"
@@ -105,23 +107,70 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       return
     }
 
+    const tryToSetContentFromLocalStorage = () => {
+      template.srcFiles.forEach((file) => {
+        const localStorageFile = localStorage.getItem(file.fullName)
+        if (localStorageFile) {
+          const localStorageData: LocalStorageContent = JSON.parse(
+            localStorageFile,
+          )
+          file.content = localStorageData.content
+        }
+      })
+    }
+
     try {
-      const submissionResult = await getLatestSubmissionZip(
+      const submissionDetails = await getLatestSubmissionDetails(
         detailsResult.val.id,
         apiConfig,
       )
-      if (submissionResult.ok && submissionResult.val) {
-        const submission = await extractExerciseArchive(
-          submissionResult.val,
-          apiConfig,
-        )
-        if (submission.srcFiles.length > 0) {
-          setSrcFiles(submission.srcFiles)
+      if (submissionDetails.ok && submissionDetails.val) {
+        const useLocalStorage = template.srcFiles.some((file) => {
+          const localStorageFile = localStorage.getItem(file.fullName)
+          if (localStorageFile) {
+            const localStorageData: LocalStorageContent = JSON.parse(
+              localStorageFile,
+            )
+            if (
+              localStorageData.createdAtMillis >
+              submissionDetails.val.createdAtMillis
+            ) {
+              return true
+            }
+          }
+        })
+        if (useLocalStorage) {
+          tryToSetContentFromLocalStorage()
+          setSrcFiles(template.srcFiles)
           return
         }
+        const submissionResult = await getLatestSubmissionZip(
+          submissionDetails.val.id,
+          apiConfig,
+        )
+        if (submissionResult.ok && submissionResult.val) {
+          const submission = await extractExerciseArchive(
+            submissionResult.val,
+            apiConfig,
+          )
+          if (submission.srcFiles.length > 0) {
+            submission.srcFiles.forEach((file) => {
+              const templateFile = template.srcFiles.find(
+                (f) => f.fullName === file.fullName,
+              )
+              if (templateFile) {
+                file.originalContent = templateFile.originalContent
+              }
+            })
+            setSrcFiles(submission.srcFiles)
+            return
+          }
+        }
       }
+      tryToSetContentFromLocalStorage()
       setSrcFiles(template.srcFiles)
     } catch (e) {
+      tryToSetContentFromLocalStorage()
       setSrcFiles(template.srcFiles)
     }
   }
@@ -184,6 +233,13 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       .mapErr((x) => Promise.reject(x.message)).val
   }
 
+  const resetExerciseToOriginalContent = async () => {
+    srcFiles.forEach((file) => {
+      file.content = file.originalContent
+      localStorage.removeItem(file.fullName)
+    })
+  }
+
   useEffect(() => {
     if (
       exerciseDetails &&
@@ -235,6 +291,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
         submitDisabled={exerciseDetails?.expired || !signedIn}
+        resetExercise={resetExerciseToOriginalContent}
         editorHeight={height}
         outputHeight={outputHeight}
         solutionUrl={

@@ -1,7 +1,10 @@
 {
   "button": {
+    "cancel": "Cancel",
     "close": "Close",
     "copy": "Copy",
+    "ok": "Yes",
+    "reset": "Reset",
     "run": "Run",
     "stop": "Stop",
     "submit": "Submit",
@@ -31,6 +34,9 @@
   "pointsAwarded": "Points awarded",
   "problemsTitle": "Problems",
   "rememberToSubmitToServer": "Remember to submit your solution for evaluation.",
+  "resetExerciseConfirmation": "Are you sure you want to reset the exercise to its initial state?",
+  "resetExerciseNotify": "This operation will download the exercise template and set the exercise to its initial state.",
+  "resetExerciseHeader": "Reset exercise template",
   "running": "Running",
   "runButtonText": "RUN",
   "sendToTmcPaste": "Send to TMC Paste",

@@ -1,7 +1,10 @@
 {
   "button": {
+    "cancel": "Peru",
     "close": "Sulje",
     "copy": "Kopioi",
+    "ok": "Kyllä",
+    "reset": "Resetoi",
     "run": "Suorita",
     "stop": "Pysäytä",
     "submit": "Palauta",
@@ -31,6 +34,9 @@
   "pleaseReportFollowingErrorsToCourseInstructor": "Ilmoita seuraavista virheistä kurssin vetäjälle",
   "pointsAwarded": "Saadut pisteet",
   "rememberToSubmitToServer": "Muistathan palauttaa ratkaisusi arviointia varten.",
+  "resetExerciseConfirmation": "Haluatko varmasti palauttaa alkuperäisen tehtäväpohjan?",
+  "resetExerciseNotify": "Toiminto lataa tehtäväpohjan ja asettaa tehtävän alkutilaan.",
+  "resetExerciseHeader": "Palauta tehtäväpohja",
   "runButtonText": "SUORITA",
   "running": "Suoritetaan",
   "sendToTmcPaste": "Lähetä TMC Pasteen",

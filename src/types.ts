@@ -12,6 +12,7 @@ export enum EditorState {
   Testing = 1 << 10,
   WaitingInput = 1 << 11,
   WorkerInitializing = 1 << 12,
+  Resetting = 1 << 13,
   WorkerActive = ExecutingCode | Testing | WaitingInput | WorkerInitializing,
 }
 
@@ -35,6 +36,16 @@ export type ExerciseDetails = {
   deadline?: string
   expired: boolean
   softDeadline?: string
+}
+
+export type SubmissionDetails = {
+  id: number
+  createdAtMillis: number
+}
+
+export type LocalStorageContent = {
+  content: string
+  createdAtMillis: number
 }
 
 export type FeedBackAnswer = {

@@ -8,6 +8,7 @@ import {
   FeedBackAnswer,
   ExerciseDetails,
   FileEntry,
+  SubmissionDetails,
 } from "../types"
 import { EDITOR_NAME, EDITOR_VERSION } from "../constants"
 
@@ -100,10 +101,10 @@ const getExerciseZip = async (
   )
 }
 
-const getLatestSubmissionZip = async (
+const getLatestSubmissionDetails = async (
   exerciseId: number,
   configuration: Configuration,
-): Promise<Result<JSZip | undefined, Error>> => {
+): Promise<Result<SubmissionDetails, Error>> => {
   const { t, token } = configuration
   const url = `${baseURL}/exercises/${exerciseId}/users/current/submissions`
   const headers = getHeaders(token)
@@ -118,18 +119,29 @@ const getLatestSubmissionZip = async (
     })
   }
   if (submissions.length <= 0) {
-    return Ok(undefined)
+    return Err({
+      status: 9001,
+      message: "No submissions",
+    })
   }
-  const latest = submissions
-    .map((submission) => ({
-      ...submission,
+  const latestSubmissionDetails: SubmissionDetails[] = submissions.map(
+    (submission) => ({
+      id: submission.id,
       createdAtMillis: Date.parse(submission.created_at),
-    }))
-    .reduce((latest, current) => {
-      return current.createdAtMillis > latest.createdAtMillis ? current : latest
-    }, submissions[0])
+    }),
+  )
+  const latest = latestSubmissionDetails.reduce((latest, current) => {
+    return current.createdAtMillis > latest.createdAtMillis ? current : latest
+  }, latestSubmissionDetails[0])
+  return Ok(latest)
+}
+
+const getLatestSubmissionZip = async (
+  submissionId: number,
+  configuration: Configuration,
+): Promise<Result<JSZip | undefined, Error>> => {
   return getZipFromUrl(
-    `${baseURL}/core/submissions/${latest.id}/download`,
+    `${baseURL}/core/submissions/${submissionId}/download`,
     configuration,
   )
 }
@@ -269,6 +281,7 @@ export {
   getExerciseDetails,
   getExerciseZip,
   getLatestSubmissionZip,
+  getLatestSubmissionDetails,
   getModelSolutionZip,
   getSubmissionResults,
   postExerciseFeedback,
