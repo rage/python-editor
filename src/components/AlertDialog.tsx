@@ -8,6 +8,7 @@ import DialogContentText from "@material-ui/core/DialogContentText"
 import DialogTitle from "@material-ui/core/DialogTitle"
 import { useState } from "react"
 import styled from "styled-components"
+import useStyles from "../hooks/useStyles"
 
 type AlertDialogProps = {
   resetExercise: () => void
@@ -24,6 +25,7 @@ const AlertDialog: React.FunctionComponent<AlertDialogProps> = ({
 }) => {
   const [open, setOpen] = useState(false)
   const [t] = useTranslation()
+  const classes = useStyles()
 
   const handleClickOpen = () => {
     setOpen(true)
@@ -40,7 +42,11 @@ const AlertDialog: React.FunctionComponent<AlertDialogProps> = ({
 
   return (
     <div style={{ display: "inline" }}>
-      <StyledButton data-cy="reset-btn" onClick={handleClickOpen}>
+      <StyledButton
+        data-cy="reset-btn"
+        className={classes.normalButton}
+        onClick={handleClickOpen}
+      >
         {t("button.reset")}
       </StyledButton>
       <Dialog

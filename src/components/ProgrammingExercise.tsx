@@ -48,7 +48,7 @@ type ProgrammingExerciseProps = {
     files: Array<FileEntry>,
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
-  resetExercise: () => void
+  resetExercise: () => Promise<void>
   debug?: boolean
   initialFiles: Array<FileEntry>
   problems?: string[]
@@ -149,6 +149,11 @@ ${testSource}
 
   const handleSubmit = () => {
     setEditorState(EditorState.Submitting)
+    setTestResults(undefined)
+  }
+
+  const handleReset = () => {
+    setEditorState(EditorState.Resetting)
     setTestResults(undefined)
   }
 
@@ -281,6 +286,12 @@ ${testSource}
           stopWorker()
         }, 10000)
         setExecutionTimeoutTimer(timeout)
+        break
+      case EditorState.Resetting:
+        resetExercise().then(() => {
+          setFiles(initialFiles)
+          setEditorState(EditorState.Idle)
+        })
         break
       case EditorState.Idle:
       case EditorState.RunAborted:
@@ -485,7 +496,7 @@ ${testSource}
           <FontAwesomeIcon icon={faEye} />
           <span style={{ paddingLeft: "5px" }}>{t("testButtonText")}</span>
         </StyledButton>
-        <AlertDialog resetExercise={resetExercise} />
+        <AlertDialog resetExercise={handleReset} />
         {solutionUrl && (
           <StyledButton
             className={classes.normalButton}

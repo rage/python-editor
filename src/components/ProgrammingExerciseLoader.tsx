@@ -225,7 +225,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       .mapErr((x) => Promise.reject(x.message)).val
   }
 
-  const reserExerciseToOriginalContent = () => {
+  const reserExerciseToOriginalContent = async () => {
     srcFiles.forEach((file) => {
       file.content = file.originalContent
     })
