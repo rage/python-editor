@@ -228,6 +228,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const resetExerciseToOriginalContent = async () => {
     srcFiles.forEach((file) => {
       file.content = file.originalContent
+      localStorage.removeItem(file.fullName)
     })
   }
 

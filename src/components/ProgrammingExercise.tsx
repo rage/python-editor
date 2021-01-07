@@ -154,6 +154,7 @@ ${testSource}
 
   const handleReset = () => {
     setEditorState(EditorState.Resetting)
+    setOutput([])
     setTestResults(undefined)
   }
 
@@ -238,11 +239,13 @@ ${testSource}
   }
 
   const setSelectedFileContent = (newContent: string) => {
-    selectedFile.content = newContent
-    localStorage.setItem(
-      selectedFile.fullName,
-      JSON.stringify({ createdAtMillis: Date.now(), content: newContent }),
-    )
+    if (!EditorState.Resetting) {
+      selectedFile.content = newContent
+      localStorage.setItem(
+        selectedFile.fullName,
+        JSON.stringify({ createdAtMillis: Date.now(), content: newContent }),
+      )
+    }
     setFiles((prev: FileEntry[]) =>
       prev.map((file: FileEntry) =>
         file.shortName === selectedFile.shortName

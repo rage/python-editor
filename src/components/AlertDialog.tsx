@@ -61,6 +61,7 @@ const AlertDialog: React.FunctionComponent<AlertDialogProps> = ({
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {t("resetExerciseConfirmation")}
+            <br />
             {t("resetExerciseNotify")}
           </DialogContentText>
         </DialogContent>
