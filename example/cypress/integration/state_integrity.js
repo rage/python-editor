@@ -40,6 +40,7 @@ describe("State integrity tests", () => {
     window.localStorage.setItem("exercise", inputExercise)
     window.localStorage.setItem("token", inputToken)
     cy.server()
+    cy.fixture("get_expired_exercise.json").as("exerciseExpired")
     cy.fixture("get_exercise.json").as("exercise")
     cy.fixture("post_submission_content.json").as("sendSubmission")
     cy.fixture("result_submission_fail.json").as("resultSubmissionFail")
@@ -47,14 +48,14 @@ describe("State integrity tests", () => {
     cy.fixture("old_submissions.json").as("oldSubmissions")
     cy.route({
       method: "GET",
-      url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
-      response: "@exercise",
-    })
-    cy.route({
-      method: "GET",
       url: "/api/v8/exercises/90703/users/current/submissions",
       response: "@oldSubmissions",
     })
+    cy.route({
+      method: "GET",
+      url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
+      response: "@exerciseExpired",
+    }).as("exerciseExpired")
     cy.route({
       method: "GET",
       url: "/api/v8/core/submissions/7313248/download",
@@ -64,12 +65,9 @@ describe("State integrity tests", () => {
       method: "GET",
       url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
       response: "fx:osa01-01_hymio.zip,binary",
-    }).as("getExercise")
-    cy.wait(10000)
-    // Wait for the Pyodide from download.mooc.fi
+    })
     cy.get("[data-cy=load-btn]").click()
-    cy.wait("@getExercise")
-    cy.contains("# Kirjoita ratkaisu tähän")
+    cy.wait(1000)
     cy.get(".monaco-editor")
       .first()
       .click()
@@ -77,11 +75,11 @@ describe("State integrity tests", () => {
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
       .type(program)
-
     cy.get("[data-cy=reset-btn]").click()
     cy.contains("Reset exercise template")
     cy.get("[data-cy=reset-btn-ok]").click()
     cy.contains(program).should("not.exist")
-    cy.contains("# Kirjoita ratkaisu tähän")
+    cy.wait(100)
+    cy.contains("Kirjoita ratkaisu tähän")
   })
 })
