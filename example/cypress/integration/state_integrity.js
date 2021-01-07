@@ -65,10 +65,10 @@ describe("State integrity tests", () => {
       url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
       response: "fx:osa01-01_hymio.zip,binary",
     }).as("getExercise")
+    cy.wait(10000)
     // Wait for the Pyodide from download.mooc.fi
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExercise")
-    cy.wait(10000)
     cy.contains("# Kirjoita ratkaisu tähän")
     cy.get(".monaco-editor")
       .first()

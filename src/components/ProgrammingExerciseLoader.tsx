@@ -154,6 +154,14 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
             apiConfig,
           )
           if (submission.srcFiles.length > 0) {
+            submission.srcFiles.forEach((file) => {
+              const templateFile = template.srcFiles.find(
+                (f) => f.fullName === file.fullName,
+              )
+              if (templateFile) {
+                file.originalContent = templateFile.originalContent
+              }
+            })
             setSrcFiles(submission.srcFiles)
             return
           }
