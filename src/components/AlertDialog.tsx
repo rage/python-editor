@@ -61,11 +61,12 @@ const AlertDialog: React.FunctionComponent<AlertDialogProps> = ({
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             {t("resetExerciseConfirmation")}
+            {t("resetExerciseNotify")}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseCancel} color="primary" autoFocus>
-            {t("button.close")}
+            {t("button.cancel")}
           </Button>
           <Button onClick={handleCloseAccept} color="primary">
             {t("button.ok")}

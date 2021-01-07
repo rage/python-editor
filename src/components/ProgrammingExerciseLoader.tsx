@@ -225,7 +225,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       .mapErr((x) => Promise.reject(x.message)).val
   }
 
-  const reserExerciseToOriginalContent = async () => {
+  const resetExerciseToOriginalContent = async () => {
     srcFiles.forEach((file) => {
       file.content = file.originalContent
     })
@@ -282,7 +282,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
         submitDisabled={exerciseDetails?.expired || !signedIn}
-        resetExercise={reserExerciseToOriginalContent}
+        resetExercise={resetExerciseToOriginalContent}
         editorHeight={height}
         outputHeight={outputHeight}
         solutionUrl={
