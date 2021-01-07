@@ -69,7 +69,11 @@ const AlertDialog: React.FunctionComponent<AlertDialogProps> = ({
           <Button onClick={handleCloseCancel} color="primary" autoFocus>
             {t("button.cancel")}
           </Button>
-          <Button onClick={handleCloseAccept} color="primary">
+          <Button
+            data-cy="reset-btn-ok"
+            onClick={handleCloseAccept}
+            color="primary"
+          >
             {t("button.ok")}
           </Button>
         </DialogActions>

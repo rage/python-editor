@@ -239,7 +239,7 @@ ${testSource}
   }
 
   const setSelectedFileContent = (newContent: string) => {
-    if (!EditorState.Resetting) {
+    if (editorState !== EditorState.Resetting) {
       selectedFile.content = newContent
       localStorage.setItem(
         selectedFile.fullName,
