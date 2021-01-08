@@ -35,7 +35,7 @@
   "pointsAwarded": "Saadut pisteet",
   "rememberToSubmitToServer": "Muistathan palauttaa ratkaisusi arviointia varten.",
   "resetExerciseConfirmation": "Haluatko varmasti palauttaa alkuperäisen tehtäväpohjan?",
-  "resetExerciseNotify": "Toiminto lataa tehtäväpohjan ja asettaa tehtävän alkutilaan.",
+  "resetExerciseNotify": "Toiminto poistaa kaiken tekemäsi tehtäväkoodin.",
   "resetExerciseHeader": "Palauta tehtäväpohja",
   "runButtonText": "SUORITA",
   "running": "Suoritetaan",
