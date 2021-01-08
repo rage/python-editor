@@ -1,4 +1,5 @@
 {
   "baseUrl": "http://localhost:1234",
-  "retries": { "runMode": 2, "openMode": 2 }
+  "retries": { "runMode": 2, "openMode": 2 },
+  "video": false
 }
