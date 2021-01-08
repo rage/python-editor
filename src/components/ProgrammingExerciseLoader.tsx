@@ -22,6 +22,7 @@ import {
 } from "../services/programming_exercise"
 import { extractExerciseArchive } from "../services/patch_exercise"
 import Notification from "./Notification"
+import JSZip from "jszip"
 
 type ProgrammingExerciseLoaderProps = {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
@@ -63,44 +64,45 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const apiConfig = { t, token }
 
   const loadExercises = async (hasToken: boolean) => {
-    const wrapError = (status: number, message: string) => [
+    const wrapError = (message: string) => [
       {
         ...defaultFile,
-        content: `# ${status}: ${message}`,
+        content: `# ${message}`,
       },
     ]
 
     setExerciseDetails(undefined)
-    const downloadResult = await getExerciseZip(
-      organization,
-      course,
-      exercise,
-      apiConfig,
-    )
-    if (downloadResult.err) {
-      setSrcFiles(
-        wrapError(downloadResult.val.status, downloadResult.val.message),
+
+    let downloadResult: JSZip
+    try {
+      downloadResult = await getExerciseZip(
+        organization,
+        course,
+        exercise,
+        apiConfig,
       )
+    } catch (e) {
+      setSrcFiles(wrapError(e.message))
       return
     }
 
-    const template = await extractExerciseArchive(downloadResult.val, apiConfig)
+    const template = await extractExerciseArchive(downloadResult, apiConfig)
     setProblems(template.problems)
     setTestSource(template.testSource)
 
-    const detailsResult = await getExerciseDetails(
-      organization,
-      course,
-      exercise,
-      apiConfig,
-    )
-    if (detailsResult.err) {
-      setSrcFiles(
-        wrapError(detailsResult.val.status, detailsResult.val.message),
+    let detailsResult: ExerciseDetails
+    try {
+      detailsResult = await getExerciseDetails(
+        organization,
+        course,
+        exercise,
+        apiConfig,
       )
+    } catch (e) {
+      setSrcFiles(wrapError(e.message))
       return
     }
-    setExerciseDetails(detailsResult.val)
+    setExerciseDetails(detailsResult)
 
     if (!hasToken) {
       setSrcFiles(template.srcFiles)
@@ -108,7 +110,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
 
     const tryToSetContentFromLocalStorage = () => {
-      template.srcFiles.forEach((file) => {
+      template.srcFiles.forEach((file: FileEntry) => {
         const localStorageFile = localStorage.getItem(file.fullName)
         if (localStorageFile) {
           const localStorageData: LocalStorageContent = JSON.parse(
@@ -121,52 +123,49 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
 
     try {
       const submissionDetails = await getLatestSubmissionDetails(
-        detailsResult.val.id,
+        detailsResult.id,
         apiConfig,
       )
-      if (submissionDetails.ok && submissionDetails.val) {
-        const useLocalStorage = template.srcFiles.some((file) => {
-          const localStorageFile = localStorage.getItem(file.fullName)
-          if (localStorageFile) {
-            const localStorageData: LocalStorageContent = JSON.parse(
-              localStorageFile,
-            )
-            if (
-              localStorageData.createdAtMillis >
-              submissionDetails.val.createdAtMillis
-            ) {
-              return true
-            }
+      const useLocalStorage = template.srcFiles.some((file) => {
+        const localStorageFile = localStorage.getItem(file.fullName)
+        if (localStorageFile) {
+          const localStorageData: LocalStorageContent = JSON.parse(
+            localStorageFile,
+          )
+          if (
+            localStorageData.createdAtMillis > submissionDetails.createdAtMillis
+          ) {
+            return true
+          }
+        }
+      })
+      if (useLocalStorage) {
+        tryToSetContentFromLocalStorage()
+        setSrcFiles(template.srcFiles)
+        return
+      }
+      const submissionResult = await getLatestSubmissionZip(
+        submissionDetails.id,
+        apiConfig,
+      )
+
+      const submission = await extractExerciseArchive(
+        submissionResult,
+        apiConfig,
+      )
+      if (submission.srcFiles.length > 0) {
+        submission.srcFiles.forEach((file: FileEntry) => {
+          const templateFile = template.srcFiles.find(
+            (f) => f.fullName === file.fullName,
+          )
+          if (templateFile) {
+            file.originalContent = templateFile.originalContent
           }
         })
-        if (useLocalStorage) {
-          tryToSetContentFromLocalStorage()
-          setSrcFiles(template.srcFiles)
-          return
-        }
-        const submissionResult = await getLatestSubmissionZip(
-          submissionDetails.val.id,
-          apiConfig,
-        )
-        if (submissionResult.ok && submissionResult.val) {
-          const submission = await extractExerciseArchive(
-            submissionResult.val,
-            apiConfig,
-          )
-          if (submission.srcFiles.length > 0) {
-            submission.srcFiles.forEach((file) => {
-              const templateFile = template.srcFiles.find(
-                (f) => f.fullName === file.fullName,
-              )
-              if (templateFile) {
-                file.originalContent = templateFile.originalContent
-              }
-            })
-            setSrcFiles(submission.srcFiles)
-            return
-          }
-        }
+        setSrcFiles(submission.srcFiles)
+        return
       }
+
       tryToSetContentFromLocalStorage()
       setSrcFiles(template.srcFiles)
     } catch (e) {
@@ -176,65 +175,67 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }
 
   const submitAndWaitResult = async (files: Array<FileEntry>) => {
-    const wrapError = (status: number, message: string): TestResultObject => ({
+    const wrapError = (message: string): TestResultObject => ({
       points: [],
       testCases: [
         {
           id: "0",
           testName: "Exercise submission",
           passed: false,
-          feedback: `Error ${status}: ${message}`,
+          feedback: `Error ${message}`,
         },
       ],
     })
     if (!exerciseDetails) {
-      return wrapError(418, "Exercise details missing")
+      return wrapError("418: Exercise details missing")
     }
-    const postResult = await postExerciseSubmission(
-      exerciseDetails.id,
-      files,
-      apiConfig,
-    )
-    if (postResult.err) {
-      return wrapError(postResult.val.status, postResult.val.message)
-    }
-    const submissionResult = await getSubmissionResults(
-      postResult.val,
-      apiConfig,
-    )
-    if (submissionResult.err) {
-      return wrapError(
-        submissionResult.val.status,
-        submissionResult.val.message,
+
+    try {
+      const postResult = await postExerciseSubmission(
+        exerciseDetails.id,
+        files,
+        apiConfig,
       )
+      try {
+        const submissionResult = await getSubmissionResults(
+          postResult,
+          apiConfig,
+        )
+        getExerciseDetails(
+          organization,
+          course,
+          exercise,
+          apiConfig,
+        ).then((result) => setExerciseDetails(result))
+        return submissionResult
+      } catch (e) {
+        setExerciseDetails(undefined)
+        return wrapError(e.message)
+      }
+    } catch (e) {
+      return wrapError(e.message)
     }
-    getExerciseDetails(
-      organization,
-      course,
-      exercise,
-      apiConfig,
-    ).then((result) => setExerciseDetails(result.ok ? result.val : undefined))
-    return submissionResult.val
   }
 
   const submitToPaste = async (files: FileEntry[]): Promise<string> => {
     if (!exerciseDetails) {
       return ""
     }
-    const submitResult = await postExerciseSubmission(
-      exerciseDetails.id,
-      files,
-      apiConfig,
-      { paste: true },
-    )
-    // Remap to avoid dependency to `ts-results`.
-    return submitResult
-      .map((x) => Promise.resolve(x.pasteUrl ?? ""))
-      .mapErr((x) => Promise.reject(x.message)).val
+    try {
+      const submitResult = await postExerciseSubmission(
+        exerciseDetails.id,
+        files,
+        apiConfig,
+        { paste: true },
+      )
+      return submitResult.pasteUrl ?? ""
+    } catch (e) {
+      return Promise.reject(e.message)
+    }
   }
 
   const resetExerciseToOriginalContent = async () => {
-    srcFiles.forEach((file) => {
+    srcFiles.forEach((file: FileEntry) => {
       file.content = file.originalContent
       localStorage.removeItem(file.fullName)
     })
@@ -247,9 +248,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       !exerciseDetails.expired &&
       time >= DateTime.fromISO(exerciseDetails.deadline)
     ) {
-      getExerciseDetails(organization, course, exercise, apiConfig).then(
-        (result) => result.ok && setExerciseDetails(result.val),
-      )
+      getExerciseDetails(organization, course, exercise, apiConfig)
+        .then((result) => setExerciseDetails(result))
+        .catch()
     }
   }, [time])
 

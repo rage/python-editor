@@ -26,15 +26,10 @@ interface Configuration {
   token: string
 }
 
-interface Error {
-  status: number
-  message: string
-}
-
 const getZipFromUrl = async (
   url: string,
   configuration: Configuration,
-): Promise<Result<JSZip, Error>> => {
+): Promise<JSZip> => {
   const { t, token } = configuration
   try {
     const zip = new JSZip()
@@ -42,17 +37,11 @@ const getZipFromUrl = async (
       headers: getHeaders(token),
       responseType: "arraybuffer",
     })
-    return Ok(await zip.loadAsync(response.data))
+    return await zip.loadAsync(response.data)
   } catch (error) {
-    return error?.response?.status
-      ? Err({
-          status: error.response.status,
-          message: t("failedToDownloadExercise"),
-        })
-      : Err({
-          status: 418,
-          message: t("failedToEstablishConnectionToServer"),
-        })
+    throw error?.response?.status
+      ? new Error(`${error.response.status}: ${t("failedToDownloadExercise")}`)
+      : new Error(`418: ${t("failedToEstablishConnectionToServer")}`)
   }
 }
 
@@ -61,13 +50,13 @@ const getExerciseDetails = async (
   course: string,
   exercise: string,
   configuration: Configuration,
-): Promise<Result<ExerciseDetails, Error>> => {
+): Promise<ExerciseDetails> => {
   const { t, token } = configuration
   const url = `${baseURL}/org/${organization}/courses/${course}/exercises/${exercise}`
   const headers = getHeaders(token)
   try {
     const data = (await axios.get(url, { headers, responseType: "json" })).data
-    return Ok({
+    return {
       id: data.id,
       availablePoints: data.available_points?.length,
       awardedPoints: data.awarded_points?.length,
@@ -75,17 +64,13 @@ const getExerciseDetails = async (
       deadline: data.deadline,
       expired: data.expired,
       softDeadline: data.soft_deadline,
-    })
+    }
   } catch (error) {
-    return error?.response?.status
-      ? Err({
-          status: error.response.status,
-          message: t("couldNotFindExerciseDetails"),
-        })
-      : Err({
-          status: 418,
-          message: t("failedToEstablishConnectionToServer"),
-        })
+    throw error?.response?.status
+      ? new Error(
+          `${error.response.status}: ${t("couldNotFindExerciseDetails")}`,
+        )
+      : new Error(`418: ${t("failedToEstablishConnectionToServer")}`)
   }
 }
 
@@ -94,7 +79,7 @@ const getExerciseZip = async (
   course: string,
   exercise: string,
   configuration: Configuration,
-): Promise<Result<JSZip, Error>> => {
+): Promise<JSZip> => {
   return getZipFromUrl(
     `${baseURL}/org/${organization}/courses/${course}/exercises/${exercise}/download`,
     configuration,
@@ -104,7 +89,7 @@ const getExerciseZip = async (
 const getLatestSubmissionDetails = async (
   exerciseId: number,
   configuration: Configuration,
-): Promise<Result<SubmissionDetails, Error>> => {
+): Promise<SubmissionDetails> => {
   const { t, token } = configuration
   const url = `${baseURL}/exercises/${exerciseId}/users/current/submissions`
   const headers = getHeaders(token)
@@ -113,16 +98,12 @@ const getLatestSubmissionDetails = async (
     const response = await axios.get(url, { headers, responseType: "json" })
     submissions = response.data as any[]
   } catch (error) {
-    return Err({
-      status: error.response.status,
-      message: t("failedToDownloadExercise"),
-    })
+    throw new Error(
+      `${error.response.status}: ${t("failedToDownloadExercise")}`,
+    )
   }
   if (submissions.length <= 0) {
-    return Err({
-      status: 9001,
-      message: "No submissions",
-    })
+    throw new Error(`9001: No submissions found`)
   }
   const latestSubmissionDetails: SubmissionDetails[] = submissions.map(
     (submission) => ({
@@ -133,13 +114,13 @@ const getLatestSubmissionDetails = async (
   const latest = latestSubmissionDetails.reduce((latest, current) => {
     return current.createdAtMillis > latest.createdAtMillis ? current : latest
   }, latestSubmissionDetails[0])
-  return Ok(latest)
+  return latest
 }
 
 const getLatestSubmissionZip = async (
   submissionId: number,
   configuration: Configuration,
-): Promise<Result<JSZip | undefined, Error>> => {
+): Promise<JSZip> => {
   return getZipFromUrl(
     `${baseURL}/core/submissions/${submissionId}/download`,
     configuration,
@@ -149,7 +130,7 @@ const getLatestSubmissionZip = async (
 const getModelSolutionZip = (
   exerciseId: number,
   configuration: Configuration,
-): Promise<Result<JSZip, Error>> => {
+): Promise<JSZip> => {
   return getZipFromUrl(
     `${baseURL}/core/exercises/${exerciseId}/solution/download`,
     configuration,
@@ -159,7 +140,7 @@ const getModelSolutionZip = (
 const getSubmissionResults = async (
   submissionResponse: SubmissionResponse,
   configuration: Configuration,
-): Promise<Result<TestResultObject, Error>> => {
+): Promise<TestResultObject> => {
   const { t, token } = configuration
   const headers = getHeaders(token)
   const times = [2000, 2000, 1000, 1000, 1000, 2000, 2000, 4000, 8000, 16000]
@@ -178,10 +159,9 @@ const getSubmissionResults = async (
       submissionStatus = { status: "error", statusCode: error.response.status }
     }
     if (submissionStatus.status === "error") {
-      return Err({
-        status: submissionStatus.statusCode,
-        message: t("submissionProcessFailed"),
-      })
+      throw new Error(
+        `${submissionStatus.statusCode}: ${t("submissionProcessFailed")}`,
+      )
     } else if (submissionStatus.status !== "processing") {
       const tests = submissionStatus.test_cases as any[]
       const testCases = tests.map((test, index) => ({
@@ -191,20 +171,17 @@ const getSubmissionResults = async (
         feedback: test.message,
       }))
       const points = submissionStatus.points as string[]
-      return Ok({
+      return {
         allTestsPassed: submissionStatus.all_tests_passed,
         points,
         testCases,
         feedbackQuestions: submissionStatus.feedback_questions,
         feedbackAnswerUrl: submissionStatus.feedback_answer_url,
         solutionUrl: submissionStatus.solution_url,
-      })
+      }
     }
   }
-  return Err({
-    status: 418,
-    message: t("submissionTookTooLong"),
-  })
+  throw new Error(`418: ${t("submissionTookTooLong")}`)
 }
 
 interface ExerciseSubmissionOptions {
@@ -216,7 +193,7 @@ const postExerciseSubmission = async (
   files: Array<FileEntry>,
   configuration: Configuration,
   submissionOptions?: ExerciseSubmissionOptions,
-): Promise<Result<SubmissionResponse, Error>> => {
+): Promise<SubmissionResponse> => {
   const { t, token } = configuration
   const headers = getHeaders(token, { "Content-Type": "multipart/form-data" })
   const paste = submissionOptions?.paste || false
@@ -233,11 +210,11 @@ const postExerciseSubmission = async (
       form,
       { headers },
     )
-    return Ok({
+    return {
       pasteUrl: paste ? response.data.paste_url : undefined,
       showSubmissionUrl: response.data.show_submission_url,
       submissionUrl: response.data.submission_url,
-    })
+    }
   } catch (error) {
     const status = error.response.status
     const message =
@@ -245,7 +222,7 @@ const postExerciseSubmission = async (
         ? t("authenticationRequired")
         : t("submissionProcessFailed")
     console.error(error.response)
-    return Err({ status, message })
+    throw new Error(`${status}: ${message}`)
   }
 }
 
@@ -253,11 +230,11 @@ const postExerciseFeedback = async (
   testResults: TestResultObject,
   feedback: Array<FeedBackAnswer>,
   configuration: Configuration,
-): Promise<Result<void, Error>> => {
-  const { t, token } = configuration
+): Promise<void> => {
+  const { token } = configuration
   const headers = getHeaders(token, { "Content-Type": "multipart/form-data" })
   if (!testResults.feedbackAnswerUrl || testResults.feedbackAnswerUrl === "") {
-    return Ok.EMPTY
+    return
   }
   const form = new FormData()
   feedback.forEach((answer, index) => {
@@ -265,15 +242,12 @@ const postExerciseFeedback = async (
     form.append(`answers[${index}][answer]`, answer.answer.toString())
   })
   try {
-    const response = await axios.post(testResults.feedbackAnswerUrl, form, {
+    await axios.post(testResults.feedbackAnswerUrl, form, {
       headers,
     })
-    return Ok.EMPTY
+    return
   } catch (error) {
-    return Err({
-      status: error.response.status,
-      message: JSON.parse(error.response),
-    })
+    throw new Error(`${error.response.status}: ${JSON.parse(error.response)}`)
   }
 }
 
