@@ -97,6 +97,7 @@ function run({ code, debug }) {
 async def execute():
     __name__ = "__main__"
 ${code
+  .replace(/\\/g, "\\\\")
   .replace(/"""/g, '\\"\\"\\"')
   .split("\n")
   .map((x) => `    ${x}`)
