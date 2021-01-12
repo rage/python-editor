@@ -1,3 +1,5 @@
+self.importScripts("https://cdn.jsdelivr.net/pyodide/v0.16.1/full/pyodide.js")
+
 let printBuffer = []
 let intervalId = null
 const batchSize = 50
@@ -44,7 +46,7 @@ let prevDate = null
  * Python print alias when running with Pyodide. include lines
  * `from js import print` and `__builtins__.print = print` to use.
  */
-function print(...args) {
+self.print = function (...args) {
   const kwargs = args.pop()
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   printBuffer.push(text)
@@ -61,7 +63,7 @@ function print(...args) {
   }
 }
 
-function printError(...args) {
+self.printError = function (...args) {
   const kwargs = args.pop()
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   postMessage({
@@ -70,7 +72,7 @@ function printError(...args) {
   })
 }
 
-async function inputPromise() {
+self.inputPromise = () => {
   printBuffer.push({ type: "input_required" })
   return new Promise((resolve) => {
     self.addEventListener("message", function (e) {
@@ -81,11 +83,11 @@ async function inputPromise() {
   })
 }
 
-async function wait(ms) {
-  await new Promise((res) => setTimeout(res, ms))
+self.wait = function (ms) {
+  return new Promise((res) => setTimeout(res, ms))
 }
 
-function exit() {
+self.exit = function () {
   postMessage({ type: "ready" })
   running = false
 }
