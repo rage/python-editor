@@ -43,15 +43,13 @@ Optional properties:
 ## Setting up the project
 
 1. Clone the project on GitHub
-2. Go to the project root directory and run `npm ci` & `npm run encode:worker`
+2. Go to the project root directory and run `npm ci`
 3. Go to the `example` directory and run `npm ci`
 
 ## Running the project
 
 To run the project in example environment, go to the `example` directory and
 run `npm start`.
-
-If you make any changes to the worker, you will always need to run the `encode:worker` command again.
 
 ## License
 

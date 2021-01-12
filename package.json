@@ -4,10 +4,9 @@
   "description": "",
   "main": "dist/src/index.js",
   "scripts": {
-    "build": "rm -rf ./dist && npm run encode:worker && tsc",
-    "encode:worker": "node bin/generateBase64.js",
+    "build": "rm -rf ./dist && tsc",
     "cypress:open": "cypress open",
-    "now-build": "npm run encode:worker && cd example && npm ci && npm run now-build",
+    "now-build": "cd example && npm ci && npm run now-build",
     "prepublishOnly": "npm run build",
     "prettier-check": "prettier --check './**/*.{js,json,md,ts,tsx}'",
     "prettier": "prettier --write './**/*.{js,json,md,ts,tsx}'",
