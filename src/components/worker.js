@@ -163,7 +163,7 @@ class PatchCode(ast.NodeTransformer):
       super().generic_visit(node)
 
       # Python 3.8 higher all is ast.Constant
-      if isinstance(node, ast.Constant):
+      if isinstance(node, ast.Constant) and isinstance(node.value, str):
         remove_padding = re.sub('[\\n]    ', '\\n', node.value)
         result = ast.Constant(remove_padding)
         return ast.copy_location(result, node)
