@@ -1,4 +1,4 @@
-self.importScripts("https://cdn.jsdelivr.net/pyodide/v0.16.1/full/pyodide.js")
+self.importScripts("https://download.mooc.fi/pyodide-cdn/v0.16.1/pyodide.js")
 
 let printBuffer = []
 let intervalId = null
