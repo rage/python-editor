@@ -12,7 +12,7 @@
   },
   "allTestsPassed": "Testit menivät läpi!",
   "authenticationRequired": "Sisään kirjautuminen vaaditaan",
-  "browserNotSupported": "Ohjelmointitehtäviä ei voi suorittaa Microsoft Edge -selaimella.\nVoit käyttää seuraavia selaimia suorittaaksesi tehtäviä:",
+  "browserNotSupported": "Ohjelmointitehtäviä ei voi suorittaa Safari -selaimella.\nVoit käyttää seuraavia selaimia suorittaaksesi tehtäviä:",
   "copiedConfirmation": "Kopioitu!",
   "couldNotFindExerciseDetails": "Tehtävän tietojen hakeminen epäonnistui.",
   "deadlineExpired": "Tehtävän deadline on ylittynyt.",
