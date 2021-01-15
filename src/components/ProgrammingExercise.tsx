@@ -408,14 +408,14 @@ ${testSource}
         width: "inherit",
       }}
     >
-      {isSafari && (
+      {(isSafari || ieOrEdge) && (
         <OverlayBox>
           <StyledOutput>
             {t("browserNotSupported")}
             <ul>
               <li>Google Chrome</li>
               <li>Mozilla Firefox</li>
-              <li>Microsoft Edge</li>
+              <li>Microsoft Edge, version 79 or later</li>
             </ul>
           </StyledOutput>
         </OverlayBox>
