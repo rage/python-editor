@@ -391,6 +391,12 @@ ${testSource}
 
   const ieOrEdge =
     window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
+  const isSafari =
+    navigator.vendor &&
+    navigator.vendor.indexOf("Apple") > -1 &&
+    navigator.userAgent &&
+    navigator.userAgent.indexOf("CriOS") == -1 &&
+    navigator.userAgent.indexOf("FxiOS") == -1
 
   const pyEditorButtonsDisabled =
     (editorState & (EditorState.WorkerActive | EditorState.Submitting)) === 0
@@ -402,14 +408,14 @@ ${testSource}
         width: "inherit",
       }}
     >
-      {ieOrEdge && (
+      {(isSafari || ieOrEdge) && (
         <OverlayBox>
           <StyledOutput>
             {t("browserNotSupported")}
             <ul>
               <li>Google Chrome</li>
-              <li>Firefox</li>
-              <li>Safari</li>
+              <li>Mozilla Firefox</li>
+              <li>Microsoft Edge, version 79 or later</li>
             </ul>
           </StyledOutput>
         </OverlayBox>

@@ -1,3 +1,5 @@
+self.importScripts("https://download.mooc.fi/pyodide-cdn/v0.16.1/pyodide.js")
+
 let printBuffer = []
 let intervalId = null
 const batchSize = 50
@@ -44,7 +46,7 @@ let prevDate = null
  * Python print alias when running with Pyodide. include lines
  * `from js import print` and `__builtins__.print = print` to use.
  */
-function print(...args) {
+self.print = function (...args) {
   const kwargs = args.pop()
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   printBuffer.push(text)
@@ -61,7 +63,7 @@ function print(...args) {
   }
 }
 
-function printError(...args) {
+self.printError = function (...args) {
   const kwargs = args.pop()
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   postMessage({
@@ -70,7 +72,7 @@ function printError(...args) {
   })
 }
 
-async function inputPromise() {
+self.inputPromise = () => {
   printBuffer.push({ type: "input_required" })
   return new Promise((resolve) => {
     self.addEventListener("message", function (e) {
@@ -81,11 +83,11 @@ async function inputPromise() {
   })
 }
 
-async function wait(ms) {
-  await new Promise((res) => setTimeout(res, ms))
+self.wait = function (ms) {
+  return new Promise((res) => setTimeout(res, ms))
 }
 
-function exit() {
+self.exit = function () {
   postMessage({ type: "ready" })
   running = false
 }
@@ -163,7 +165,7 @@ class PatchCode(ast.NodeTransformer):
       super().generic_visit(node)
 
       # Python 3.8 higher all is ast.Constant
-      if isinstance(node, ast.Constant):
+      if isinstance(node, ast.Constant) and isinstance(node.value, str):
         remove_padding = re.sub('[\\n]    ', '\\n', node.value)
         result = ast.Constant(remove_padding)
         return ast.copy_location(result, node)

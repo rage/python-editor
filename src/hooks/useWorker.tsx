@@ -1,11 +1,4 @@
 import { useEffect, useState } from "react"
-import { pyodideJsSource, workerJsSource } from "../constants"
-
-const blobObject = URL.createObjectURL(
-  new Blob([pyodideJsSource, workerJsSource], {
-    type: "application/javascript",
-  }),
-)
 
 // interface WorkerEventKind<T1, T2> {
 //   type: T1
@@ -27,7 +20,7 @@ interface Message {
 }
 
 console.log("Creating first worker")
-const workerPool = [new Worker(blobObject)]
+const workerPool = [new Worker("../components/worker.js")]
 
 interface WorkerProps {
   // messageListener?: Listener
@@ -43,7 +36,7 @@ const useWorker = ({ debug }: WorkerProps) => {
     const w = workerPool.pop()
     if (workerPool.length === 0) {
       debug && console.log("Creating another worker")
-      workerPool.push(new Worker(blobObject))
+      workerPool.push(new Worker("../components/worker.js"))
     } else {
       debug && console.log("Returning worker without creating new")
     }
