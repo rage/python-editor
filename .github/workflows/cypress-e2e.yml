@@ -13,17 +13,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
-      - name: Install deps
-        uses: cypress-io/github-action@v2.3.10
-        with:
-          runTests: false
+      - name: Install root dependencies
+        uses: bahmutov/npm-install@v1.4.5
       - name: Encode workers
         run: npm run encode:worker
       - name: Cypress tests
         if: success()
         uses: cypress-io/github-action@v2.3.10
         with:
-          install: false
           working-directory: example
           start: npm start
           wait-on: http://localhost:1234
+          record: false
