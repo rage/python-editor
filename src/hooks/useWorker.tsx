@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react"
-import fs from "fs"
+import { workerJsSource } from "../constants"
+
+const blobObject = URL.createObjectURL(
+  new Blob([workerJsSource], {
+    type: "application/javascript",
+  }),
+)
 
 // interface WorkerEventKind<T1, T2> {
 //   type: T1
@@ -20,13 +26,8 @@ interface Message {
   msg?: any
 }
 
-const workerSource = fs.readFileSync(
-  __dirname + "/../components/worker.js",
-  "utf8",
-)
-
 console.log("Creating first worker")
-const workerPool = [new Worker(workerSource)]
+const workerPool = [new Worker(blobObject)]
 
 interface WorkerProps {
   // messageListener?: Listener
@@ -42,7 +43,7 @@ const useWorker = ({ debug }: WorkerProps) => {
     const w = workerPool.pop()
     if (workerPool.length === 0) {
       debug && console.log("Creating another worker")
-      workerPool.push(new Worker(workerSource))
+      workerPool.push(new Worker(blobObject))
     } else {
       debug && console.log("Returning worker without creating new")
     }
