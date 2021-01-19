@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/src/index.js",
   "scripts": {
-    "build": "rm -rf ./dist && tsc",
+    "build": "rm -rf ./dist && npm run encode:worker && tsc",
     "encode:worker": "node bin/generateBase64.js",
     "cypress:open": "cypress open",
     "now-build": "npm run encode:worker && cd example && npm ci && npm run now-build",
