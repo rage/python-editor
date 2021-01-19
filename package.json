@@ -1,6 +1,6 @@
 {
   "name": "moocfi-python-editor",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "",
   "main": "dist/src/index.js",
   "scripts": {
