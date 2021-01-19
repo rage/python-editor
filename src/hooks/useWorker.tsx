@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import fs from "fs"
 
 // interface WorkerEventKind<T1, T2> {
 //   type: T1
@@ -19,8 +20,13 @@ interface Message {
   msg?: any
 }
 
+const workerSource = fs.readFileSync(
+  __dirname + "/../components/worker.js",
+  "utf8",
+)
+
 console.log("Creating first worker")
-const workerPool = [new Worker("../components/worker.js")]
+const workerPool = [new Worker(workerSource)]
 
 interface WorkerProps {
   // messageListener?: Listener
@@ -36,7 +42,7 @@ const useWorker = ({ debug }: WorkerProps) => {
     const w = workerPool.pop()
     if (workerPool.length === 0) {
       debug && console.log("Creating another worker")
-      workerPool.push(new Worker("../components/worker.js"))
+      workerPool.push(new Worker(workerSource))
     } else {
       debug && console.log("Returning worker without creating new")
     }
