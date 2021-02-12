@@ -1,16 +1,36 @@
-const inputOrganization = "test"
-const inputCourse = "python-test"
-const inputExercise = "osa01-01_hymio"
-const inputToken = "49a491a3fc7"
-const program = '# A simple program\nprint("hello from", "python")\n'
+//@ts-check
+/// <reference types="cypress" />
 
 describe("State integrity tests", () => {
+  const inputOrganization = "test"
+  const inputCourse = "python-test"
+  const inputExercise = "osa01-01_hymio"
+  const inputToken = "49a491a3fc7"
+  const program = '# A simple program\nprint("hello from", "python")\n'
+
   beforeEach(() => {
+    window.localStorage.setItem("organization", inputOrganization)
+    window.localStorage.setItem("course", inputCourse)
+    window.localStorage.setItem("exercise", inputExercise)
+    window.localStorage.setItem("token", inputToken)
+
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
+      { fixture: "get_exercise.json" },
+    ).as("getExercise")
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      { fixture: "osa01-01_hymio.zip" },
+    ).as("getExerciseDownload")
+
     cy.visit("/")
-    window.localStorage.setItem("organization", "")
-    window.localStorage.setItem("course", "")
-    window.localStorage.setItem("exercise", "")
-    window.localStorage.setItem("token", "")
+    // Wait for the Pyodide from download.mooc.fi
+    cy.wait(10000)
+    cy.get("[data-cy=load-btn]").click()
+    cy.wait("@getExercise")
+    cy.wait("@getExerciseDownload")
   })
 
   it("Can handle complex state changes that involve input()", () => {
@@ -39,33 +59,7 @@ describe("State integrity tests", () => {
     window.localStorage.setItem("course", inputCourse)
     window.localStorage.setItem("exercise", inputExercise)
     window.localStorage.setItem("token", inputToken)
-    cy.server()
-    cy.fixture("get_expired_exercise.json").as("exerciseExpired")
-    cy.fixture("get_exercise.json").as("exercise")
-    cy.fixture("post_submission_content.json").as("sendSubmission")
-    cy.fixture("result_submission_fail.json").as("resultSubmissionFail")
-    cy.fixture("result_submission_passed.json").as("resultSubmissionPass")
-    cy.fixture("old_submissions.json").as("oldSubmissions")
-    cy.route({
-      method: "GET",
-      url: "/api/v8/exercises/90703/users/current/submissions",
-      response: "@oldSubmissions",
-    })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
-      response: "@exerciseExpired",
-    }).as("exerciseExpired")
-    cy.route({
-      method: "GET",
-      url: "/api/v8/core/submissions/7313248/download",
-      response: { errors: ["Authentication required"] },
-    })
-    cy.route({
-      method: "GET",
-      url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
-      response: "fx:osa01-01_hymio.zip,binary",
-    })
+
     cy.get("[data-cy=load-btn]").click()
     cy.wait(1000)
     cy.get(".monaco-editor")

@@ -1,10 +1,13 @@
-const program = '# A simple program\nprint("hello from", "python")\n'
-const inputOrganization = "test"
-const inputCourse = "python-test"
-const inputExercise = "osa01-01_hymio"
-const inputToken = "3213hddf"
+//@ts-check
+/// <reference types="cypress" />
 
 describe("The Playground", () => {
+  const program = '# A simple program\nprint("hello from", "python")\n'
+  const inputOrganization = "test"
+  const inputCourse = "python-test"
+  const inputExercise = "osa01-01_hymio"
+  const inputToken = "3213hddf"
+
   it("successfully loads", () => {
     cy.visit("/")
   })
