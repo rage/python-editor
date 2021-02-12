@@ -15,22 +15,31 @@ describe("State integrity tests", () => {
     window.localStorage.setItem("token", inputToken)
 
     cy.intercept(
+      "https://cdn.jsdelivr.net/npm/monaco-editor@0.21.2/min/vs/base/worker/workerMain.js",
+    ).as("monacoDep")
+    cy.intercept(
       "GET",
       `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
       { fixture: "get_exercise.json" },
     ).as("getExercise")
+    cy.intercept("GET", "**/api/v8/exercises/90703/users/current/submissions", {
+      fixture: "old_submissions.json",
+    })
     cy.intercept(
       "GET",
       `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
       { fixture: "osa01-01_hymio.zip" },
     ).as("getExerciseDownload")
+    cy.intercept("GET", "**/api/v8/core/submissions/7313248/download", {
+      errors: ["Authentication required"],
+    })
 
+    require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    // Wait for the Pyodide from download.mooc.fi
-    cy.wait(10000)
+    cy.wait("@monacoDep")
     cy.get("[data-cy=load-btn]").click()
-    cy.wait("@getExercise")
     cy.wait("@getExerciseDownload")
+    cy.wait("@getExercise")
   })
 
   it("Can handle complex state changes that involve input()", () => {
@@ -41,11 +50,11 @@ describe("State integrity tests", () => {
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
       .type("input()\ninput()\ninput()\nprint('made it to the end')")
-    cy.wait(12000)
+    cy.wait(500)
     cy.get("[data-cy=run-btn]").click()
     cy.get("[data-cy=user-input-field]")
     cy.get("[data-cy=stop-btn]").click()
-    cy.wait(12000)
+    cy.wait(500)
     cy.get("[data-cy=run-btn]").click()
     cy.get("[data-cy=user-input-field]").find("input").type("one{enter}")
     cy.get("[data-cy=user-input-field]").find("input").type("two{enter}")
@@ -61,7 +70,7 @@ describe("State integrity tests", () => {
     window.localStorage.setItem("token", inputToken)
 
     cy.get("[data-cy=load-btn]").click()
-    cy.wait(1000)
+    cy.wait(500)
     cy.get(".monaco-editor")
       .first()
       .click()

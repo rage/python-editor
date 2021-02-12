@@ -8,6 +8,37 @@ describe("The Playground", () => {
   const inputExercise = "osa01-01_hymio"
   const inputToken = "3213hddf"
 
+  beforeEach(() => {
+    window.localStorage.setItem("organization", inputOrganization)
+    window.localStorage.setItem("course", inputCourse)
+    window.localStorage.setItem("exercise", inputExercise)
+    window.localStorage.setItem("token", inputToken)
+
+    cy.intercept(
+      "https://cdn.jsdelivr.net/npm/monaco-editor@0.21.2/min/vs/base/worker/workerMain.js",
+    ).as("monacoDep")
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
+      { fixture: "get_exercise.json" },
+    ).as("getExercise")
+    cy.intercept("GET", "**/api/v8/exercises/90703/users/current/submissions", {
+      fixture: "old_submissions.json",
+    })
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      { fixture: "osa01-01_hymio.zip" },
+    ).as("getExerciseDownload")
+    cy.intercept("GET", "**/api/v8/core/submissions/7313248/download", {
+      errors: ["Authentication required"],
+    })
+
+    require("../helpers/pyodide_helper").interceptPyodide(cy)
+    cy.visit("/")
+    cy.wait("@monacoDep")
+  })
+
   it("successfully loads", () => {
     cy.visit("/")
   })
