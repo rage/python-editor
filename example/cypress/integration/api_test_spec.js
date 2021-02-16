@@ -32,9 +32,9 @@ describe("API Endpoint tests #1", () => {
       errors: ["Authentication required"],
     })
 
-    require("../helpers/pyodide_helper").interceptPyodide(cy)
+    // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    cy.wait(5000)
+    cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")
@@ -151,9 +151,9 @@ describe("API Endpoint tests #2", () => {
       { fixture: "osa01-01_hymio.zip" },
     ).as("getExerciseDownload")
 
-    require("../helpers/pyodide_helper").interceptPyodide(cy)
+    // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    cy.wait(5000)
+    cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExpiredExercise")

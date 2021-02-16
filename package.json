@@ -8,7 +8,7 @@
     "encode:worker": "node bin/generateBase64.js",
     "cypress:open": "cypress open",
     "download-pyodide": "node bin/downloadPyodideFiles.js",
-    "now-build": "npm run encode:worker && npm run download-pyodide && cd example && npm ci && npm run now-build",
+    "now-build": "npm run encode:worker && cd example && npm ci && npm run now-build",
     "prepublishOnly": "npm run build",
     "prettier-check": "prettier --check './**/*.{js,json,md,ts,tsx}'",
     "prettier": "prettier --write './**/*.{js,json,md,ts,tsx}'",

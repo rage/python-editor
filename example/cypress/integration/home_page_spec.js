@@ -31,9 +31,9 @@ describe("The Playground", () => {
       errors: ["Authentication required"],
     })
 
-    require("../helpers/pyodide_helper").interceptPyodide(cy)
+    // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    cy.wait(5000)
+    cy.wait(10000)
   })
 
   describe("Running code", () => {
