@@ -9,10 +9,10 @@ describe("The Playground", () => {
   const inputToken = "3213hddf"
 
   beforeEach(() => {
-    window.localStorage.setItem("organization", inputOrganization)
-    window.localStorage.setItem("course", inputCourse)
-    window.localStorage.setItem("exercise", inputExercise)
-    window.localStorage.setItem("token", inputToken)
+    window.localStorage.setItem("organization", "")
+    window.localStorage.setItem("course", "")
+    window.localStorage.setItem("exercise", "")
+    window.localStorage.setItem("token", "")
 
     cy.intercept(
       "https://cdn.jsdelivr.net/npm/monaco-editor@0.21.2/min/vs/base/worker/workerMain.js",
@@ -43,88 +43,6 @@ describe("The Playground", () => {
     cy.visit("/")
   })
 
-  describe("Has elements", () => {
-    it("has a organization input field", () => {
-      cy.get("[data-cy=organization-input]")
-        .find("input")
-        .type(inputOrganization)
-        .should("have.value", inputOrganization)
-    })
-
-    it("has a course input field", () => {
-      cy.get("[data-cy=course-input]")
-        .find("input")
-        .type(inputCourse)
-        .should("have.value", inputCourse)
-    })
-
-    it("has an exercise input field", () => {
-      cy.get("[data-cy=exercise-input]")
-        .find("input")
-        .type(inputExercise)
-        .should("have.value", inputExercise)
-    })
-
-    it("has a user token input field", () => {
-      cy.get("[data-cy=token-input]")
-        .find("input")
-        .type(inputToken)
-        .should("have.value", inputToken)
-    })
-
-    it("has a load exercise button", () => {
-      cy.get("[data-cy=load-btn]")
-    })
-
-    it("has an unload exercise button", () => {
-      cy.get("[data-cy=unload-btn]")
-    })
-
-    it("has a run code button", () => {
-      cy.visit("/")
-      cy.get("[data-cy=run-btn]").click()
-    })
-
-    it("has an editor field", () => {
-      cy.visit("/")
-      cy.get(".monaco-editor")
-    })
-  })
-
-  describe("Local storage", () => {
-    it("can get organization from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("organization", inputOrganization)
-      cy.get("[data-cy=organization-input]")
-        .find("input")
-        .should("have.value", inputOrganization)
-    })
-
-    it("can get course from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("course", inputCourse)
-      cy.get("[data-cy=course-input]")
-        .find("input")
-        .should("have.value", inputCourse)
-    })
-
-    it("can get exercise from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("exercise", inputExercise)
-      cy.get("[data-cy=exercise-input]")
-        .find("input")
-        .should("have.value", inputExercise)
-    })
-
-    it("can get token from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("token", inputToken)
-      cy.get("[data-cy=token-input]")
-        .find("input")
-        .should("have.value", inputToken)
-    })
-  })
-
   describe("Running code", () => {
     it("code produces output", () => {
       cy.visit("/")
@@ -134,7 +52,6 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(program)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("hello from python")
     })
@@ -147,8 +64,8 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(program)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
+      cy.wait(1000)
       cy.get("[data-cy=close-btn").click()
       cy.contains("hello from python").should("not.exist")
     })
@@ -162,7 +79,6 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(infiniteProgram)
-      cy.wait(10000)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("Running")
       cy.get("[data-cy=stop-btn]").should("not.be.disabled")
@@ -180,7 +96,6 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
-      cy.wait(15000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=output-container]").contains("Enter a word:")
       cy.get("[data-cy=user-input-field]").contains(
@@ -197,7 +112,6 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=user-input-field]")
         .find("input")
@@ -214,7 +128,6 @@ describe("The Playground", () => {
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=user-input-field]")
         .find("input")
@@ -270,7 +183,6 @@ describe("The Playground", () => {
         .type("{shift}{ctrl}{home}{backspace}")
         .type(testString)
       cy.get("[data-cy=select-file]").find("select").select("test.py")
-      // cy.wait(1000)
       // cy.contains("# This is the default file test.py")
       cy.get("[data-cy=select-file]").find("select").select("main.py")
       cy.contains(testString)
