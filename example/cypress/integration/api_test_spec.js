@@ -37,7 +37,7 @@ describe("API Endpoint tests #1", () => {
 
     require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    cy.wait("@monacoDep")
+    // cy.wait("@monacoDep")
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")
@@ -159,7 +159,7 @@ describe("API Endpoint tests #2", () => {
 
     require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    cy.wait("@monacoDep")
+    // cy.wait("@monacoDep")
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExpiredExercise")

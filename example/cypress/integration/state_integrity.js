@@ -36,7 +36,7 @@ describe("State integrity tests", () => {
 
     require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    cy.wait("@monacoDep")
+    // cy.wait("@monacoDep")
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")

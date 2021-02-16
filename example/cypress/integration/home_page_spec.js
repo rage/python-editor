@@ -36,7 +36,7 @@ describe("The Playground", () => {
 
     require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    cy.wait("@monacoDep")
+    // cy.wait("@monacoDep")
   })
 
   it("successfully loads", () => {
