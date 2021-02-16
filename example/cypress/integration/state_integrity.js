@@ -15,9 +15,6 @@ describe("State integrity tests", () => {
     window.localStorage.setItem("token", inputToken)
 
     cy.intercept(
-      "https://cdn.jsdelivr.net/npm/monaco-editor@0.21.2/min/vs/base/worker/workerMain.js",
-    ).as("monacoDep")
-    cy.intercept(
       "GET",
       `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
       { fixture: "get_exercise.json" },
@@ -36,7 +33,7 @@ describe("State integrity tests", () => {
 
     require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    // cy.wait("@monacoDep")
+    cy.wait(5000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")
@@ -63,14 +60,7 @@ describe("State integrity tests", () => {
   })
 
   it("Can reset exercise template to its initial state", () => {
-    cy.visit("/")
-    window.localStorage.setItem("organization", inputOrganization)
-    window.localStorage.setItem("course", inputCourse)
-    window.localStorage.setItem("exercise", inputExercise)
-    window.localStorage.setItem("token", inputToken)
-
     cy.get("[data-cy=load-btn]").click()
-    cy.wait(500)
     cy.get(".monaco-editor")
       .first()
       .click()

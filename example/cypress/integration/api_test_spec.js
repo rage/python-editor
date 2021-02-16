@@ -16,9 +16,6 @@ describe("API Endpoint tests #1", () => {
     window.localStorage.setItem("token", inputToken)
 
     cy.intercept(
-      "https://cdn.jsdelivr.net/npm/monaco-editor@0.21.2/min/vs/base/worker/workerMain.js",
-    ).as("monacoDep")
-    cy.intercept(
       "GET",
       `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
       { fixture: "get_exercise.json" },
@@ -37,7 +34,7 @@ describe("API Endpoint tests #1", () => {
 
     require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    // cy.wait("@monacoDep")
+    cy.wait(5000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")
@@ -144,9 +141,6 @@ describe("API Endpoint tests #2", () => {
     window.localStorage.setItem("token", inputToken)
 
     cy.intercept(
-      "https://cdn.jsdelivr.net/npm/monaco-editor@0.21.2/min/vs/base/worker/workerMain.js",
-    ).as("monacoDep")
-    cy.intercept(
       "GET",
       `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
       { fixture: "get_expired_exercise.json" },
@@ -159,7 +153,7 @@ describe("API Endpoint tests #2", () => {
 
     require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-    // cy.wait("@monacoDep")
+    cy.wait(5000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExerciseDownload")
     cy.wait("@getExpiredExercise")
