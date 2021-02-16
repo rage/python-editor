@@ -1,46 +1,42 @@
-const program = '# A simple program\nprint("hello from", "python")\n'
-const workingProgram = '# Hymio\nprint(":", end="")\nprint("-)", end="")'
-const inputOrganization = "test"
-const inputCourse = "python-test"
-const inputExercise = "osa01-01_hymio"
-const inputToken = "49a491a3fc7"
+//@ts-check
+/// <reference types="cypress" />
 
 describe("API Endpoint tests #1", () => {
+  const program = '# A simple program\nprint("hello from", "python")\n'
+  const workingProgram = '# Hymio\nprint(":", end="")\nprint("-)", end="")'
+  const inputOrganization = "test"
+  const inputCourse = "python-test"
+  const inputExercise = "osa01-01_hymio"
+  const inputToken = "49a491a3fc7"
+
   beforeEach(() => {
-    cy.visit("/")
     window.localStorage.setItem("organization", inputOrganization)
     window.localStorage.setItem("course", inputCourse)
     window.localStorage.setItem("exercise", inputExercise)
     window.localStorage.setItem("token", inputToken)
-    cy.server()
-    cy.fixture("get_exercise.json").as("exercise")
-    cy.fixture("post_submission_content.json").as("sendSubmission")
-    cy.fixture("result_submission_fail.json").as("resultSubmissionFail")
-    cy.fixture("result_submission_passed.json").as("resultSubmissionPass")
-    cy.fixture("old_submissions.json").as("oldSubmissions")
-    cy.route({
-      method: "GET",
-      url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
-      response: "@exercise",
+
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
+      { fixture: "get_exercise.json" },
+    ).as("getExercise")
+    cy.intercept("GET", "**/api/v8/exercises/90703/users/current/submissions", {
+      fixture: "old_submissions.json",
     })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/exercises/90703/users/current/submissions",
-      response: "@oldSubmissions",
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      { fixture: "osa01-01_hymio.zip" },
+    ).as("getExerciseDownload")
+    cy.intercept("GET", "**/api/v8/core/submissions/7313248/download", {
+      errors: ["Authentication required"],
     })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/core/submissions/7313248/download",
-      response: { errors: ["Authentication required"] },
-    })
-    cy.route({
-      method: "GET",
-      url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
-      response: "fx:osa01-01_hymio.zip,binary",
-    }).as("getExercise")
-    // Wait for the Pyodide from download.mooc.fi
+
+    // require("../helpers/pyodide_helper").interceptPyodide(cy)
+    cy.visit("/")
     cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
+    cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")
   })
 
@@ -49,16 +45,13 @@ describe("API Endpoint tests #1", () => {
   })
 
   it("fail to solve exercise, shows correct information", () => {
-    cy.route({
-      method: "POST",
-      url: "/api/v8/core/exercises/90703/submissions",
-      response: "@sendSubmission",
+    cy.intercept("POST", "**/api/v8/core/exercises/90703/submissions", {
+      fixture: "post_submission_content.json",
     })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/core/submissions/123123",
-      response: "@resultSubmissionFail",
+    cy.intercept("GET", "**/api/v8/core/submissions/123123", {
+      fixture: "result_submission_fail.json",
     })
+
     cy.get(".monaco-editor")
       .first()
       .click()
@@ -93,6 +86,13 @@ describe("API Endpoint tests #1", () => {
   })
 
   it("solve exercise correctly gives points, congratulates, feedback form, model solution", () => {
+    cy.intercept("POST", "**/api/v8/core/exercises/90703/submissions", {
+      fixture: "post_submission_content.json",
+    })
+    cy.intercept("GET", "**/api/v8/core/submissions/123123", {
+      fixture: "result_submission_passed.json",
+    })
+
     const testString = "print(':-)')"
     cy.get(".monaco-editor")
       .first()
@@ -102,19 +102,7 @@ describe("API Endpoint tests #1", () => {
       .type("{shift}{ctrl}{home}{backspace}")
       .type(workingProgram)
     cy.get("[data-cy=test-btn]").click()
-    cy.route({
-      method: "POST",
-      url: "/api/v8/core/exercises/90703/submissions",
-      response: "@sendSubmission",
-    })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/core/submissions/123123",
-      response: "@resultSubmissionPass",
-    })
-    // cy.contains("PASS")
-    // cy.get("[data-cy=submit-btn]").click()
-    // cy.contains("Submitting")
+
     cy.wait(250)
     cy.contains("Points awarded: 1.1")
     cy.contains("Question A")
@@ -141,40 +129,34 @@ describe("API Endpoint tests #1", () => {
 })
 
 describe("API Endpoint tests #2", () => {
+  const inputOrganization = "test"
+  const inputCourse = "python-test"
+  const inputExercise = "osa01-01_hymio"
+  const inputToken = "49a491a3fc7"
+
   beforeEach(() => {
-    cy.visit("/")
     window.localStorage.setItem("organization", inputOrganization)
     window.localStorage.setItem("course", inputCourse)
     window.localStorage.setItem("exercise", inputExercise)
     window.localStorage.setItem("token", inputToken)
-    cy.server()
-    cy.fixture("get_expired_exercise.json").as("exerciseExpired")
-    cy.fixture("get_exercise.json").as("exercise")
-    cy.fixture("post_submission_content.json").as("sendSubmission")
-    cy.fixture("result_submission_fail.json").as("resultSubmissionFail")
-    cy.fixture("result_submission_passed.json").as("resultSubmissionPass")
-    cy.fixture("old_submissions.json").as("oldSubmissions")
-    cy.route({
-      method: "GET",
-      url: "/api/v8/exercises/90703/users/current/submissions",
-      response: "@oldSubmissions",
-    })
-    cy.route({
-      method: "GET",
-      url: "/api/v8/org/test/courses/python-test/exercises/osa01-01_hymio",
-      response: "@exerciseExpired",
-    }).as("exerciseExpired")
-    cy.route({
-      method: "GET",
-      url: "/api/v8/core/submissions/7313248/download",
-      response: { errors: ["Authentication required"] },
-    })
-    cy.route({
-      method: "GET",
-      url: `/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
-      response: "fx:osa01-01_hymio.zip,binary",
-    })
+
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
+      { fixture: "get_expired_exercise.json" },
+    ).as("getExpiredExercise")
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      { fixture: "osa01-01_hymio.zip" },
+    ).as("getExerciseDownload")
+
+    // require("../helpers/pyodide_helper").interceptPyodide(cy)
+    cy.visit("/")
+    cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
+    cy.wait("@getExerciseDownload")
+    cy.wait("@getExpiredExercise")
   })
 
   it("expired exercise has model solution and deadline warning", () => {

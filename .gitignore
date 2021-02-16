@@ -9,3 +9,4 @@ DevProfile
 **/constants/*JsSource.ts
 .cache
 debug.log
+**/pyodide/

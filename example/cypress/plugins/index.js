@@ -11,7 +11,32 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
+const fs = require("fs")
+const path = require("path")
+
 module.exports = (on, config) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
+  on("task", {
+    fixture(fixtures) {
+      const result = {}
+
+      function importFile(fixture) {
+        return fs.readFileSync(
+          path.join(__dirname, "..", "fixtures", fixture),
+          { encoding: "binary" },
+        )
+      }
+
+      if (Array.isArray(fixtures)) {
+        fixtures.forEach((fixture) => {
+          result[fixture] = importFile(fixture)
+        })
+      } else {
+        result[fixtures] = importFile(fixtures)
+      }
+
+      return result
+    },
+  })
+
+  return config
 }

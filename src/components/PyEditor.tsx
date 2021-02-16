@@ -1,5 +1,5 @@
 import React from "react"
-import { ControlledEditor } from "@monaco-editor/react"
+import Editor, { OnChange, OnMount } from "@monaco-editor/react"
 import styled from "styled-components"
 
 interface EditorWrapperProps {
@@ -27,25 +27,23 @@ const PyEditor: React.FunctionComponent<PyEditorProps> = ({
   editorHeight,
   setIsEditorReady,
 }) => {
-  function handleEditorDidMount(_: any, editor: any) {
+  const handleEditorDidMount: OnMount = () => {
     setIsEditorReady(true)
   }
 
-  const handleChange = (ev: any, value: string | undefined): string => {
+  const handleChange: OnChange = (value) => {
     if (value) {
       setEditorValue(value)
-      return value
     }
-    return ""
   }
 
   return (
     <EditorWrapper height={editorHeight}>
-      <ControlledEditor
+      <Editor
         value={editorValue}
         language="python"
-        editorDidMount={handleEditorDidMount}
         onChange={handleChange}
+        onMount={handleEditorDidMount}
         options={{
           minimap: { enabled: false },
           wordWrap: "on",

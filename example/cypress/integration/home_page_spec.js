@@ -1,119 +1,62 @@
-const program = '# A simple program\nprint("hello from", "python")\n'
-const inputOrganization = "test"
-const inputCourse = "python-test"
-const inputExercise = "osa01-01_hymio"
-const inputToken = "3213hddf"
+//@ts-check
+/// <reference types="cypress" />
 
 describe("The Playground", () => {
-  it("successfully loads", () => {
+  const program = '# A simple program\nprint("hello from", "python")\n'
+  const inputOrganization = "test"
+  const inputCourse = "python-test"
+  const inputExercise = "osa01-01_hymio"
+  const inputToken = "3213hddf"
+
+  beforeEach(() => {
+    window.localStorage.setItem("organization", inputOrganization)
+    window.localStorage.setItem("course", inputCourse)
+    window.localStorage.setItem("exercise", inputExercise)
+    window.localStorage.setItem("token", inputToken)
+
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
+      { fixture: "get_exercise.json" },
+    ).as("getExercise")
+    cy.intercept("GET", "**/api/v8/exercises/90703/users/current/submissions", {
+      fixture: "old_submissions.json",
+    })
+    cy.intercept(
+      "GET",
+      `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,
+      { fixture: "osa01-01_hymio.zip" },
+    ).as("getExerciseDownload")
+    cy.intercept("GET", "**/api/v8/core/submissions/7313248/download", {
+      errors: ["Authentication required"],
+    })
+
+    // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
-  })
-
-  describe("Has elements", () => {
-    it("has a organization input field", () => {
-      cy.get("[data-cy=organization-input]")
-        .find("input")
-        .type(inputOrganization)
-        .should("have.value", inputOrganization)
-    })
-
-    it("has a course input field", () => {
-      cy.get("[data-cy=course-input]")
-        .find("input")
-        .type(inputCourse)
-        .should("have.value", inputCourse)
-    })
-
-    it("has an exercise input field", () => {
-      cy.get("[data-cy=exercise-input]")
-        .find("input")
-        .type(inputExercise)
-        .should("have.value", inputExercise)
-    })
-
-    it("has a user token input field", () => {
-      cy.get("[data-cy=token-input]")
-        .find("input")
-        .type(inputToken)
-        .should("have.value", inputToken)
-    })
-
-    it("has a load exercise button", () => {
-      cy.get("[data-cy=load-btn]")
-    })
-
-    it("has an unload exercise button", () => {
-      cy.get("[data-cy=unload-btn]")
-    })
-
-    it("has a run code button", () => {
-      cy.visit("/")
-      cy.get("[data-cy=run-btn]").click()
-    })
-
-    it("has an editor field", () => {
-      cy.visit("/")
-      cy.get(".monaco-editor")
-    })
-  })
-
-  describe("Local storage", () => {
-    it("can get organization from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("organization", inputOrganization)
-      cy.get("[data-cy=organization-input]")
-        .find("input")
-        .should("have.value", inputOrganization)
-    })
-
-    it("can get course from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("course", inputCourse)
-      cy.get("[data-cy=course-input]")
-        .find("input")
-        .should("have.value", inputCourse)
-    })
-
-    it("can get exercise from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("exercise", inputExercise)
-      cy.get("[data-cy=exercise-input]")
-        .find("input")
-        .should("have.value", inputExercise)
-    })
-
-    it("can get token from local storage", () => {
-      cy.visit("/")
-      window.localStorage.setItem("token", inputToken)
-      cy.get("[data-cy=token-input]")
-        .find("input")
-        .should("have.value", inputToken)
-    })
+    cy.wait(10000)
   })
 
   describe("Running code", () => {
     it("code produces output", () => {
-      cy.visit("/")
       cy.get(".monaco-editor")
+        .first()
         .click()
         .focused()
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(program)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("hello from python")
     })
 
     it("close button hides output", () => {
-      cy.visit("/")
       cy.get(".monaco-editor")
+        .first()
         .click()
         .focused()
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(program)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=close-btn").click()
       cy.contains("hello from python").should("not.exist")
@@ -121,14 +64,13 @@ describe("The Playground", () => {
 
     it("displays running status when program is running", () => {
       const infiniteProgram = "while True:\n  x = 0"
-      cy.visit("/")
       cy.get(".monaco-editor")
+        .first()
         .click()
         .focused()
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(infiniteProgram)
-      cy.wait(10000)
       cy.get("[data-cy=run-btn]").click()
       cy.contains("Running")
       cy.get("[data-cy=stop-btn]").should("not.be.disabled")
@@ -139,14 +81,13 @@ describe("The Playground", () => {
     const inputProgram = 'input("Enter a word:")'
 
     it("displays input prompt & waiting indication in title", () => {
-      cy.visit("/")
       cy.get(".monaco-editor")
+        .first()
         .click()
         .focused()
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
-      cy.wait(15000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=output-container]").contains("Enter a word:")
       cy.get("[data-cy=user-input-field]").contains(
@@ -156,14 +97,13 @@ describe("The Playground", () => {
     })
 
     it("can enter input value and add it to output", () => {
-      cy.visit("/")
       cy.get(".monaco-editor")
+        .first()
         .click()
         .focused()
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=user-input-field]")
         .find("input")
@@ -173,14 +113,13 @@ describe("The Playground", () => {
     })
 
     it("hides input field and changes title after entering input", () => {
-      cy.visit("/")
       cy.get(".monaco-editor")
+        .first()
         .click()
         .focused()
         .type("{ctrl}{end}")
         .type("{shift}{ctrl}{home}{backspace}")
         .type(inputProgram)
-      cy.wait(12000)
       cy.get("[data-cy=run-btn]").click()
       cy.get("[data-cy=user-input-field]")
         .find("input")
@@ -195,8 +134,8 @@ describe("The Playground", () => {
   describe("Halting program", () => {
     const infiniteProgram = "while True:\n  x = 0"
     it("stops program if stop button is clicked", () => {
-      cy.visit("/")
       cy.get(".monaco-editor")
+        .first()
         .click()
         .focused()
         .type("{ctrl}{end}")
@@ -211,7 +150,6 @@ describe("The Playground", () => {
 
   describe("Using default files", () => {
     it("Unloading exercise brings up default main.py file", () => {
-      cy.visit("/")
       cy.get("[data-cy=unload-btn]").click()
       cy.contains("main.py")
     })
@@ -236,35 +174,9 @@ describe("The Playground", () => {
         .type("{shift}{ctrl}{home}{backspace}")
         .type(testString)
       cy.get("[data-cy=select-file]").find("select").select("test.py")
-      // cy.wait(1000)
       // cy.contains("# This is the default file test.py")
       cy.get("[data-cy=select-file]").find("select").select("main.py")
       cy.contains(testString)
     })
   })
-  /*
-  describe("Running default tests", () => {
-    it("displays testing title in output title box", () => {
-      cy.visit("/")
-      cy.get("[data-cy=run-tests-btn]").click()
-      cy.contains("Test Results")
-    })
-
-    it("displays passed tests progress bar on output title", () => {
-      cy.get("[data-cy=run-tests-btn]").click()
-      cy.contains("Tests passed")
-      cy.contains("83%")
-    })
-
-    it("initially shows output of one failed test only", () => {
-      cy.get("[data-cy=test-result]").should("have.length", 1)
-      cy.get("[data-cy=test-result]").contains("FAIL")
-    })
-
-    it('checking "Show all" shows all test results', () => {
-      cy.get("[data-cy=show-all-results-checkbox]").click()
-      cy.get("[data-cy=test-result]").should("have.length", 6)
-    })
-  })
-  */
 })
