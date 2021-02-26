@@ -25,16 +25,27 @@ const App = () => {
   const course = useInput("course", "")
   const exercise = useInput("exercise", "")
   const token = useInput("token", "")
+  const [exerciseToLoad, setExerciseToLoad] = useState({
+    organization: organization.value,
+    course: course.value,
+    exercise: exercise.value,
+  })
   const [language, setLanguage] = useState("en")
   const [height, setHeight] = useState("400px")
   const [outputHeight, setOutputHeight] = useState("250px")
   const [fetch, setFetch] = useLocalStorage("fetch", false)
   const [details, setDetails] = useState<{}>()
-  const handleLoad = () => {
+  const handleLoad = (event) => {
     event.preventDefault()
+    setExerciseToLoad({
+      organization: organization.value,
+      course: course.value,
+      exercise: exercise.value,
+    })
     setFetch(true)
   }
-  const handleUnload = () => {
+  const handleUnload = (event) => {
+    setExerciseToLoad({ organization: "", course: "", exercise: "" })
     event.preventDefault()
     setFetch(false)
   }
@@ -63,29 +74,12 @@ const App = () => {
     <>
       <div>
         <Grid container direction="row" justify="space-between">
-          <Grid item xs={4}>
-            <StyledTextField
-              {...organization}
-              label="Organization slug"
-              data-cy="organization-input"
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <StyledTextField
-              {...course}
-              label="Course"
-              data-cy="course-input"
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <StyledTextField
-              {...exercise}
-              label="Exercise"
-              data-cy="exercise-input"
-            />
-          </Grid>
+          <StyledTextField
+            {...token}
+            label="User token"
+            data-cy="token-input"
+          />
         </Grid>
-        <StyledTextField {...token} label="User token" data-cy="token-input" />
         <Grid container direction="row" justify="space-between">
           <Grid item xs={6}>
             <StyledTextField
@@ -119,19 +113,42 @@ const App = () => {
             />
           </Grid>
         </Grid>
+        <Grid container direction="row" justify="space-between">
+          <Grid item xs={4}>
+            <StyledTextField
+              {...organization}
+              label="Organization slug"
+              data-cy="organization-input"
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <StyledTextField
+              {...course}
+              label="Course"
+              data-cy="course-input"
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <StyledTextField
+              {...exercise}
+              label="Exercise"
+              data-cy="exercise-input"
+            />
+          </Grid>
+        </Grid>
         <StyledButton onClick={handleLoad} data-cy="load-btn">
-          Load Exercise
+          Reload exercise
         </StyledButton>
         <StyledButton onClick={handleUnload} data-cy="unload-btn">
-          Unload Exercise
+          Unload exercise
         </StyledButton>
       </div>
       {fetch && (
         <>
           {loadExercise(
-            organization.value,
-            course.value,
-            exercise.value,
+            exerciseToLoad.organization,
+            exerciseToLoad.course,
+            exerciseToLoad.exercise,
             token.value,
           )}
         </>

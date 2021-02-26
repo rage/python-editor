@@ -267,7 +267,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     const hasToken = token !== "" && token !== null
     setSignedIn(hasToken)
     loadExercises(hasToken).finally(() => setReady(true))
-  }, [token])
+  }, [token, organization, course, exercise])
 
   return (
     <div>
