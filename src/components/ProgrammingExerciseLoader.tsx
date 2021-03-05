@@ -24,15 +24,16 @@ import { extractExerciseArchive } from "../services/patch_exercise"
 import Notification from "./Notification"
 import JSZip from "jszip"
 
-type ProgrammingExerciseLoaderProps = {
+interface ProgrammingExerciseLoaderProps {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
   organization: string
   course: string
-  debug?: boolean
   exercise: string
   token: string
+  username?: string
   height?: string
   outputHeight?: string
+  debug?: boolean
   language?: Language
 }
 
@@ -44,11 +45,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   onExerciseDetailsChange,
   organization,
   course,
-  debug,
   exercise,
   token,
+  username,
   height,
   outputHeight,
+  debug,
   language = "en",
 }) => {
   const time = useTime(10000)
