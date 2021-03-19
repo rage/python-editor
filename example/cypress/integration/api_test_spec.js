@@ -36,8 +36,8 @@ describe("API Endpoint tests #1", () => {
     cy.visit("/")
     cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
-    cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")
+    cy.wait("@getExerciseDownload")
   })
 
   it("should not have sign-in warning", () => {
@@ -155,8 +155,8 @@ describe("API Endpoint tests #2", () => {
     cy.visit("/")
     cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
-    cy.wait("@getExerciseDownload")
     cy.wait("@getExpiredExercise")
+    cy.wait("@getExerciseDownload")
   })
 
   it("expired exercise has model solution and deadline warning", () => {

@@ -64,6 +64,7 @@ const getExerciseDetails = async (
       deadline: data.deadline,
       expired: data.expired,
       softDeadline: data.soft_deadline,
+      unlocked: data.unlocked,
     }
   } catch (error) {
     throw error?.response?.status

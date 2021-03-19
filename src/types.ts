@@ -28,7 +28,7 @@ export interface ExerciseTemplate {
   testSource: string
 }
 
-export type ExerciseDetails = {
+export interface ExerciseDetails {
   id: number
   availablePoints?: number
   awardedPoints?: number
@@ -36,6 +36,7 @@ export type ExerciseDetails = {
   deadline?: string
   expired: boolean
   softDeadline?: string
+  unlocked?: boolean
 }
 
 export type SubmissionDetails = {
