@@ -71,7 +71,25 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       },
     ]
 
-    setExerciseDetails(undefined)
+    let detailsResult: ExerciseDetails
+    try {
+      detailsResult = await getExerciseDetails(
+        organization,
+        course,
+        exercise,
+        apiConfig,
+      )
+    } catch (e) {
+      setExerciseDetails(undefined)
+      setSrcFiles(wrapError(e.message))
+      return
+    }
+    setExerciseDetails(detailsResult)
+
+    if (!detailsResult.unlocked) {
+      setSrcFiles(wrapError(t("exerciseNotYetUnlocked")))
+      return
+    }
 
     let downloadResult: JSZip
     try {
@@ -89,20 +107,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     const template = await extractExerciseArchive(downloadResult, apiConfig)
     setProblems(template.problems)
     setTestSource(template.testSource)
-
-    let detailsResult: ExerciseDetails
-    try {
-      detailsResult = await getExerciseDetails(
-        organization,
-        course,
-        exercise,
-        apiConfig,
-      )
-    } catch (e) {
-      setSrcFiles(wrapError(e.message))
-      return
-    }
-    setExerciseDetails(detailsResult)
 
     if (!hasToken) {
       setSrcFiles(template.srcFiles)

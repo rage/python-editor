@@ -35,8 +35,8 @@ describe("State integrity tests", () => {
     cy.visit("/")
     cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
-    cy.wait("@getExerciseDownload")
     cy.wait("@getExercise")
+    cy.wait("@getExerciseDownload")
   })
 
   it("Can handle complex state changes that involve input()", () => {
