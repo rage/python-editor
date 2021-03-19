@@ -18,6 +18,7 @@
   "deadlineExpired": "Exercise deadline exceeded.",
   "dontSend": "Don't send",
   "enterInputAndPressEnter": "Enter input and press \"Enter\"",
+  "exerciseNotYetUnlocked": "Exercise not yet unlocked. Please make sure that you have enough points from previous parts.",
   "failedToEstablishConnectionToServer": "Failed to establish a connection to TestMyCode Server.",
   "failedToDownloadExercise": "Failed to download exercise.",
   "feedbackTitle": "Exercise completed, congratulations!",

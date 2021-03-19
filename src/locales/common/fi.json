@@ -18,6 +18,7 @@
   "deadlineExpired": "Tehtävän deadline on ylittynyt.",
   "dontSend": "Älä lähetä",
   "enterInputAndPressEnter": "Anna syöte ja paina \"Enter\"",
+  "exerciseNotYetUnlocked": "Tehtävää ei ole vielä avattu. Varmista, että sinulla on riittävästi pisteitä edellisistä osista.",
   "failedToEstablishConnectionToServer": "Yhteyden muodostaminen TestMyCode-palvelimelle epäonnistui.",
   "failedToDownloadExercise": "Tehtävän lataaminen epäonnistui.",
   "feedbackTitle": "Tehtävä suoritettu, onneksi olkoon!",
