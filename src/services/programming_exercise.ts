@@ -88,10 +88,10 @@ const getExerciseZip = async (
   )
 }
 
-const getLatestSubmissionDetails = async (
+export const getOldSubmissions = async (
   exerciseId: number,
   configuration: Configuration,
-): Promise<SubmissionDetails> => {
+): Promise<Array<SubmissionDetails>> => {
   const { t, token } = configuration
   const url = `${baseURL}/exercises/${exerciseId}/users/current/submissions`
   const headers = getHeaders(token)
@@ -104,19 +104,10 @@ const getLatestSubmissionDetails = async (
       `${error.response.status}: ${t("failedToDownloadExercise")}`,
     )
   }
-  if (submissions.length <= 0) {
-    throw new Error(`9001: No submissions found`)
-  }
-  const latestSubmissionDetails: SubmissionDetails[] = submissions.map(
-    (submission) => ({
-      id: submission.id,
-      createdAtMillis: Date.parse(submission.created_at),
-    }),
-  )
-  const latest = latestSubmissionDetails.reduce((latest, current) => {
-    return current.createdAtMillis > latest.createdAtMillis ? current : latest
-  }, latestSubmissionDetails[0])
-  return latest
+  return submissions.map<SubmissionDetails>((submission) => ({
+    id: submission.id,
+    createdAtMillis: Date.parse(submission.created_at),
+  }))
 }
 
 const getLatestSubmissionZip = async (
@@ -257,7 +248,6 @@ export {
   getExerciseDetails,
   getExerciseZip,
   getLatestSubmissionZip,
-  getLatestSubmissionDetails,
   getModelSolutionZip,
   getSubmissionResults,
   postExerciseFeedback,

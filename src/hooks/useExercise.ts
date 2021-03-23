@@ -8,11 +8,10 @@ import {
 import {
   getExerciseDetails,
   getExerciseZip,
-  getLatestSubmissionDetails,
   getLatestSubmissionZip,
+  getOldSubmissions,
 } from "../services/programming_exercise"
 import { ExerciseDetails, FileEntry } from "../types"
-import { mergeArraysFromRight } from "../utils/arrays"
 
 export interface WebEditorExercise {
   details: ExerciseDetails | undefined
@@ -57,25 +56,27 @@ export default function useExercise(
           return
         }
 
-        const template = await extractExerciseArchive(
-          await getExercise(),
-          apiConfig,
-        )
-        const submissionDetails = await getSubmissionDetails(details.id)
-        const submission = await extractExerciseArchive(
-          await getSubmission(submissionDetails.id),
-          apiConfig,
-        )
-        setProjectFiles(
-          template.srcFiles.map<FileEntry>((templateFile) => {
-            const submittedFile = submission.srcFiles.find(
-              (y) => y.fullName === templateFile.fullName,
+        const template = await getExercise()
+        const submissionDetails = await getLatestSubmissionDetails(details.id)
+        if (submissionDetails) {
+          const submission = await getSubmission(submissionDetails.id)
+          if (submission) {
+            setProjectFiles(
+              template.srcFiles.map<FileEntry>((templateFile) => {
+                const submittedFile = submission.srcFiles.find(
+                  (y) => y.fullName === templateFile.fullName,
+                )
+                return submittedFile
+                  ? { ...templateFile, content: submittedFile.content }
+                  : templateFile
+              }),
             )
-            return submittedFile
-              ? { ...templateFile, content: submittedFile.content }
-              : templateFile
-          }),
-        )
+          } else {
+            setProjectFiles(template.srcFiles)
+          }
+        } else {
+          setProjectFiles(template.srcFiles)
+        }
         setTemplateIssues(template.problems ?? [])
         setTestCode(template.testSource)
       } catch (e) {
@@ -87,21 +88,39 @@ export default function useExercise(
       setReady(true)
     }
 
-    setReady(false)
     effect()
   }, [organization, course, exercise, token])
 
   const getDetails = () =>
     getExerciseDetails(organization, course, exercise, apiConfig)
 
-  const getExercise = () =>
-    getExerciseZip(organization, course, exercise, apiConfig)
+  const getExercise = async () => {
+    const zip = await getExerciseZip(organization, course, exercise, apiConfig)
+    const parsed = await extractExerciseArchive(zip, apiConfig)
+    return parsed
+  }
 
-  const getSubmissionDetails = (exerciseId: number) =>
-    getLatestSubmissionDetails(exerciseId, apiConfig)
+  const getLatestSubmissionDetails = async (exerciseId: number) => {
+    const submissions = await getOldSubmissions(exerciseId, apiConfig)
+    if (submissions.length <= 0) {
+      return undefined
+    }
+    const latest = submissions.reduce((latest, current) => {
+      return current.createdAtMillis > latest.createdAtMillis ? current : latest
+    }, submissions[0])
+    return latest
+  }
 
-  const getSubmission = (submissionId: number) =>
-    getLatestSubmissionZip(submissionId, apiConfig)
+  const getSubmission = async (submissionId: number) => {
+    try {
+      const zip = await getLatestSubmissionZip(submissionId, apiConfig)
+      const parsed = await extractExerciseArchive(zip, apiConfig)
+      return parsed
+    } catch (e) {
+      // Stop caring, show template
+      return undefined
+    }
+  }
 
   const getTestProgram = (code: string) => `
 __webeditor_module_source = ${createWebEditorModuleSource(code)}
