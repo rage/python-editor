@@ -236,7 +236,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   const setSelectedFileContent = (newContent: string) => {
-    setSelectedFile({ ...selectedFile, content: newContent })
+    selectedFile.content = newContent
     setFiles((prev: FileEntry[]) =>
       prev.map((file: FileEntry) =>
         file.shortName === selectedFile.shortName
