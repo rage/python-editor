@@ -67,11 +67,14 @@ export default function useExercise(
           apiConfig,
         )
         setProjectFiles(
-          mergeArraysFromRight(
-            template.srcFiles,
-            submission.srcFiles,
-            (a, b) => a.fullName === b.fullName,
-          ),
+          template.srcFiles.map<FileEntry>((templateFile) => {
+            const submittedFile = submission.srcFiles.find(
+              (y) => y.fullName === templateFile.fullName,
+            )
+            return submittedFile
+              ? { ...templateFile, content: submittedFile.content }
+              : templateFile
+          }),
         )
         setTemplateIssues(template.problems ?? [])
         setTestCode(template.testSource)
@@ -84,7 +87,6 @@ export default function useExercise(
       setReady(true)
     }
 
-    console.log("Effect triggered")
     setReady(false)
     effect()
   }, [organization, course, exercise, token])

@@ -8,21 +8,14 @@ import {
   Language,
   ExerciseDetails,
   FileEntry,
-  LocalStorageContent,
 } from "../types"
-import { ProgrammingExercise, defaultFile } from "./ProgrammingExercise"
+import { ProgrammingExercise } from "./ProgrammingExercise"
 import {
-  getExerciseDetails,
-  getExerciseZip,
   getSubmissionResults,
   postExerciseFeedback,
   postExerciseSubmission,
-  getLatestSubmissionZip,
-  getLatestSubmissionDetails,
 } from "../services/programming_exercise"
-import { extractExerciseArchive } from "../services/patch_exercise"
 import Notification from "./Notification"
-import JSZip from "jszip"
 import useExercise from "../hooks/useExercise"
 
 interface ProgrammingExerciseLoaderProps {
@@ -114,10 +107,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
   }
 
-  const resetExerciseToOriginalContent = async () => {
-    exerciseObject.reset()
-  }
-
   useEffect(() => {
     const exerciseDetails = exerciseObject.details
     if (
@@ -165,7 +154,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
         submitDisabled={exerciseObject.details?.expired || !signedIn}
-        resetExercise={resetExerciseToOriginalContent}
         editorHeight={height}
         outputHeight={outputHeight}
         solutionUrl={

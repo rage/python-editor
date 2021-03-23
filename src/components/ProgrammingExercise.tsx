@@ -23,7 +23,6 @@ import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { useWorker } from "../hooks/useWorker"
 import { parseTestCases } from "../services/test_parsing"
-import { createWebEditorModuleSource } from "../services/patch_exercise"
 import EditorOutput from "./EditorOutput"
 import TestOutput from "./TestOutput"
 import SubmissionOutput from "./SubmissionOutput"
@@ -49,7 +48,6 @@ type ProgrammingExerciseProps = {
     files: Array<FileEntry>,
   ) => Promise<TestResultObject>
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
-  resetExercise: () => Promise<void>
   debug?: boolean
   initialFiles: ReadonlyArray<FileEntry>
   exercise: WebEditorExercise
@@ -89,7 +87,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   initialFiles,
   submitDisabled,
   solutionUrl,
-  resetExercise,
   editorHeight,
   outputHeight,
 }) => {
@@ -145,7 +142,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   const handleReset = () => {
-    setEditorState(EditorState.Resetting)
+    exercise.reset()
+    setFiles(files.map((x) => ({ ...x, content: x.originalContent })))
+    setSelectedFile({ ...selectedFile, content: selectedFile.originalContent })
     setOutput([])
     setTestResults(undefined)
   }
@@ -237,13 +236,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   const setSelectedFileContent = (newContent: string) => {
-    if (editorState !== EditorState.Resetting) {
-      selectedFile.content = newContent
-      localStorage.setItem(
-        selectedFile.fullName,
-        JSON.stringify({ createdAtMillis: Date.now(), content: newContent }),
-      )
-    }
+    setSelectedFile({ ...selectedFile, content: newContent })
     setFiles((prev: FileEntry[]) =>
       prev.map((file: FileEntry) =>
         file.shortName === selectedFile.shortName
@@ -287,12 +280,6 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           stopWorker()
         }, 10000)
         setExecutionTimeoutTimer(timeout)
-        break
-      case EditorState.Resetting:
-        resetExercise().then(() => {
-          setFiles([...initialFiles])
-          setEditorState(EditorState.Idle)
-        })
         break
       case EditorState.Idle:
       case EditorState.RunAborted:
