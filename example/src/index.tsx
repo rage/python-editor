@@ -50,7 +50,13 @@ const App = () => {
     setFetch(true)
   }
   const handleUnload = (event) => {
-    setExerciseToLoad({ username: "", organization: "", course: "", exercise: "", token: "" })
+    setExerciseToLoad({
+      username: "",
+      organization: "",
+      course: "",
+      exercise: "",
+      token: "",
+    })
     event.preventDefault()
     setFetch(false)
   }

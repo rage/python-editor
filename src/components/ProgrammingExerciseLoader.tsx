@@ -23,6 +23,7 @@ import {
 import { extractExerciseArchive } from "../services/patch_exercise"
 import Notification from "./Notification"
 import JSZip from "jszip"
+import useExercise from "../hooks/useExercise"
 
 interface ProgrammingExerciseLoaderProps {
   onExerciseDetailsChange?: (exerciseDetails?: ExerciseDetails) => void
@@ -55,130 +56,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
 }) => {
   const time = useTime(10000)
   const [t, i18n] = useTranslation()
-  const [ready, setReady] = useState(false)
-  const [problems, setProblems] = useState<string[] | undefined>(undefined)
-  const [srcFiles, setSrcFiles] = useState([defaultFile])
-  const [testSource, setTestSource] = useState<string | undefined>()
   const [signedIn, setSignedIn] = useState(false)
-  const [exerciseDetails, setExerciseDetails] = useState<
-    ExerciseDetails | undefined
-  >()
   const apiConfig = { t, token }
-
-  const loadExercises = async (hasToken: boolean) => {
-    const wrapError = (message: string) => [
-      {
-        ...defaultFile,
-        content: `# ${message}`,
-      },
-    ]
-
-    let detailsResult: ExerciseDetails
-    try {
-      detailsResult = await getExerciseDetails(
-        organization,
-        course,
-        exercise,
-        apiConfig,
-      )
-    } catch (e) {
-      setExerciseDetails(undefined)
-      setSrcFiles(wrapError(e.message))
-      return
-    }
-    setExerciseDetails(detailsResult)
-
-    if (!detailsResult.unlocked) {
-      setSrcFiles(wrapError(t("exerciseNotYetUnlocked")))
-      return
-    }
-
-    let downloadResult: JSZip
-    try {
-      downloadResult = await getExerciseZip(
-        organization,
-        course,
-        exercise,
-        apiConfig,
-      )
-    } catch (e) {
-      setSrcFiles(wrapError(e.message))
-      return
-    }
-
-    const template = await extractExerciseArchive(downloadResult, apiConfig)
-    setProblems(template.problems)
-    setTestSource(template.testSource)
-
-    if (!hasToken) {
-      setSrcFiles(template.srcFiles)
-      return
-    }
-
-    const tryToSetContentFromLocalStorage = () => {
-      template.srcFiles.forEach((file: FileEntry) => {
-        const localStorageFile = localStorage.getItem(file.fullName)
-        if (localStorageFile) {
-          const localStorageData: LocalStorageContent = JSON.parse(
-            localStorageFile,
-          )
-          file.content = localStorageData.content
-        }
-      })
-    }
-
-    try {
-      const submissionDetails = await getLatestSubmissionDetails(
-        detailsResult.id,
-        apiConfig,
-      )
-      const useLocalStorage = template.srcFiles.some((file) => {
-        const localStorageFile = localStorage.getItem(file.fullName)
-        if (localStorageFile) {
-          const localStorageData: LocalStorageContent = JSON.parse(
-            localStorageFile,
-          )
-          if (
-            localStorageData.createdAtMillis > submissionDetails.createdAtMillis
-          ) {
-            return true
-          }
-        }
-      })
-      if (useLocalStorage) {
-        tryToSetContentFromLocalStorage()
-        setSrcFiles(template.srcFiles)
-        return
-      }
-      const submissionResult = await getLatestSubmissionZip(
-        submissionDetails.id,
-        apiConfig,
-      )
-
-      const submission = await extractExerciseArchive(
-        submissionResult,
-        apiConfig,
-      )
-      if (submission.srcFiles.length > 0) {
-        submission.srcFiles.forEach((file: FileEntry) => {
-          const templateFile = template.srcFiles.find(
-            (f) => f.fullName === file.fullName,
-          )
-          if (templateFile) {
-            file.originalContent = templateFile.originalContent
-          }
-        })
-        setSrcFiles(submission.srcFiles)
-        return
-      }
-
-      tryToSetContentFromLocalStorage()
-      setSrcFiles(template.srcFiles)
-    } catch (e) {
-      tryToSetContentFromLocalStorage()
-      setSrcFiles(template.srcFiles)
-    }
-  }
+  const exerciseObject = useExercise(organization, course, exercise, token)
 
   const submitAndWaitResult = async (files: Array<FileEntry>) => {
     const wrapError = (message: string): TestResultObject => ({
@@ -192,13 +72,13 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         },
       ],
     })
-    if (!exerciseDetails) {
+    if (!exerciseObject.details) {
       return wrapError("418: Exercise details missing")
     }
 
     try {
       const postResult = await postExerciseSubmission(
-        exerciseDetails.id,
+        exerciseObject.details.id,
         files,
         apiConfig,
       )
@@ -207,15 +87,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
           postResult,
           apiConfig,
         )
-        getExerciseDetails(
-          organization,
-          course,
-          exercise,
-          apiConfig,
-        ).then((result) => setExerciseDetails(result))
+        exerciseObject.updateDetails()
         return submissionResult
       } catch (e) {
-        setExerciseDetails(undefined)
         return wrapError(e.message)
       }
     } catch (e) {
@@ -224,12 +98,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }
 
   const submitToPaste = async (files: FileEntry[]): Promise<string> => {
-    if (!exerciseDetails) {
+    if (!exerciseObject.details) {
       return ""
     }
     try {
       const submitResult = await postExerciseSubmission(
-        exerciseDetails.id,
+        exerciseObject.details.id,
         files,
         apiConfig,
         { paste: true },
@@ -241,39 +115,33 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   }
 
   const resetExerciseToOriginalContent = async () => {
-    srcFiles.forEach((file: FileEntry) => {
-      file.content = file.originalContent
-      localStorage.removeItem(file.fullName)
-    })
+    exerciseObject.reset()
   }
 
   useEffect(() => {
+    const exerciseDetails = exerciseObject.details
     if (
       exerciseDetails &&
       exerciseDetails.deadline &&
       !exerciseDetails.expired &&
       time >= DateTime.fromISO(exerciseDetails.deadline)
     ) {
-      getExerciseDetails(organization, course, exercise, apiConfig)
-        .then((result) => setExerciseDetails(result))
-        .catch()
+      exerciseObject.updateDetails()
     }
-  }, [time])
+  }, [exerciseObject, time])
 
   useEffect(() => {
-    onExerciseDetailsChange?.(exerciseDetails)
-  }, [exerciseDetails])
+    onExerciseDetailsChange?.(exerciseObject.details)
+  }, [exerciseObject])
 
   useEffect(() => {
     i18n.changeLanguage(language)
   }, [language])
 
   useEffect(() => {
-    setReady(false)
     const hasToken = token !== "" && token !== null
     setSignedIn(hasToken)
-    loadExercises(hasToken).finally(() => setReady(true))
-  }, [token, organization, course, exercise])
+  }, [token])
 
   return (
     <div>
@@ -282,31 +150,29 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
           {t("signInToSubmitExercise")}
         </Notification>
       )}
-      {exerciseDetails?.expired && (
+      {exerciseObject.details?.expired && (
         <Notification style="warning">{t("deadlineExpired")}</Notification>
       )}
       <ProgrammingExercise
         debug={debug}
-        initialFiles={srcFiles}
-        problems={problems}
+        exercise={exerciseObject}
+        initialFiles={exerciseObject.projectFiles}
         submitFeedback={(testResults, feedback) => {
           if (testResults.feedbackAnswerUrl && feedback.length > 0) {
             postExerciseFeedback(testResults, feedback, apiConfig)
           }
         }}
-        testSource={testSource}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
-        submitDisabled={exerciseDetails?.expired || !signedIn}
+        submitDisabled={exerciseObject.details?.expired || !signedIn}
         resetExercise={resetExerciseToOriginalContent}
         editorHeight={height}
         outputHeight={outputHeight}
         solutionUrl={
-          exerciseDetails?.completed || exerciseDetails?.expired
-            ? `https://tmc.mooc.fi/exercises/${exerciseDetails.id}/solution`
+          exerciseObject.details?.completed || exerciseObject.details?.expired
+            ? `https://tmc.mooc.fi/exercises/${exerciseObject.details.id}/solution`
             : undefined
         }
-        ready={ready}
       />
     </div>
   )

@@ -12,6 +12,7 @@ import {
 } from "../types"
 import { EDITOR_NAME, EDITOR_VERSION } from "../constants"
 
+// const baseURL = "http://localhost:3000/api/v8"
 const baseURL = "https://tmc.mooc.fi/api/v8"
 
 const getHeaders = (token: string, additional?: any) => ({

@@ -38,6 +38,7 @@ import { faEye } from "@fortawesome/free-regular-svg-icons"
 import SubmittingOutput from "./SubmittingOutput"
 import useStyles from "../hooks/useStyles"
 import AlertDialog from "./AlertDialog"
+import { WebEditorExercise } from "../hooks/useExercise"
 
 type ProgrammingExerciseProps = {
   submitFeedback: (
@@ -50,13 +51,11 @@ type ProgrammingExerciseProps = {
   submitToPaste: (files: Array<FileEntry>) => Promise<string>
   resetExercise: () => Promise<void>
   debug?: boolean
-  initialFiles: Array<FileEntry>
-  problems?: string[]
+  initialFiles: ReadonlyArray<FileEntry>
+  exercise: WebEditorExercise
   submitDisabled: boolean
-  testSource?: string
   editorHeight?: string
   outputHeight?: string
-  ready?: boolean
   solutionUrl?: string
 }
 
@@ -86,15 +85,13 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitProgrammingExercise,
   submitToPaste,
   debug,
+  exercise,
   initialFiles,
-  problems,
-  testSource,
   submitDisabled,
   solutionUrl,
   resetExercise,
   editorHeight,
   outputHeight,
-  ready = true,
 }) => {
   const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
@@ -131,12 +128,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   function handleTests(code?: string) {
     if (workerAvailable) {
-      const testCode = `
-__webeditor_module_source = ${createWebEditorModuleSource(
-        code ?? selectedFile.content,
-      )}
-${testSource}
-`
+      const testCode = exercise.getTestProgram(code ?? selectedFile.content)
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
@@ -229,11 +221,17 @@ ${testSource}
     }
   }
 
-  const changeFile = (shortName: string, fileList: Array<object>) => {
+  const changeFile = (
+    shortName: string,
+    fileList: ReadonlyArray<FileEntry>,
+  ) => {
     setSelectedFile(getFileByShortName(shortName, fileList))
   }
 
-  const getFileByShortName = (name: string, fileSet: Array<any>) => {
+  const getFileByShortName = (
+    name: string,
+    fileSet: ReadonlyArray<FileEntry>,
+  ) => {
     let firstMatch = fileSet.filter(({ shortName }) => shortName === name)[0]
     return firstMatch
   }
@@ -256,7 +254,7 @@ ${testSource}
   }
 
   useEffect(() => {
-    setFiles(initialFiles)
+    setFiles([...initialFiles])
     changeFile(initialFiles[0].shortName, initialFiles)
   }, [initialFiles])
 
@@ -292,7 +290,7 @@ ${testSource}
         break
       case EditorState.Resetting:
         resetExercise().then(() => {
-          setFiles(initialFiles)
+          setFiles([...initialFiles])
           setEditorState(EditorState.Idle)
         })
         break
@@ -370,7 +368,7 @@ ${testSource}
         return (
           <Problems
             onClose={closeOutput}
-            problems={problems ?? []}
+            problems={exercise.templateIssues}
             outputHeight={outputHeight}
           />
         )
@@ -460,7 +458,7 @@ ${testSource}
         </>
       )}
 
-      {!ready && (
+      {!exercise.ready && (
         <OverlayCenterWrapper>
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
@@ -498,7 +496,7 @@ ${testSource}
         )}
         <StyledButton
           onClick={() => handleTests()}
-          disabled={!(!!testSource && pyEditorButtonsDisabled)}
+          disabled={!pyEditorButtonsDisabled}
           className={classes.testButton}
           data-cy="test-btn"
         >
@@ -514,7 +512,7 @@ ${testSource}
             {t("modelSolution")}
           </StyledButton>
         )}
-        {problems && problems.length > 0 && (
+        {exercise.templateIssues.length > 0 && (
           <StyledButton
             onClick={() => {
               setEditorState(EditorState.ShowProblems)
@@ -526,7 +524,7 @@ ${testSource}
           >
             <FontAwesomeIcon icon={faExclamationCircle} />
             <span className={classes.whiteText}>{`${t("problemsTitle")} (${
-              problems.length
+              exercise.templateIssues.length
             })`}</span>
           </StyledButton>
         )}
@@ -592,6 +590,16 @@ ProgrammingExercise.defaultProps = {
   submitProgrammingExercise: () =>
     Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
+  exercise: {
+    details: undefined,
+    projectFiles: [],
+    ready: true,
+    reset: () => console.log("Called for exercise reset."),
+    templateIssues: [],
+    updateDetails: async () =>
+      console.log("Called for exercise details update."),
+    getTestProgram: () => 'print("Default test called.")',
+  },
   initialFiles: [
     {
       fullName: "main.py",
