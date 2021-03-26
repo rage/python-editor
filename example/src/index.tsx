@@ -36,7 +36,11 @@ const App = () => {
   const [language, setLanguage] = useState("en")
   const [height, setHeight] = useState("400px")
   const [outputHeight, setOutputHeight] = useState("250px")
-  const [fetch, setFetch] = useLocalStorage("fetch", false)
+  const [fetch, setFetch] = useLocalStorage(
+    "fetch",
+    false,
+    (object): object is boolean => typeof object === "boolean",
+  )
   const [details, setDetails] = useState<{}>()
   const handleLoad = (event) => {
     event.preventDefault()
