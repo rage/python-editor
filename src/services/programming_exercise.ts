@@ -110,7 +110,7 @@ export const getOldSubmissions = async (
   }))
 }
 
-const getLatestSubmissionZip = async (
+export const getSubmissionZip = async (
   submissionId: number,
   configuration: Configuration,
 ): Promise<JSZip> => {
@@ -247,7 +247,6 @@ const postExerciseFeedback = async (
 export {
   getExerciseDetails,
   getExerciseZip,
-  getLatestSubmissionZip,
   getModelSolutionZip,
   getSubmissionResults,
   postExerciseFeedback,

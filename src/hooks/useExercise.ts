@@ -8,8 +8,8 @@ import {
 import {
   getExerciseDetails,
   getExerciseZip,
-  getLatestSubmissionZip,
   getOldSubmissions,
+  getSubmissionZip,
 } from "../services/programming_exercise"
 import { ExerciseDetails, FileEntry } from "../types"
 
@@ -122,7 +122,7 @@ export default function useExercise(
 
   const getSubmission = async (submissionId: number) => {
     try {
-      const zip = await getLatestSubmissionZip(submissionId, apiConfig)
+      const zip = await getSubmissionZip(submissionId, apiConfig)
       const parsed = await extractExerciseArchive(zip, apiConfig)
       return parsed
     } catch (e) {
