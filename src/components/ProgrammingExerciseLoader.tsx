@@ -86,7 +86,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
     setExerciseDetails(detailsResult)
 
-    if (!detailsResult.unlocked) {
+    if (!detailsResult.downloadable) {
       setSrcFiles(wrapError(t("exerciseNotYetUnlocked")))
       return
     }

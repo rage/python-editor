@@ -62,6 +62,7 @@ const getExerciseDetails = async (
       awardedPoints: data.awarded_points?.length,
       completed: data.completed,
       deadline: data.deadline,
+      downloadable: data.downloadable,
       expired: data.expired,
       softDeadline: data.soft_deadline,
       unlocked: data.unlocked,
