@@ -21,9 +21,13 @@ export function useLocalStorage<T>(
   isCachedData: (object: unknown) => object is T,
 ): [T, (t: T) => void] {
   const [storedValue, setStoredValue] = useState(() => {
-    if (!key) return initialValue
+    if (!key) {
+      return initialValue
+    }
     const cached = window.localStorage.getItem(key)
-    if (!cached) return initialValue
+    if (!cached) {
+      return initialValue
+    }
 
     try {
       const parsed = JSON.parse(cached)

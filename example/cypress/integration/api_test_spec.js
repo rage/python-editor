@@ -10,7 +10,10 @@ describe("API Endpoint tests #1", () => {
   const inputToken = "49a491a3fc7"
 
   beforeEach(() => {
-    window.localStorage.setItem("organization", JSON.stringify(inputOrganization))
+    window.localStorage.setItem(
+      "organization",
+      JSON.stringify(inputOrganization),
+    )
     window.localStorage.setItem("course", JSON.stringify(inputCourse))
     window.localStorage.setItem("exercise", JSON.stringify(inputExercise))
     window.localStorage.setItem("token", JSON.stringify(inputToken))
@@ -135,10 +138,13 @@ describe("API Endpoint tests #2", () => {
   const inputToken = "49a491a3fc7"
 
   beforeEach(() => {
-    window.localStorage.setItem("organization", inputOrganization)
-    window.localStorage.setItem("course", inputCourse)
-    window.localStorage.setItem("exercise", inputExercise)
-    window.localStorage.setItem("token", inputToken)
+    window.localStorage.setItem(
+      "organization",
+      JSON.stringify(inputOrganization),
+    )
+    window.localStorage.setItem("course", JSON.stringify(inputCourse))
+    window.localStorage.setItem("exercise", JSON.stringify(inputExercise))
+    window.localStorage.setItem("token", JSON.stringify(inputToken))
 
     cy.intercept(
       "GET",

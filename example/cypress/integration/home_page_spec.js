@@ -9,7 +9,10 @@ describe("The Playground", () => {
   const inputToken = "3213hddf"
 
   beforeEach(() => {
-    window.localStorage.setItem("organization", JSON.stringify(inputOrganization))
+    window.localStorage.setItem(
+      "organization",
+      JSON.stringify(inputOrganization),
+    )
     window.localStorage.setItem("course", JSON.stringify(inputCourse))
     window.localStorage.setItem("exercise", JSON.stringify(inputExercise))
     window.localStorage.setItem("token", JSON.stringify(inputToken))

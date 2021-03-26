@@ -183,7 +183,7 @@ interface ExerciseSubmissionOptions {
 
 const postExerciseSubmission = async (
   exerciseId: number,
-  files: Array<FileEntry>,
+  files: ReadonlyArray<FileEntry>,
   configuration: Configuration,
   submissionOptions?: ExerciseSubmissionOptions,
 ): Promise<SubmissionResponse> => {

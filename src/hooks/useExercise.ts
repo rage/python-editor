@@ -11,7 +11,7 @@ import {
   getOldSubmissions,
   getSubmissionZip,
 } from "../services/programming_exercise"
-import { ExerciseDetails, FileEntry } from "../types"
+import { ExerciseDetails, FileEntry, SubmissionDetails } from "../types"
 
 export interface WebEditorExercise {
   details: ExerciseDetails | undefined
@@ -19,6 +19,7 @@ export interface WebEditorExercise {
   projectFiles: ReadonlyArray<FileEntry>
   ready: boolean
   reset(): void
+  submissionDetails?: SubmissionDetails
   templateIssues: ReadonlyArray<string>
   updateDetails(): Promise<void>
 }
@@ -34,6 +35,10 @@ export default function useExercise(
   const [projectFiles, setProjectFiles] = useState<ReadonlyArray<FileEntry>>([
     defaultFile,
   ])
+  const [
+    submissionDetails,
+    setSubmissionDetails,
+  ] = useState<SubmissionDetails>()
   const [templateIssues, setTemplateIssues] = useState<ReadonlyArray<string>>(
     [],
   )
@@ -43,7 +48,6 @@ export default function useExercise(
 
   useEffect(() => {
     const effect = async () => {
-      setReady(false)
       try {
         const details = await getDetails()
         setDetails(details)
@@ -64,9 +68,11 @@ export default function useExercise(
           return
         }
 
-        const submissionDetails = await getLatestSubmissionDetails(details.id)
-        if (submissionDetails) {
-          const submission = await getSubmission(submissionDetails.id)
+        const latestSubmissionDetails = await getLatestSubmissionDetails(
+          details.id,
+        )
+        if (latestSubmissionDetails) {
+          const submission = await getSubmission(latestSubmissionDetails.id)
           if (submission) {
             setProjectFiles(
               template.srcFiles.map<FileEntry>((templateFile) => {
@@ -84,19 +90,23 @@ export default function useExercise(
         } else {
           setProjectFiles(template.srcFiles)
         }
+        setSubmissionDetails(latestSubmissionDetails)
         setTemplateIssues(template.problems ?? [])
         setTestCode(template.testSource)
       } catch (e) {
         setDetails(undefined)
         setProjectFiles([{ ...defaultFile, content: `# ${e.message}` }])
+        setSubmissionDetails(undefined)
         setTemplateIssues([])
         setTestCode(undefined)
       }
-      setReady(true)
     }
 
     if (organization && course && exercise) {
-      effect()
+      setReady(false)
+      effect().then(() => setReady(true))
+    } else {
+      setReady(true)
     }
   }, [organization, course, exercise, token])
 
@@ -156,6 +166,7 @@ ${testCode}
     projectFiles,
     ready,
     reset,
+    submissionDetails,
     updateDetails,
   }
 }

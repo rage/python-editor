@@ -52,8 +52,12 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   const [signedIn, setSignedIn] = useState(false)
   const apiConfig = { t, token }
   const exerciseObject = useExercise(organization, course, exercise, token)
+  const cacheKey =
+    username && organization && course && exercise
+      ? `${username}:${organization}-${course}-${exercise}`
+      : undefined
 
-  const submitAndWaitResult = async (files: Array<FileEntry>) => {
+  const submitAndWaitResult = async (files: ReadonlyArray<FileEntry>) => {
     const wrapError = (message: string): TestResultObject => ({
       points: [],
       testCases: [
@@ -90,7 +94,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     }
   }
 
-  const submitToPaste = async (files: FileEntry[]): Promise<string> => {
+  const submitToPaste = async (
+    files: ReadonlyArray<FileEntry>,
+  ): Promise<string> => {
     if (!exerciseObject.details) {
       return ""
     }
@@ -143,9 +149,9 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         <Notification style="warning">{t("deadlineExpired")}</Notification>
       )}
       <ProgrammingExercise
+        cacheKey={cacheKey}
         debug={debug}
         exercise={exerciseObject}
-        initialFiles={exerciseObject.projectFiles}
         submitFeedback={(testResults, feedback) => {
           if (testResults.feedbackAnswerUrl && feedback.length > 0) {
             postExerciseFeedback(testResults, feedback, apiConfig)

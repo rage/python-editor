@@ -38,18 +38,19 @@ import SubmittingOutput from "./SubmittingOutput"
 import useStyles from "../hooks/useStyles"
 import AlertDialog from "./AlertDialog"
 import { WebEditorExercise } from "../hooks/useExercise"
+import useCachedFileEntries from "../hooks/useCachedFileEntries"
 
-type ProgrammingExerciseProps = {
+export interface ProgrammingExerciseProps {
   submitFeedback: (
     testResults: TestResultObject,
     feedback: Array<FeedBackAnswer>,
   ) => void
   submitProgrammingExercise: (
-    files: Array<FileEntry>,
+    files: ReadonlyArray<FileEntry>,
   ) => Promise<TestResultObject>
-  submitToPaste: (files: Array<FileEntry>) => Promise<string>
+  submitToPaste: (files: ReadonlyArray<FileEntry>) => Promise<string>
+  cacheKey?: string
   debug?: boolean
-  initialFiles: ReadonlyArray<FileEntry>
   exercise: WebEditorExercise
   submitDisabled: boolean
   editorHeight?: string
@@ -82,9 +83,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   submitFeedback,
   submitProgrammingExercise,
   submitToPaste,
+  cacheKey,
   debug,
   exercise,
-  initialFiles,
   submitDisabled,
   solutionUrl,
   editorHeight,
@@ -94,8 +95,11 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
   const [workerAvailable, setWorkerAvailable] = useState(true)
-  const [files, setFiles] = useState([defaultFile])
-  const [selectedFile, setSelectedFile] = useState(defaultFile)
+  const [files, setFiles, updateFile] = useCachedFileEntries(cacheKey, {
+    timestamp: -1,
+    value: [defaultFile],
+  })
+  const [activeFile, setActiveFile] = useState(0)
   const [openNotification, setOpenNotification] = useState(false)
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
     NodeJS.Timeout | undefined
@@ -114,7 +118,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       worker.postMessage({
         type: "run",
         msg: {
-          code: code ?? selectedFile.content,
+          code: code ?? files[activeFile].content,
           debug,
         },
       })
@@ -125,7 +129,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   function handleTests(code?: string) {
     if (workerAvailable) {
-      const testCode = exercise.getTestProgram(code ?? selectedFile.content)
+      const testCode = exercise.getTestProgram(
+        code ?? files[activeFile].content,
+      )
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
@@ -143,8 +149,11 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   const handleReset = () => {
     exercise.reset()
-    setFiles(files.map((x) => ({ ...x, content: x.originalContent })))
-    setSelectedFile({ ...selectedFile, content: selectedFile.originalContent })
+    setFiles({
+      timestamp: Date.now(),
+      value: files.map((x) => ({ ...x, content: x.originalContent })),
+    })
+    setActiveFile(0)
     setOutput([])
     setTestResults(undefined)
   }
@@ -220,36 +229,12 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     }
   }
 
-  const changeFile = (
-    shortName: string,
-    fileList: ReadonlyArray<FileEntry>,
-  ) => {
-    setSelectedFile(getFileByShortName(shortName, fileList))
-  }
-
-  const getFileByShortName = (
-    name: string,
-    fileSet: ReadonlyArray<FileEntry>,
-  ) => {
-    let firstMatch = fileSet.filter(({ shortName }) => shortName === name)[0]
-    return firstMatch
-  }
-
-  const setSelectedFileContent = (newContent: string) => {
-    selectedFile.content = newContent
-    setFiles((prev: FileEntry[]) =>
-      prev.map((file: FileEntry) =>
-        file.shortName === selectedFile.shortName
-          ? { ...file, content: selectedFile.content }
-          : file,
-      ),
-    )
-  }
-
   useEffect(() => {
-    setFiles([...initialFiles])
-    changeFile(initialFiles[0].shortName, initialFiles)
-  }, [initialFiles])
+    setFiles({
+      value: exercise.projectFiles,
+      timestamp: exercise.submissionDetails?.createdAtMillis ?? -1,
+    })
+  }, [exercise])
 
   useEffect(() => {
     debug && console.log(EditorState[editorState])
@@ -316,6 +301,10 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       return
     }
     setOpenNotification(false)
+  }
+
+  const handleFileChange = (e: any) => {
+    setActiveFile(files.findIndex((x) => x.shortName === e.target.value) ?? 0)
   }
 
   const mapStateToOutput = () => {
@@ -428,8 +417,8 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
           <Select
             labelId="label"
             native
-            value={selectedFile.shortName}
-            onChange={(e: any) => changeFile(e.target.value, files)}
+            value={files[activeFile].shortName}
+            onChange={handleFileChange}
             data-cy="select-file"
           >
             {
@@ -452,8 +441,10 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       )}
 
       <PyEditor
-        editorValue={selectedFile.content}
-        setEditorValue={(value) => setSelectedFileContent(value)}
+        editorValue={files[activeFile].content}
+        setEditorValue={(value) =>
+          updateFile({ ...files[activeFile], content: value })
+        }
         editorHeight={editorHeight}
         setIsEditorReady={(isReady) =>
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
@@ -579,7 +570,26 @@ ProgrammingExercise.defaultProps = {
   submitToPaste: () => Promise.resolve("default paste called"),
   exercise: {
     details: undefined,
-    projectFiles: [],
+    projectFiles: [
+      {
+        fullName: "main.py",
+        shortName: "main.py",
+        originalContent: defaultSrcContent,
+        content: defaultSrcContent,
+      },
+      {
+        fullName: "utils.py",
+        shortName: "utils.py",
+        originalContent: defaultUtilsContent,
+        content: defaultUtilsContent,
+      },
+      {
+        fullName: "test.py",
+        shortName: "test.py",
+        originalContent: defaultTestContent,
+        content: defaultTestContent,
+      },
+    ],
     ready: true,
     reset: () => console.log("Called for exercise reset."),
     templateIssues: [],
@@ -587,26 +597,6 @@ ProgrammingExercise.defaultProps = {
       console.log("Called for exercise details update."),
     getTestProgram: () => 'print("Default test called.")',
   },
-  initialFiles: [
-    {
-      fullName: "main.py",
-      shortName: "main.py",
-      originalContent: defaultSrcContent,
-      content: defaultSrcContent,
-    },
-    {
-      fullName: "utils.py",
-      shortName: "utils.py",
-      originalContent: defaultUtilsContent,
-      content: defaultUtilsContent,
-    },
-    {
-      fullName: "test.py",
-      shortName: "test.py",
-      originalContent: defaultTestContent,
-      content: defaultTestContent,
-    },
-  ],
 }
 
-export { ProgrammingExercise, ProgrammingExerciseProps, defaultFile }
+export { ProgrammingExercise, defaultFile }
