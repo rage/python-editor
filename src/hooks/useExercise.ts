@@ -57,6 +57,13 @@ export default function useExercise(
         }
 
         const template = await getExercise()
+        if (!token) {
+          setProjectFiles(template.srcFiles)
+          setTemplateIssues(template.problems ?? [])
+          setTestCode(template.testSource)
+          return
+        }
+
         const submissionDetails = await getLatestSubmissionDetails(details.id)
         if (submissionDetails) {
           const submission = await getSubmission(submissionDetails.id)
@@ -88,7 +95,9 @@ export default function useExercise(
       setReady(true)
     }
 
-    effect()
+    if (organization && course && exercise) {
+      effect()
+    }
   }, [organization, course, exercise, token])
 
   const getDetails = () =>
