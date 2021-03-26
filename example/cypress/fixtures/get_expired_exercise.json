@@ -15,6 +15,7 @@
   "soft_deadline": null,
   "expired": true,
   "disabled": false,
+  "downloadable": true,
   "unlocked": true,
   "completed": false,
   "model_solution_token_used_on_this_exercise": false,
