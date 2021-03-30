@@ -26,11 +26,17 @@ const App = () => {
       organization="organization-slug"
       course="course-name"
       exercise="exercise-name"
+      username="username"
       token="user-token"
     />
   )
 }
 ```
+
+Required properties:
+
+- `organization`, `course` and `exercise` Define which TMC exercise will be loaded.
+- `username` and `token` are used to identify the current user.
 
 Optional properties:
 
