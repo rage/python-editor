@@ -33,6 +33,7 @@ export interface ExerciseDetails {
   awardedPoints?: number
   completed: boolean
   deadline?: string
+  downloadable?: boolean
   expired: boolean
   softDeadline?: string
   unlocked?: boolean

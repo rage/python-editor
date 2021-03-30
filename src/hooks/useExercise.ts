@@ -51,7 +51,7 @@ export default function useExercise(
       try {
         const details = await getDetails()
         setDetails(details)
-        if (!details.unlocked) {
+        if (!details.downloadable) {
           setProjectFiles([
             { ...emptyFile, content: `# ${t("exerciseNotYetUnlocked")}` },
           ])
