@@ -6,6 +6,7 @@ describe("State integrity tests", () => {
   const inputCourse = "python-test"
   const inputExercise = "osa01-01_hymio"
   const inputToken = "49a491a3fc7"
+  const inputUsername = "test"
   const program = '# A simple program\nprint("hello from", "python")\n'
 
   beforeEach(() => {
@@ -15,6 +16,7 @@ describe("State integrity tests", () => {
     )
     window.localStorage.setItem("course", JSON.stringify(inputCourse))
     window.localStorage.setItem("exercise", JSON.stringify(inputExercise))
+    window.localStorage.setItem("username", JSON.stringify(inputUsername))
     window.localStorage.setItem("token", JSON.stringify(inputToken))
 
     cy.intercept(

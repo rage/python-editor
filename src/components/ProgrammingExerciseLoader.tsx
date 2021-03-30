@@ -1,5 +1,5 @@
 import { DateTime } from "luxon"
-import React, { useState, useEffect } from "react"
+import React, { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useTime } from "../hooks/customHooks"
@@ -24,7 +24,7 @@ interface ProgrammingExerciseLoaderProps {
   course: string
   exercise: string
   token: string
-  username?: string
+  username: string
   height?: string
   outputHeight?: string
   debug?: boolean
@@ -49,11 +49,19 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
 }) => {
   const time = useTime(10000)
   const [t, i18n] = useTranslation()
-  const [signedIn, setSignedIn] = useState(false)
+  const exerciseObject = useExercise(
+    organization,
+    course,
+    exercise,
+    username ? token : "",
+  )
+
   const apiConfig = { t, token }
-  const exerciseObject = useExercise(organization, course, exercise, token)
+  const signedIn = username && token
+  const exerciseDefined = organization && course && exercise
+
   const cacheKey =
-    username && organization && course && exercise
+    signedIn && exerciseDefined
       ? `${username}:${organization}-${course}-${exercise}`
       : undefined
 
@@ -132,11 +140,6 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   useEffect(() => {
     i18n.changeLanguage(language)
   }, [language])
-
-  useEffect(() => {
-    const hasToken = token !== "" && token !== null
-    setSignedIn(hasToken)
-  }, [token])
 
   return (
     <div>

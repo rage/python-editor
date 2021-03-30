@@ -2,7 +2,8 @@ import packageJson from "../../package.json"
 
 import workerJsSource from "./workerJsSource"
 
-const EDITOR_NAME = "moocfi_python_editor"
-const EDITOR_VERSION = packageJson.version
+export * from "./defaultFiles"
+export { workerJsSource }
 
-export { EDITOR_NAME, EDITOR_VERSION, workerJsSource }
+export const EDITOR_NAME = "moocfi_python_editor"
+export const EDITOR_VERSION = packageJson.version

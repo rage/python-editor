@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { defaultFile } from "../components/ProgrammingExercise"
+import { emptyFile } from "../constants"
 import {
   createWebEditorModuleSource,
   extractExerciseArchive,
@@ -33,7 +33,7 @@ export default function useExercise(
   const [ready, setReady] = useState(false)
   const [details, setDetails] = useState<ExerciseDetails>()
   const [projectFiles, setProjectFiles] = useState<ReadonlyArray<FileEntry>>([
-    defaultFile,
+    emptyFile,
   ])
   const [
     submissionDetails,
@@ -53,7 +53,7 @@ export default function useExercise(
         setDetails(details)
         if (!details.unlocked) {
           setProjectFiles([
-            { ...defaultFile, content: `# ${t("exerciseNotYetUnlocked")}` },
+            { ...emptyFile, content: `# ${t("exerciseNotYetUnlocked")}` },
           ])
           setTemplateIssues([])
           setTestCode(undefined)
@@ -95,7 +95,7 @@ export default function useExercise(
         setTestCode(template.testSource)
       } catch (e) {
         setDetails(undefined)
-        setProjectFiles([{ ...defaultFile, content: `# ${e.message}` }])
+        setProjectFiles([{ ...emptyFile, content: `# ${e.message}` }])
         setSubmissionDetails(undefined)
         setTemplateIssues([])
         setTestCode(undefined)

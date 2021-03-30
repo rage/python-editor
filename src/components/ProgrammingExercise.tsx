@@ -39,6 +39,7 @@ import useStyles from "../hooks/useStyles"
 import AlertDialog from "./AlertDialog"
 import { WebEditorExercise } from "../hooks/useExercise"
 import useCachedFileEntries from "../hooks/useCachedFileEntries"
+import { emptyFile, exampleFiles } from "../constants"
 
 export interface ProgrammingExerciseProps {
   submitFeedback: (
@@ -72,13 +73,6 @@ const StyledButton = styled((props) => (
   margin: 0.5em;
 `
 
-const defaultFile: FileEntry = {
-  fullName: "",
-  shortName: "",
-  originalContent: "",
-  content: "",
-}
-
 const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = ({
   submitFeedback,
   submitProgrammingExercise,
@@ -97,7 +91,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [workerAvailable, setWorkerAvailable] = useState(true)
   const [files, setFiles, updateFile] = useCachedFileEntries(cacheKey, {
     timestamp: -1,
-    value: [defaultFile],
+    value: [emptyFile],
   })
   const [activeFile, setActiveFile] = useState(0)
   const [openNotification, setOpenNotification] = useState(false)
@@ -516,7 +510,12 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         {mapStateToOutput()}
       </AnimatedOutputBox>
 
-      {debug && <div>{EditorState[editorState]}</div>}
+      {debug && (
+        <div>
+          <div>EditorState: {EditorState[editorState]}</div>
+          <div>Cache key: {cacheKey || "undefined"}</div>
+        </div>
+      )}
 
       <Snackbar
         open={openNotification}
@@ -530,66 +529,13 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   )
 }
 
-const defaultSrcContent = `# No ProgrammingExercise has been loaded.
-# This is the default file main.py
-
-from .utils import greeting, getLocality
-
-def greetWorld():
-  print(greeting(getLocality()))
-
-def foo():
-  print("foo!")
-`
-
-const defaultTestContent = `# No ProgrammingExercise has been loaded.
-# This is the default file test.py
-
-from .main import greetWorld
-
-greetWorld()
-`
-
-const defaultUtilsContent = `# No ProgrammingExercise has been loaded.
-# This is the default file utils.py
-
-# Mutually recursive imports are disallowed.
-# Try uncommenting the line below!
-#from .main import foo
-
-def greeting(recipient):
-  return "Hello " + recipient + "!"
-
-def getLocality():
-  return "world"
-`
-
 ProgrammingExercise.defaultProps = {
   submitProgrammingExercise: () =>
     Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
   exercise: {
     details: undefined,
-    projectFiles: [
-      {
-        fullName: "main.py",
-        shortName: "main.py",
-        originalContent: defaultSrcContent,
-        content: defaultSrcContent,
-      },
-      {
-        fullName: "utils.py",
-        shortName: "utils.py",
-        originalContent: defaultUtilsContent,
-        content: defaultUtilsContent,
-      },
-      {
-        fullName: "test.py",
-        shortName: "test.py",
-        originalContent: defaultTestContent,
-        content: defaultTestContent,
-      },
-    ],
+    projectFiles: exampleFiles,
     ready: true,
     reset: () => console.log("Called for exercise reset."),
     templateIssues: [],
@@ -599,4 +545,4 @@ ProgrammingExercise.defaultProps = {
   },
 }
 
-export { ProgrammingExercise, defaultFile }
+export { ProgrammingExercise }
