@@ -20,24 +20,27 @@ export function useLocalStorage<T>(
   initialValue: T,
   isCachedData: (object: unknown) => object is T,
 ): [T, (t: T) => void] {
-  const [storedValue, setStoredValue] = useState(() => {
-    if (!key) {
-      return initialValue
-    }
-    const cached = window.localStorage.getItem(key)
-    if (!cached) {
-      return initialValue
-    }
-
-    try {
-      const parsed = JSON.parse(cached)
-      if (isCachedData(parsed)) {
-        return parsed
+  const readValueFromLocalStorage = (): T | undefined => {
+    if (key) {
+      const cached = window.localStorage.getItem(key)
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached)
+          if (isCachedData(parsed)) {
+            return parsed
+          }
+        } catch (e) {}
       }
-    } catch (e) {}
+    }
+  }
 
-    return initialValue
+  const [storedValue, setStoredValue] = useState(() => {
+    return readValueFromLocalStorage() ?? initialValue
   })
+
+  useEffect(() => {
+    setStoredValue(readValueFromLocalStorage() ?? initialValue)
+  }, [key])
 
   const setValue = (value: T): void => {
     setStoredValue(value)

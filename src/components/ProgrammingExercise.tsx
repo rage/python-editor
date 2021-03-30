@@ -228,7 +228,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       value: exercise.projectFiles,
       timestamp: exercise.submissionDetails?.createdAtMillis ?? -1,
     })
-  }, [exercise])
+  }, [exercise.projectFiles])
 
   useEffect(() => {
     debug && console.log(EditorState[editorState])
