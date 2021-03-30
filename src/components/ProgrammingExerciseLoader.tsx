@@ -53,7 +53,8 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     organization,
     course,
     exercise,
-    username ? token : "",
+    username,
+    token,
   )
 
   const apiConfig = { t, token }
