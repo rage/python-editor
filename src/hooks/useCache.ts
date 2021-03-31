@@ -5,20 +5,17 @@ export interface CachedData<T> {
   value: T
 }
 
-export interface DispatchOptions {
-  override: boolean
-}
-
-export type Cache<T> = [
+export type CacheHook<T> = [
   value: T,
-  setValue: (newValue: CachedData<T>, options?: DispatchOptions) => void,
+  setValue: (newValue: CachedData<T>) => void,
+  setValueIfNewer: (newValue: CachedData<T>) => void,
 ]
 
 export default function useCache<T>(
   key: string | undefined,
   initialValue: CachedData<T>,
   isValidEntry: (object: unknown) => object is T,
-): Cache<T> {
+): CacheHook<T> {
   const isValidAndFreshData = (object: unknown): object is CachedData<T> => {
     if (!isValidEntry((object as CachedData<T>).value)) return false
     if (typeof (object as CachedData<T>).timestamp !== "number") return false
@@ -33,14 +30,15 @@ export default function useCache<T>(
     isValidAndFreshData,
   )
 
-  const setValue = (
-    newValue: CachedData<T>,
-    options?: { override: boolean },
-  ) => {
-    if (newValue.timestamp >= cachedValue.timestamp || options?.override) {
+  const setValue = (newValue: CachedData<T>) => {
+    setCachedValue(newValue)
+  }
+
+  const setValueIfNewer = (newValue: CachedData<T>) => {
+    if (newValue.timestamp >= cachedValue.timestamp) {
       setCachedValue(newValue)
     }
   }
 
-  return [cachedValue.value, setValue]
+  return [cachedValue.value, setValue, setValueIfNewer]
 }

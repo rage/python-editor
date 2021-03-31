@@ -1,28 +1,39 @@
 import { FileEntry } from "../types"
-import useCache, { CachedData, DispatchOptions } from "./useCache"
+import useCache, { CachedData } from "./useCache"
 
 type CachedFileEntries = CachedData<ReadonlyArray<FileEntry>>
 
 export type FileEntries = [
   files: ReadonlyArray<FileEntry>,
-  setValue: (newValue: CachedFileEntries, options?: DispatchOptions) => void,
-  updateFile: (file: FileEntry) => void,
+  setFiles: (newValue: ReadonlyArray<FileEntry>) => void,
+  setFilesIfNewer: (
+    newValue: ReadonlyArray<FileEntry>,
+    timestamp: number,
+  ) => void,
 ]
 
 export default function useCachedFileEntries(
   cacheKey: string | undefined,
   initialFiles: CachedFileEntries,
 ): FileEntries {
-  const [files, setFiles] = useCache(cacheKey, initialFiles, areFileEntries)
+  const [value, setValue, setValueIfNewer] = useCache(
+    cacheKey,
+    initialFiles,
+    areFileEntries,
+  )
 
-  const updateFile = (newFile: FileEntry) => {
-    const value = files.map((file) =>
-      file.fullName === newFile.fullName ? newFile : file,
-    )
-    setFiles({ value, timestamp: Date.now() }, { override: true })
+  const setFiles = (files: ReadonlyArray<FileEntry>) => {
+    setValue({ value: files, timestamp: Date.now() })
   }
 
-  return [files, setFiles, updateFile]
+  const setFilesIfNewer = (
+    newFiles: ReadonlyArray<FileEntry>,
+    timestamp: number,
+  ) => {
+    setValueIfNewer({ value: newFiles, timestamp })
+  }
+
+  return [value, setFiles, setFilesIfNewer]
 }
 
 const areFileEntries = (data: unknown): data is Array<FileEntry> => {

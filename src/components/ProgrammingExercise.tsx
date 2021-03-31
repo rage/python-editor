@@ -89,7 +89,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
   const [workerAvailable, setWorkerAvailable] = useState(true)
-  const [files, setFiles, updateFile] = useCachedFileEntries(cacheKey, {
+  const [files, setFiles, setFilesIfNewer] = useCachedFileEntries(cacheKey, {
     timestamp: -1,
     value: [emptyFile],
   })
@@ -143,10 +143,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   const handleReset = () => {
     exercise.reset()
-    setFiles({
-      timestamp: Date.now(),
-      value: files.map((x) => ({ ...x, content: x.originalContent })),
-    })
+    setFiles(files.map((x) => ({ ...x, content: x.originalContent })))
     setActiveFile(0)
     setOutput([])
     setTestResults(undefined)
@@ -224,10 +221,11 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   useEffect(() => {
-    setFiles({
-      value: exercise.projectFiles,
-      timestamp: exercise.submissionDetails?.createdAtMillis ?? -1,
-    })
+    // If exercise includes previous submission data, compare against cache.
+    setFilesIfNewer(
+      exercise.projectFiles,
+      exercise.submissionDetails?.createdAtMillis ?? -1,
+    )
   }, [exercise.projectFiles])
 
   useEffect(() => {
@@ -436,9 +434,12 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
       <PyEditor
         editorValue={files[activeFile].content}
-        setEditorValue={(value) =>
-          updateFile({ ...files[activeFile], content: value })
-        }
+        setEditorValue={(value) => {
+          const newFiles = files.map((x, i) =>
+            i !== activeFile ? x : { ...x, content: value },
+          )
+          setFiles(newFiles)
+        }}
         editorHeight={editorHeight}
         setIsEditorReady={(isReady) =>
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
