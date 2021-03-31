@@ -28,7 +28,7 @@ export default function useExercise(
   organization: string,
   course: string,
   exercise: string,
-  username: string,
+  userId: string,
   token: string,
 ): WebEditorExercise {
   const [ready, setReady] = useState(false)
@@ -62,7 +62,7 @@ export default function useExercise(
         }
 
         const template = await getExercise()
-        if (!username || !token) {
+        if (!userId || !token) {
           setProjectFiles(template.srcFiles)
           setTemplateIssues(template.problems ?? [])
           setTestCode(template.testSource)
@@ -109,7 +109,7 @@ export default function useExercise(
     } else {
       setReady(true)
     }
-  }, [organization, course, exercise, username, token])
+  }, [organization, course, exercise, userId, token])
 
   const getDetails = () =>
     getExerciseDetails(organization, course, exercise, apiConfig)

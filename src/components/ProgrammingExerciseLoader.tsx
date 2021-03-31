@@ -24,7 +24,7 @@ interface ProgrammingExerciseLoaderProps {
   course: string
   exercise: string
   token: string
-  username: string
+  userId: string
   height?: string
   outputHeight?: string
   debug?: boolean
@@ -41,7 +41,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
   course,
   exercise,
   token,
-  username,
+  userId,
   height,
   outputHeight,
   debug,
@@ -53,17 +53,17 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     organization,
     course,
     exercise,
-    username,
+    userId,
     token,
   )
 
   const apiConfig = { t, token }
-  const signedIn = username && token
+  const signedIn = userId && token
   const exerciseDefined = organization && course && exercise
 
   const cacheKey =
     signedIn && exerciseDefined
-      ? `${username}:${organization}-${course}-${exercise}`
+      ? `${userId}:${organization}-${course}-${exercise}`
       : undefined
 
   const submitAndWaitResult = async (files: ReadonlyArray<FileEntry>) => {

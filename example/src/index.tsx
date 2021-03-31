@@ -25,9 +25,9 @@ const App = () => {
   const course = useInput("course", "")
   const exercise = useInput("exercise", "")
   const token = useInput("token", "")
-  const username = useInput("username", "")
+  const userId = useInput("user-id", "")
   const [exerciseToLoad, setExerciseToLoad] = useState({
-    username: username.value,
+    userId: userId.value,
     organization: organization.value,
     course: course.value,
     exercise: exercise.value,
@@ -45,7 +45,7 @@ const App = () => {
   const handleLoad = (event) => {
     event.preventDefault()
     setExerciseToLoad({
-      username: username.value,
+      userId: userId.value,
       organization: organization.value,
       course: course.value,
       exercise: exercise.value,
@@ -55,7 +55,7 @@ const App = () => {
   }
   const handleUnload = (event) => {
     setExerciseToLoad({
-      username: "",
+      userId: "",
       organization: "",
       course: "",
       exercise: "",
@@ -102,9 +102,9 @@ const App = () => {
         <Grid container direction="row" justify="space-between">
           <Grid item xs={6}>
             <StyledTextField
-              {...username}
-              label="Username"
-              data-cy="username-input"
+              {...userId}
+              label="User id"
+              data-cy="user-id-input"
             />
           </Grid>
           <Grid item xs={6}>
@@ -150,7 +150,7 @@ const App = () => {
           onExerciseDetailsChange={(d) => {
             setDetails(d)
           }}
-          username={exerciseToLoad.username}
+          userId={exerciseToLoad.userId}
           organization={exerciseToLoad.organization}
           course={exerciseToLoad.course}
           debug={true}
