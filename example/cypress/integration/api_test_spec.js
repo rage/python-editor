@@ -7,13 +7,18 @@ describe("API Endpoint tests #1", () => {
   const inputOrganization = "test"
   const inputCourse = "python-test"
   const inputExercise = "osa01-01_hymio"
+  const inputUserId = "test"
   const inputToken = "49a491a3fc7"
 
   beforeEach(() => {
-    window.localStorage.setItem("organization", inputOrganization)
-    window.localStorage.setItem("course", inputCourse)
-    window.localStorage.setItem("exercise", inputExercise)
-    window.localStorage.setItem("token", inputToken)
+    window.localStorage.setItem(
+      "organization",
+      JSON.stringify(inputOrganization),
+    )
+    window.localStorage.setItem("course", JSON.stringify(inputCourse))
+    window.localStorage.setItem("exercise", JSON.stringify(inputExercise))
+    window.localStorage.setItem("user-id", JSON.stringify(inputUserId))
+    window.localStorage.setItem("token", JSON.stringify(inputToken))
 
     cy.intercept(
       "GET",
@@ -132,13 +137,18 @@ describe("API Endpoint tests #2", () => {
   const inputOrganization = "test"
   const inputCourse = "python-test"
   const inputExercise = "osa01-01_hymio"
+  const inputUserId = "test"
   const inputToken = "49a491a3fc7"
 
   beforeEach(() => {
-    window.localStorage.setItem("organization", inputOrganization)
-    window.localStorage.setItem("course", inputCourse)
-    window.localStorage.setItem("exercise", inputExercise)
-    window.localStorage.setItem("token", inputToken)
+    window.localStorage.setItem(
+      "organization",
+      JSON.stringify(inputOrganization),
+    )
+    window.localStorage.setItem("course", JSON.stringify(inputCourse))
+    window.localStorage.setItem("exercise", JSON.stringify(inputExercise))
+    window.localStorage.setItem("user-id", JSON.stringify(inputUserId))
+    window.localStorage.setItem("token", JSON.stringify(inputToken))
 
     cy.intercept(
       "GET",

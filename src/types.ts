@@ -12,7 +12,6 @@ export enum EditorState {
   Testing = 1 << 10,
   WaitingInput = 1 << 11,
   WorkerInitializing = 1 << 12,
-  Resetting = 1 << 13,
   WorkerActive = ExecutingCode | Testing | WaitingInput | WorkerInitializing,
 }
 

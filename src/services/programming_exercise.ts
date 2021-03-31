@@ -12,6 +12,7 @@ import {
 } from "../types"
 import { EDITOR_NAME, EDITOR_VERSION } from "../constants"
 
+// const baseURL = "http://localhost:3000/api/v8"
 const baseURL = "https://tmc.mooc.fi/api/v8"
 
 const getHeaders = (token: string, additional?: any) => ({
@@ -88,10 +89,10 @@ const getExerciseZip = async (
   )
 }
 
-const getLatestSubmissionDetails = async (
+export const getOldSubmissions = async (
   exerciseId: number,
   configuration: Configuration,
-): Promise<SubmissionDetails> => {
+): Promise<Array<SubmissionDetails>> => {
   const { t, token } = configuration
   const url = `${baseURL}/exercises/${exerciseId}/users/current/submissions`
   const headers = getHeaders(token)
@@ -104,22 +105,13 @@ const getLatestSubmissionDetails = async (
       `${error.response.status}: ${t("failedToDownloadExercise")}`,
     )
   }
-  if (submissions.length <= 0) {
-    throw new Error(`9001: No submissions found`)
-  }
-  const latestSubmissionDetails: SubmissionDetails[] = submissions.map(
-    (submission) => ({
-      id: submission.id,
-      createdAtMillis: Date.parse(submission.created_at),
-    }),
-  )
-  const latest = latestSubmissionDetails.reduce((latest, current) => {
-    return current.createdAtMillis > latest.createdAtMillis ? current : latest
-  }, latestSubmissionDetails[0])
-  return latest
+  return submissions.map<SubmissionDetails>((submission) => ({
+    id: submission.id,
+    createdAtMillis: Date.parse(submission.created_at),
+  }))
 }
 
-const getLatestSubmissionZip = async (
+export const getSubmissionZip = async (
   submissionId: number,
   configuration: Configuration,
 ): Promise<JSZip> => {
@@ -192,7 +184,7 @@ interface ExerciseSubmissionOptions {
 
 const postExerciseSubmission = async (
   exerciseId: number,
-  files: Array<FileEntry>,
+  files: ReadonlyArray<FileEntry>,
   configuration: Configuration,
   submissionOptions?: ExerciseSubmissionOptions,
 ): Promise<SubmissionResponse> => {
@@ -256,8 +248,6 @@ const postExerciseFeedback = async (
 export {
   getExerciseDetails,
   getExerciseZip,
-  getLatestSubmissionZip,
-  getLatestSubmissionDetails,
   getModelSolutionZip,
   getSubmissionResults,
   postExerciseFeedback,

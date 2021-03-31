@@ -12,7 +12,7 @@ import ScrollBox, { ScrollBoxRef } from "./ScrollBox"
 interface EditorOutputProps {
   onClose: () => void
   outputHeight?: string
-  problems: string[]
+  problems: ReadonlyArray<string>
 }
 
 const EditorOutput: React.FunctionComponent<EditorOutputProps> = ({

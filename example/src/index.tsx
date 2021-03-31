@@ -25,63 +25,51 @@ const App = () => {
   const course = useInput("course", "")
   const exercise = useInput("exercise", "")
   const token = useInput("token", "")
+  const userId = useInput("user-id", "")
   const [exerciseToLoad, setExerciseToLoad] = useState({
+    userId: userId.value,
     organization: organization.value,
     course: course.value,
     exercise: exercise.value,
+    token: token.value,
   })
   const [language, setLanguage] = useState("en")
   const [height, setHeight] = useState("400px")
   const [outputHeight, setOutputHeight] = useState("250px")
-  const [fetch, setFetch] = useLocalStorage("fetch", false)
+  const [fetch, setFetch] = useLocalStorage(
+    "fetch",
+    false,
+    (object): object is boolean => typeof object === "boolean",
+  )
   const [details, setDetails] = useState<{}>()
   const handleLoad = (event) => {
     event.preventDefault()
     setExerciseToLoad({
+      userId: userId.value,
       organization: organization.value,
       course: course.value,
       exercise: exercise.value,
+      token: token.value,
     })
     setFetch(true)
   }
   const handleUnload = (event) => {
-    setExerciseToLoad({ organization: "", course: "", exercise: "" })
+    setExerciseToLoad({
+      userId: "",
+      organization: "",
+      course: "",
+      exercise: "",
+      token: "",
+    })
     event.preventDefault()
     setFetch(false)
-  }
-  const loadExercise = (organization, course, exercise, token) => {
-    console.log(
-      `Got organization=${organization}, course=${course}, exercise=${exercise}, token=${token}`,
-    )
-    return (
-      <ProgrammingExerciseLoader
-        onExerciseDetailsChange={(d) => {
-          setDetails(d)
-        }}
-        organization={organization}
-        course={course}
-        debug={true}
-        exercise={exercise}
-        token={token}
-        height={height}
-        outputHeight={outputHeight}
-        language={language}
-      />
-    )
   }
 
   return (
     <>
       <div>
         <Grid container direction="row" justify="space-between">
-          <StyledTextField
-            {...token}
-            label="User token"
-            data-cy="token-input"
-          />
-        </Grid>
-        <Grid container direction="row" justify="space-between">
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <StyledTextField
               value={language}
               onChange={(event) => setLanguage(event.target.value)}
@@ -96,20 +84,34 @@ const App = () => {
               ))}
             </StyledTextField>
           </Grid>
-        </Grid>
-        <Grid container direction="row" justify="space-between">
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <StyledTextField
               value={height}
               onChange={(event) => setHeight(event.target.value)}
               label="Height"
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <StyledTextField
               value={outputHeight}
               onChange={(event) => setOutputHeight(event.target.value)}
               label="Output Height"
+            />
+          </Grid>
+        </Grid>
+        <Grid container direction="row" justify="space-between">
+          <Grid item xs={6}>
+            <StyledTextField
+              {...userId}
+              label="User id"
+              data-cy="user-id-input"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <StyledTextField
+              {...token}
+              label="User token"
+              data-cy="token-input"
             />
           </Grid>
         </Grid>
@@ -144,14 +146,20 @@ const App = () => {
         </StyledButton>
       </div>
       {fetch && (
-        <>
-          {loadExercise(
-            exerciseToLoad.organization,
-            exerciseToLoad.course,
-            exerciseToLoad.exercise,
-            token.value,
-          )}
-        </>
+        <ProgrammingExerciseLoader
+          onExerciseDetailsChange={(d) => {
+            setDetails(d)
+          }}
+          userId={exerciseToLoad.userId}
+          organization={exerciseToLoad.organization}
+          course={exerciseToLoad.course}
+          debug={true}
+          exercise={exerciseToLoad.exercise}
+          token={exerciseToLoad.token}
+          height={height}
+          outputHeight={outputHeight}
+          language={language}
+        />
       )}
       {!fetch && (
         <I18nextProvider i18n={i18n}>

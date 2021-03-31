@@ -23,7 +23,6 @@ import styled from "styled-components"
 import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
 import { useWorker } from "../hooks/useWorker"
 import { parseTestCases } from "../services/test_parsing"
-import { createWebEditorModuleSource } from "../services/patch_exercise"
 import EditorOutput from "./EditorOutput"
 import TestOutput from "./TestOutput"
 import SubmissionOutput from "./SubmissionOutput"
@@ -38,25 +37,25 @@ import { faEye } from "@fortawesome/free-regular-svg-icons"
 import SubmittingOutput from "./SubmittingOutput"
 import useStyles from "../hooks/useStyles"
 import AlertDialog from "./AlertDialog"
+import { WebEditorExercise } from "../hooks/useExercise"
+import useCachedFileEntries from "../hooks/useCachedFileEntries"
+import { emptyFile, exampleFiles } from "../constants"
 
-type ProgrammingExerciseProps = {
+export interface ProgrammingExerciseProps {
   submitFeedback: (
     testResults: TestResultObject,
     feedback: Array<FeedBackAnswer>,
   ) => void
   submitProgrammingExercise: (
-    files: Array<FileEntry>,
+    files: ReadonlyArray<FileEntry>,
   ) => Promise<TestResultObject>
-  submitToPaste: (files: Array<FileEntry>) => Promise<string>
-  resetExercise: () => Promise<void>
+  submitToPaste: (files: ReadonlyArray<FileEntry>) => Promise<string>
+  cacheKey?: string
   debug?: boolean
-  initialFiles: Array<FileEntry>
-  problems?: string[]
+  exercise: WebEditorExercise
   submitDisabled: boolean
-  testSource?: string
   editorHeight?: string
   outputHeight?: string
-  ready?: boolean
   solutionUrl?: string
 }
 
@@ -74,34 +73,27 @@ const StyledButton = styled((props) => (
   margin: 0.5em;
 `
 
-const defaultFile: FileEntry = {
-  fullName: "",
-  shortName: "",
-  originalContent: "",
-  content: "",
-}
-
 const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = ({
   submitFeedback,
   submitProgrammingExercise,
   submitToPaste,
+  cacheKey,
   debug,
-  initialFiles,
-  problems,
-  testSource,
+  exercise,
   submitDisabled,
   solutionUrl,
-  resetExercise,
   editorHeight,
   outputHeight,
-  ready = true,
 }) => {
   const [t] = useTranslation()
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
   const [workerAvailable, setWorkerAvailable] = useState(true)
-  const [files, setFiles] = useState([defaultFile])
-  const [selectedFile, setSelectedFile] = useState(defaultFile)
+  const [files, setFiles, setFilesIfNewer] = useCachedFileEntries(cacheKey, {
+    timestamp: -1,
+    value: [emptyFile],
+  })
+  const [activeFile, setActiveFile] = useState(0)
   const [openNotification, setOpenNotification] = useState(false)
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
     NodeJS.Timeout | undefined
@@ -120,7 +112,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       worker.postMessage({
         type: "run",
         msg: {
-          code: code ?? selectedFile.content,
+          code: code ?? files[activeFile].content,
           debug,
         },
       })
@@ -131,12 +123,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   function handleTests(code?: string) {
     if (workerAvailable) {
-      const testCode = `
-__webeditor_module_source = ${createWebEditorModuleSource(
-        code ?? selectedFile.content,
-      )}
-${testSource}
-`
+      const testCode = exercise.getTestProgram(
+        code ?? files[activeFile].content,
+      )
       setOutput([])
       setTestResults(undefined)
       setWorkerAvailable(false)
@@ -153,7 +142,9 @@ ${testSource}
   }
 
   const handleReset = () => {
-    setEditorState(EditorState.Resetting)
+    exercise.reset()
+    setFiles(files.map((x) => ({ ...x, content: x.originalContent })))
+    setActiveFile(0)
     setOutput([])
     setTestResults(undefined)
   }
@@ -229,36 +220,13 @@ ${testSource}
     }
   }
 
-  const changeFile = (shortName: string, fileList: Array<object>) => {
-    setSelectedFile(getFileByShortName(shortName, fileList))
-  }
-
-  const getFileByShortName = (name: string, fileSet: Array<any>) => {
-    let firstMatch = fileSet.filter(({ shortName }) => shortName === name)[0]
-    return firstMatch
-  }
-
-  const setSelectedFileContent = (newContent: string) => {
-    if (editorState !== EditorState.Resetting) {
-      selectedFile.content = newContent
-      localStorage.setItem(
-        selectedFile.fullName,
-        JSON.stringify({ createdAtMillis: Date.now(), content: newContent }),
-      )
-    }
-    setFiles((prev: FileEntry[]) =>
-      prev.map((file: FileEntry) =>
-        file.shortName === selectedFile.shortName
-          ? { ...file, content: selectedFile.content }
-          : file,
-      ),
-    )
-  }
-
   useEffect(() => {
-    setFiles(initialFiles)
-    changeFile(initialFiles[0].shortName, initialFiles)
-  }, [initialFiles])
+    // If exercise includes previous submission data, compare against cache.
+    setFilesIfNewer(
+      exercise.projectFiles,
+      exercise.submissionDetails?.createdAtMillis ?? -1,
+    )
+  }, [exercise.projectFiles])
 
   useEffect(() => {
     debug && console.log(EditorState[editorState])
@@ -289,12 +257,6 @@ ${testSource}
           stopWorker()
         }, 10000)
         setExecutionTimeoutTimer(timeout)
-        break
-      case EditorState.Resetting:
-        resetExercise().then(() => {
-          setFiles(initialFiles)
-          setEditorState(EditorState.Idle)
-        })
         break
       case EditorState.Idle:
       case EditorState.RunAborted:
@@ -331,6 +293,10 @@ ${testSource}
       return
     }
     setOpenNotification(false)
+  }
+
+  const handleFileChange = (e: any) => {
+    setActiveFile(files.findIndex((x) => x.shortName === e.target.value) ?? 0)
   }
 
   const mapStateToOutput = () => {
@@ -370,7 +336,7 @@ ${testSource}
         return (
           <Problems
             onClose={closeOutput}
-            problems={problems ?? []}
+            problems={exercise.templateIssues}
             outputHeight={outputHeight}
           />
         )
@@ -443,8 +409,8 @@ ${testSource}
           <Select
             labelId="label"
             native
-            value={selectedFile.shortName}
-            onChange={(e: any) => changeFile(e.target.value, files)}
+            value={files[activeFile].shortName}
+            onChange={handleFileChange}
             data-cy="select-file"
           >
             {
@@ -460,15 +426,20 @@ ${testSource}
         </>
       )}
 
-      {!ready && (
+      {!exercise.ready && (
         <OverlayCenterWrapper>
           <CircularProgress thickness={5} color="inherit" />
         </OverlayCenterWrapper>
       )}
 
       <PyEditor
-        editorValue={selectedFile.content}
-        setEditorValue={(value) => setSelectedFileContent(value)}
+        editorValue={files[activeFile].content}
+        setEditorValue={(value) => {
+          const newFiles = files.map((x, i) =>
+            i !== activeFile ? x : { ...x, content: value },
+          )
+          setFiles(newFiles)
+        }}
         editorHeight={editorHeight}
         setIsEditorReady={(isReady) =>
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
@@ -498,7 +469,7 @@ ${testSource}
         )}
         <StyledButton
           onClick={() => handleTests()}
-          disabled={!(!!testSource && pyEditorButtonsDisabled)}
+          disabled={!pyEditorButtonsDisabled}
           className={classes.testButton}
           data-cy="test-btn"
         >
@@ -514,7 +485,7 @@ ${testSource}
             {t("modelSolution")}
           </StyledButton>
         )}
-        {problems && problems.length > 0 && (
+        {exercise.templateIssues.length > 0 && (
           <StyledButton
             onClick={() => {
               setEditorState(EditorState.ShowProblems)
@@ -526,7 +497,7 @@ ${testSource}
           >
             <FontAwesomeIcon icon={faExclamationCircle} />
             <span className={classes.whiteText}>{`${t("problemsTitle")} (${
-              problems.length
+              exercise.templateIssues.length
             })`}</span>
           </StyledButton>
         )}
@@ -540,7 +511,12 @@ ${testSource}
         {mapStateToOutput()}
       </AnimatedOutputBox>
 
-      {debug && <div>{EditorState[editorState]}</div>}
+      {debug && (
+        <div>
+          <div>EditorState: {EditorState[editorState]}</div>
+          <div>Cache key: {cacheKey || "undefined"}</div>
+        </div>
+      )}
 
       <Snackbar
         open={openNotification}
@@ -554,64 +530,20 @@ ${testSource}
   )
 }
 
-const defaultSrcContent = `# No ProgrammingExercise has been loaded.
-# This is the default file main.py
-
-from .utils import greeting, getLocality
-
-def greetWorld():
-  print(greeting(getLocality()))
-
-def foo():
-  print("foo!")
-`
-
-const defaultTestContent = `# No ProgrammingExercise has been loaded.
-# This is the default file test.py
-
-from .main import greetWorld
-
-greetWorld()
-`
-
-const defaultUtilsContent = `# No ProgrammingExercise has been loaded.
-# This is the default file utils.py
-
-# Mutually recursive imports are disallowed.
-# Try uncommenting the line below!
-#from .main import foo
-
-def greeting(recipient):
-  return "Hello " + recipient + "!"
-
-def getLocality():
-  return "world"
-`
-
 ProgrammingExercise.defaultProps = {
   submitProgrammingExercise: () =>
     Promise.resolve({ points: [], testCases: [] }),
   submitToPaste: () => Promise.resolve("default paste called"),
-  initialFiles: [
-    {
-      fullName: "main.py",
-      shortName: "main.py",
-      originalContent: defaultSrcContent,
-      content: defaultSrcContent,
-    },
-    {
-      fullName: "utils.py",
-      shortName: "utils.py",
-      originalContent: defaultUtilsContent,
-      content: defaultUtilsContent,
-    },
-    {
-      fullName: "test.py",
-      shortName: "test.py",
-      originalContent: defaultTestContent,
-      content: defaultTestContent,
-    },
-  ],
+  exercise: {
+    details: undefined,
+    projectFiles: exampleFiles,
+    ready: true,
+    reset: () => console.log("Called for exercise reset."),
+    templateIssues: [],
+    updateDetails: async () =>
+      console.log("Called for exercise details update."),
+    getTestProgram: () => 'print("Default test called.")',
+  },
 }
 
-export { ProgrammingExercise, ProgrammingExerciseProps, defaultFile }
+export { ProgrammingExercise }
