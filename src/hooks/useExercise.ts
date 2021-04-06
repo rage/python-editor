@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { emptyFile } from "../constants"
 import {
@@ -50,7 +50,12 @@ export default function useExercise(
   useEffect(() => {
     const effect = async () => {
       try {
-        const details = await getDetails()
+        const details = await getExerciseDetails(
+          organization,
+          course,
+          exercise,
+          apiConfig,
+        )
         setDetails(details)
         if (!details.downloadable) {
           setProjectFiles([
@@ -111,9 +116,6 @@ export default function useExercise(
     }
   }, [organization, course, exercise, userId, token])
 
-  const getDetails = () =>
-    getExerciseDetails(organization, course, exercise, apiConfig)
-
   const getExercise = async () => {
     const zip = await getExerciseZip(organization, course, exercise, apiConfig)
     const parsed = await extractExerciseArchive(zip, apiConfig)
@@ -142,23 +144,33 @@ export default function useExercise(
     }
   }
 
-  const getTestProgram = (code: string) => `
+  const getTestProgram = useCallback(
+    (code: string) => `
 __webeditor_module_source = ${createWebEditorModuleSource(code)}
 ${testCode}
-`
+`,
+    [testCode],
+  )
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setProjectFiles((prev) =>
       prev.map((x) => ({ ...x, content: x.originalContent })),
     )
-  }
+  }, [])
 
-  const updateDetails = async () => {
+  const updateDetails = useCallback(async () => {
     try {
-      const details = await getDetails()
+      const details = await getExerciseDetails(
+        organization,
+        course,
+        exercise,
+        apiConfig,
+      )
       setDetails(details)
-    } catch (e) {}
-  }
+    } catch (e) {
+      // no op
+    }
+  }, [organization, course, exercise])
 
   return {
     details,

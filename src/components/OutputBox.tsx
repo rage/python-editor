@@ -78,9 +78,9 @@ const OutputHeaderText = styled(Typography)`
   color: black;
 `
 
-const OutputBody: React.FunctionComponent<{}> = (props) => (
-  <StyledOutputContent>{props.children}</StyledOutputContent>
-)
+const OutputBody: React.FunctionComponent<Record<string, unknown>> = (
+  props,
+) => <StyledOutputContent>{props.children}</StyledOutputContent>
 
 interface OutputHeaderProps {
   color: OutputColor

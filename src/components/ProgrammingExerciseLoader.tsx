@@ -1,5 +1,5 @@
 import { DateTime } from "luxon"
-import React, { useEffect } from "react"
+import React, { useCallback, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useTime } from "../hooks/customHooks"
@@ -66,42 +66,45 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
       ? `${userId}:${organization}-${course}-${exercise}`
       : undefined
 
-  const submitAndWaitResult = async (files: ReadonlyArray<FileEntry>) => {
-    const wrapError = (message: string): TestResultObject => ({
-      points: [],
-      testCases: [
-        {
-          id: "0",
-          testName: "Exercise submission",
-          passed: false,
-          feedback: `Error ${message}`,
-        },
-      ],
-    })
-    if (!exerciseObject.details) {
-      return wrapError("418: Exercise details missing")
-    }
+  const submitAndWaitResult = useCallback(
+    async (files: ReadonlyArray<FileEntry>) => {
+      const wrapError = (message: string): TestResultObject => ({
+        points: [],
+        testCases: [
+          {
+            id: "0",
+            testName: "Exercise submission",
+            passed: false,
+            feedback: `Error ${message}`,
+          },
+        ],
+      })
+      if (!exerciseObject.details) {
+        return wrapError("418: Exercise details missing")
+      }
 
-    try {
-      const postResult = await postExerciseSubmission(
-        exerciseObject.details.id,
-        files,
-        apiConfig,
-      )
       try {
-        const submissionResult = await getSubmissionResults(
-          postResult,
+        const postResult = await postExerciseSubmission(
+          exerciseObject.details.id,
+          files,
           apiConfig,
         )
-        exerciseObject.updateDetails()
-        return submissionResult
+        try {
+          const submissionResult = await getSubmissionResults(
+            postResult,
+            apiConfig,
+          )
+          exerciseObject.updateDetails()
+          return submissionResult
+        } catch (e) {
+          return wrapError(e.message)
+        }
       } catch (e) {
         return wrapError(e.message)
       }
-    } catch (e) {
-      return wrapError(e.message)
-    }
-  }
+    },
+    [exerciseObject.details],
+  )
 
   const submitToPaste = async (
     files: ReadonlyArray<FileEntry>,
@@ -136,7 +139,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
 
   useEffect(() => {
     onExerciseDetailsChange?.(exerciseObject.details)
-  }, [exerciseObject])
+  }, [exerciseObject.details, onExerciseDetailsChange])
 
   useEffect(() => {
     i18n.changeLanguage(language)

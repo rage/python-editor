@@ -73,6 +73,8 @@ const StyledButton = styled((props) => (
   margin: 0.5em;
 `
 
+const initialFiles = { value: [emptyFile], timestamp: -1 }
+
 const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = ({
   submitFeedback,
   submitProgrammingExercise,
@@ -89,10 +91,10 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   const [output, setOutput] = useState<OutputObject[]>([])
   const [testResults, setTestResults] = useState<TestResultObject | undefined>()
   const [workerAvailable, setWorkerAvailable] = useState(true)
-  const [files, setFiles, setFilesIfNewer] = useCachedFileEntries(cacheKey, {
-    timestamp: -1,
-    value: [emptyFile],
-  })
+  const [files, setFiles, setFilesIfNewer] = useCachedFileEntries(
+    cacheKey,
+    initialFiles,
+  )
   const [activeFile, setActiveFile] = useState(0)
   const [openNotification, setOpenNotification] = useState(false)
   const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
@@ -150,7 +152,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   worker.setMessageListener((e: any) => {
-    let { type, msg } = e.data
+    const { type, msg } = e.data
     switch (type) {
       case "print":
         setOutput(output.concat({ id: uuid(), type: "output", text: msg }))
@@ -222,11 +224,15 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   useEffect(() => {
     // If exercise includes previous submission data, compare against cache.
-    setFilesIfNewer(
-      exercise.projectFiles,
-      exercise.submissionDetails?.createdAtMillis ?? -1,
-    )
-  }, [exercise.projectFiles])
+    setFilesIfNewer({
+      value: exercise.projectFiles,
+      timestamp: exercise.submissionDetails?.createdAtMillis ?? -1,
+    })
+  }, [
+    exercise.projectFiles,
+    exercise.submissionDetails?.createdAtMillis,
+    setFilesIfNewer,
+  ])
 
   useEffect(() => {
     debug && console.log(EditorState[editorState])
@@ -244,7 +250,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         })
         break
       case EditorState.ExecutingCode:
-      case EditorState.Testing:
+      case EditorState.Testing: {
         const msg = t("infiniteLoopMessage")
         const timeout = setTimeout(() => {
           setOutput([
@@ -258,6 +264,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         }, 10000)
         setExecutionTimeoutTimer(timeout)
         break
+      }
       case EditorState.Idle:
       case EditorState.RunAborted:
       case EditorState.ShowTestResults:

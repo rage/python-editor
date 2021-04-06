@@ -176,7 +176,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
   const mapQuestions = () => {
     return formState.map((question) => {
       switch (question.kind) {
-        case "intrange":
+        case "intrange": {
           const marks = [{ value: question.min - 1, label: "-" }]
           for (let i = question.min; i <= question.max; i++) {
             marks.push({ value: i, label: i.toString() })
@@ -198,6 +198,7 @@ const FeedbackForm: React.FunctionComponent<FeedbackFormProps> = ({
               />
             </Question>
           )
+        }
         case "text":
           return (
             <Question key={question.id}>
