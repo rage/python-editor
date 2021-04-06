@@ -4,7 +4,9 @@ import { ProgrammingExercise } from "../../src/components/ProgrammingExercise"
 import { Button, TextField, MenuItem, Grid } from "@material-ui/core"
 import { StylesProvider } from "@material-ui/styles"
 import styled from "styled-components"
-import { useInput, useLocalStorage } from "../../src/hooks/customHooks"
+import { useInput } from "../../src/hooks/customHooks"
+import { useLocalStorage } from "../../src/hooks/useLocalStorage"
+import { isBoolean } from "../../src/utils/booleans"
 import { I18nextProvider } from "../../node_modules/react-i18next"
 import i18n from "../../src/i18n"
 
@@ -36,12 +38,8 @@ const App = () => {
   const [language, setLanguage] = useState("en")
   const [height, setHeight] = useState("400px")
   const [outputHeight, setOutputHeight] = useState("250px")
-  const [fetch, setFetch] = useLocalStorage(
-    "fetch",
-    false,
-    (object): object is boolean => typeof object === "boolean",
-  )
-  const [details, setDetails] = useState<{}>()
+  const [fetch, setFetch] = useLocalStorage("fetch", false, isBoolean)
+  const [details, setDetails] = useState<Record<string, unknown>>()
   const handleLoad = (event) => {
     event.preventDefault()
     setExerciseToLoad({

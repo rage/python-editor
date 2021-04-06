@@ -1,4 +1,5 @@
-import { useLocalStorage } from "./customHooks"
+import React, { useCallback, useEffect } from "react"
+import { useLocalStorage } from "./useLocalStorage"
 
 export interface CachedData<T> {
   timestamp: number
@@ -7,8 +8,8 @@ export interface CachedData<T> {
 
 export type CacheHook<T> = [
   value: T,
-  setValue: (newValue: CachedData<T>) => void,
-  setValueIfNewer: (newValue: CachedData<T>) => void,
+  setValue: React.Dispatch<React.SetStateAction<CachedData<T>>>,
+  setValueIfNewer: React.Dispatch<React.SetStateAction<CachedData<T>>>,
 ]
 
 export default function useCache<T>(
@@ -16,29 +17,35 @@ export default function useCache<T>(
   initialValue: CachedData<T>,
   isValidEntry: (object: unknown) => object is T,
 ): CacheHook<T> {
-  const isValidAndFreshData = (object: unknown): object is CachedData<T> => {
-    if (!isValidEntry((object as CachedData<T>).value)) return false
-    if (typeof (object as CachedData<T>).timestamp !== "number") return false
+  const isValidAndFreshData = useCallback(
+    (object: unknown): object is CachedData<T> => {
+      if (!isValidEntry((object as CachedData<T>).value)) return false
+      if (typeof (object as CachedData<T>).timestamp !== "number") return false
 
-    // Only use cached data if it is newer than provided timestamp.
-    return (object as CachedData<T>).timestamp > initialValue.timestamp
-  }
+      // Only use cached data if it is newer than provided timestamp.
+      return (object as CachedData<T>).timestamp > initialValue.timestamp
+    },
+    [initialValue.timestamp, isValidEntry],
+  )
 
-  const [cachedValue, setCachedValue] = useLocalStorage<CachedData<T>>(
+  const [cachedValue, setCachedValue] = useLocalStorage(
     key,
     initialValue,
     isValidAndFreshData,
   )
 
-  const setValue = (newValue: CachedData<T>) => {
-    setCachedValue(newValue)
-  }
+  const setValueIfNewer = useCallback(
+    (newValue: React.SetStateAction<CachedData<T>>) => {
+      setCachedValue((prev) => {
+        if (typeof newValue === "function") {
+          newValue = newValue(prev)
+        }
 
-  const setValueIfNewer = (newValue: CachedData<T>) => {
-    if (newValue.timestamp >= cachedValue.timestamp) {
-      setCachedValue(newValue)
-    }
-  }
+        return newValue.timestamp >= prev.timestamp ? newValue : prev
+      })
+    },
+    [setCachedValue],
+  )
 
-  return [cachedValue.value, setValue, setValueIfNewer]
+  return [cachedValue.value, setCachedValue, setValueIfNewer]
 }

@@ -1,39 +1,38 @@
+import React, { useCallback } from "react"
 import { FileEntry } from "../types"
 import useCache, { CachedData } from "./useCache"
 
-type CachedFileEntries = CachedData<ReadonlyArray<FileEntry>>
+type FileEntries = ReadonlyArray<FileEntry>
+type CachedFileEntries = CachedData<FileEntries>
 
-export type FileEntries = [
+export type CachedFileEntriesHook = [
   files: ReadonlyArray<FileEntry>,
-  setFiles: (newValue: ReadonlyArray<FileEntry>) => void,
-  setFilesIfNewer: (
-    newValue: ReadonlyArray<FileEntry>,
-    timestamp: number,
-  ) => void,
+  setFiles: React.Dispatch<React.SetStateAction<ReadonlyArray<FileEntry>>>,
+  setFilesIfNewer: React.Dispatch<React.SetStateAction<CachedFileEntries>>,
 ]
 
 export default function useCachedFileEntries(
   cacheKey: string | undefined,
   initialFiles: CachedFileEntries,
-): FileEntries {
+): CachedFileEntriesHook {
   const [value, setValue, setValueIfNewer] = useCache(
     cacheKey,
     initialFiles,
     areFileEntries,
   )
 
-  const setFiles = (files: ReadonlyArray<FileEntry>) => {
-    setValue({ value: files, timestamp: Date.now() })
-  }
+  const setFiles = useCallback(
+    (newFiles: React.SetStateAction<FileEntries>) => {
+      if (typeof newFiles === "function") {
+        newFiles = newFiles(value)
+      }
 
-  const setFilesIfNewer = (
-    newFiles: ReadonlyArray<FileEntry>,
-    timestamp: number,
-  ) => {
-    setValueIfNewer({ value: newFiles, timestamp })
-  }
+      setValue({ value: newFiles, timestamp: Date.now() })
+    },
+    [value, setValue],
+  )
 
-  return [value, setFiles, setFilesIfNewer]
+  return [value, setFiles, setValueIfNewer]
 }
 
 const areFileEntries = (data: unknown): data is Array<FileEntry> => {
@@ -46,6 +45,5 @@ const isFileEntry = (data: unknown): data is FileEntry => {
   if (typeof (data as FileEntry).fullName !== "string") return false
   if (typeof (data as FileEntry).originalContent !== "string") return false
   if (typeof (data as FileEntry).shortName !== "string") return false
-
   return true
 }
