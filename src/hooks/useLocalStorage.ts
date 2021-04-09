@@ -14,15 +14,20 @@ export function useLocalStorage<T>(
   }, [key, isCachedData, initialValue])
 
   const setValue = useCallback(
-    (value: React.SetStateAction<T>) => {
-      setStoredValue(value)
-      if (key) {
-        window.localStorage.setItem(key, JSON.stringify(value))
-      }
+    (newValue: React.SetStateAction<T>) => {
+      setStoredValue((prev) => {
+        // This will likely break if T is callable
+        if (newValue instanceof Function) {
+          newValue = newValue(prev)
+        }
+        if (key) {
+          window.localStorage.setItem(key, JSON.stringify(newValue))
+        }
+        return newValue
+      })
     },
     [key],
   )
-
   return [storedValue, setValue]
 }
 

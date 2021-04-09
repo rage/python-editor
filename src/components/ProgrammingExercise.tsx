@@ -441,12 +441,13 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
       <PyEditor
         editorValue={files[activeFile].content}
-        setEditorValue={(value) => {
-          const newFiles = files.map((x, i) =>
-            i !== activeFile ? x : { ...x, content: value },
+        setEditorValue={(value) =>
+          setFiles((prev) =>
+            prev.map((x, i) =>
+              i !== activeFile ? x : { ...x, content: value },
+            ),
           )
-          setFiles(newFiles)
-        }}
+        }
         editorHeight={editorHeight}
         setIsEditorReady={(isReady) =>
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
