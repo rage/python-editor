@@ -144,8 +144,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
   }
 
   const handleReset = () => {
-    exercise.reset()
-    setFiles(files.map((x) => ({ ...x, content: x.originalContent })))
+    setFiles(
+      exercise.projectFiles.map((x) => ({ ...x, content: x.originalContent })),
+    )
     setActiveFile(0)
     setOutput([])
     setTestResults(undefined)
@@ -442,8 +443,8 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
       <PyEditor
         editorValue={files[activeFile].content}
         setEditorValue={(value) =>
-          setFiles((prev) =>
-            prev.map((x, i) =>
+          setFiles(
+            files.map((x, i) =>
               i !== activeFile ? x : { ...x, content: value },
             ),
           )
@@ -523,6 +524,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         <div>
           <div>EditorState: {EditorState[editorState]}</div>
           <div>Cache key: {cacheKey || "undefined"}</div>
+          <div>Active file: {files[activeFile].fullName}</div>
         </div>
       )}
 
