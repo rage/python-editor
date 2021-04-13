@@ -43,6 +43,7 @@ const areFileEntries = (data: unknown): data is Array<FileEntry> => {
 const isFileEntry = (data: unknown): data is FileEntry => {
   if (typeof (data as FileEntry).content !== "string") return false
   if (typeof (data as FileEntry).fullName !== "string") return false
+  if ((data as FileEntry).fullName.length <= 0) return false
   if (typeof (data as FileEntry).originalContent !== "string") return false
   if (typeof (data as FileEntry).shortName !== "string") return false
   return true

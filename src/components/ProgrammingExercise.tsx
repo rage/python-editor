@@ -363,6 +363,15 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     }
   }
 
+  const handleEditorValueChange = (newContent: string) => {
+    if (!exercise.ready) return
+    setFiles((prev) =>
+      prev.map((x, i) =>
+        i !== activeFile ? x : { ...x, content: newContent },
+      ),
+    )
+  }
+
   const ieOrEdge =
     window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
   const isSafari =
@@ -442,13 +451,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
       <PyEditor
         editorValue={files[activeFile].content}
-        setEditorValue={(value) =>
-          setFiles(
-            files.map((x, i) =>
-              i !== activeFile ? x : { ...x, content: value },
-            ),
-          )
-        }
+        setEditorValue={handleEditorValueChange}
         editorHeight={editorHeight}
         setIsEditorReady={(isReady) =>
           setEditorState(isReady ? EditorState.Idle : EditorState.Initializing)
