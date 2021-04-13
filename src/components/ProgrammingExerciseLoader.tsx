@@ -145,6 +145,11 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
     i18n.changeLanguage(language)
   }, [language])
 
+  const submitDisabled =
+    exerciseObject.details?.expired ||
+    !exerciseObject.details?.downloadable ||
+    !signedIn
+
   return (
     <div>
       {!signedIn && (
@@ -166,7 +171,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         }}
         submitProgrammingExercise={submitAndWaitResult}
         submitToPaste={submitToPaste}
-        submitDisabled={exerciseObject.details?.expired || !signedIn}
+        submitDisabled={submitDisabled}
         editorHeight={height}
         outputHeight={outputHeight}
         solutionUrl={

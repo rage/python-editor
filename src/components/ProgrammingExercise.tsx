@@ -365,7 +365,8 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
 
   const handleEditorValueChange = (newContent: string) => {
     if (!exercise.ready) return
-    setFiles((prev) => prev.map((x, i) =>
+    setFiles((prev) =>
+      prev.map((x, i) =>
         i !== activeFile ? x : { ...x, content: newContent },
       ),
     )
