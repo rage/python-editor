@@ -22,7 +22,7 @@ const getHeaders = (token: string, additional?: any) => ({
   client_version: EDITOR_VERSION,
 })
 
-interface Configuration {
+export interface Configuration {
   t: TFunction
   token: string
 }

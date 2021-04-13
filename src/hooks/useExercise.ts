@@ -6,6 +6,7 @@ import {
   extractExerciseArchive,
 } from "../services/patch_exercise"
 import {
+  Configuration,
   getExerciseDetails,
   getExerciseZip,
   getOldSubmissions,
@@ -45,11 +46,11 @@ export default function useExercise(
   )
   const [testCode, setTestCode] = useState<string>()
   const [t] = useTranslation()
-  const apiConfig = { t, token }
 
   useEffect(() => {
     const effect = async () => {
       try {
+        const apiConfig = { token, t }
         const details = await getExerciseDetails(
           organization,
           course,
@@ -66,7 +67,12 @@ export default function useExercise(
           return
         }
 
-        const template = await getExercise()
+        const template = await getExercise(
+          organization,
+          course,
+          exercise,
+          apiConfig,
+        )
         if (!userId || !token) {
           setProjectFiles(template.srcFiles)
           setTemplateIssues(template.problems ?? [])
@@ -76,9 +82,13 @@ export default function useExercise(
 
         const latestSubmissionDetails = await getLatestSubmissionDetails(
           details.id,
+          apiConfig,
         )
         if (latestSubmissionDetails) {
-          const submission = await getSubmission(latestSubmissionDetails.id)
+          const submission = await getSubmission(
+            latestSubmissionDetails.id,
+            apiConfig,
+          )
           if (submission) {
             setProjectFiles(
               template.srcFiles.map<FileEntry>((templateFile) => {
@@ -114,35 +124,7 @@ export default function useExercise(
     } else {
       setReady(true)
     }
-  }, [organization, course, exercise, userId, token])
-
-  const getExercise = async () => {
-    const zip = await getExerciseZip(organization, course, exercise, apiConfig)
-    const parsed = await extractExerciseArchive(zip, apiConfig)
-    return parsed
-  }
-
-  const getLatestSubmissionDetails = async (exerciseId: number) => {
-    const submissions = await getOldSubmissions(exerciseId, apiConfig)
-    if (submissions.length <= 0) {
-      return undefined
-    }
-    const latest = submissions.reduce((latest, current) => {
-      return current.createdAtMillis > latest.createdAtMillis ? current : latest
-    }, submissions[0])
-    return latest
-  }
-
-  const getSubmission = async (submissionId: number) => {
-    try {
-      const zip = await getSubmissionZip(submissionId, apiConfig)
-      const parsed = await extractExerciseArchive(zip, apiConfig)
-      return parsed
-    } catch (e) {
-      // Stop caring, show template
-      return undefined
-    }
-  }
+  }, [organization, course, exercise, userId, token, t])
 
   const getTestProgram = useCallback(
     (code: string) => `
@@ -160,17 +142,15 @@ ${testCode}
 
   const updateDetails = useCallback(async () => {
     try {
-      const details = await getExerciseDetails(
-        organization,
-        course,
-        exercise,
-        apiConfig,
-      )
+      const details = await getExerciseDetails(organization, course, exercise, {
+        token,
+        t,
+      })
       setDetails(details)
     } catch (e) {
       // no op
     }
-  }, [organization, course, exercise])
+  }, [organization, course, exercise, token, t])
 
   return {
     details,
@@ -181,5 +161,44 @@ ${testCode}
     reset,
     submissionDetails,
     updateDetails,
+  }
+}
+
+const getExercise = async (
+  organization: string,
+  course: string,
+  exercise: string,
+  apiConfig: Configuration,
+) => {
+  const zip = await getExerciseZip(organization, course, exercise, apiConfig)
+  const parsed = await extractExerciseArchive(zip, apiConfig)
+  return parsed
+}
+
+const getLatestSubmissionDetails = async (
+  exerciseId: number,
+  apiConfig: Configuration,
+) => {
+  const submissions = await getOldSubmissions(exerciseId, apiConfig)
+  if (submissions.length <= 0) {
+    return undefined
+  }
+  const latest = submissions.reduce((latest, current) => {
+    return current.createdAtMillis > latest.createdAtMillis ? current : latest
+  }, submissions[0])
+  return latest
+}
+
+const getSubmission = async (
+  submissionId: number,
+  apiConfig: Configuration,
+) => {
+  try {
+    const zip = await getSubmissionZip(submissionId, apiConfig)
+    const parsed = await extractExerciseArchive(zip, apiConfig)
+    return parsed
+  } catch (e) {
+    // Stop caring, show template
+    return undefined
   }
 }
