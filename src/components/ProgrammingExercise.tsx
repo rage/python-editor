@@ -5,7 +5,6 @@ import {
   InputLabel,
   Select,
   Snackbar,
-  Grid,
   Button,
 } from "@material-ui/core"
 import PyEditor from "./PyEditor"
@@ -20,7 +19,7 @@ import {
 } from "../types"
 import FeedbackForm from "./FeedbackForm"
 import styled from "styled-components"
-import { OverlayBox, OverlayCenterWrapper } from "./Overlay"
+import { OverlayCenterWrapper } from "./Overlay"
 import { useWorker } from "../hooks/useWorker"
 import { parseTestCases } from "../services/test_parsing"
 import EditorOutput from "./EditorOutput"
@@ -40,6 +39,7 @@ import AlertDialog from "./AlertDialog"
 import { WebEditorExercise } from "../hooks/useExercise"
 import useCachedFileEntries from "../hooks/useCachedFileEntries"
 import { emptyFile, exampleFiles } from "../constants"
+import WithBrowserIncompatibilityOverlay from "./WithBrowserIncompatibilityOverlay"
 
 export interface ProgrammingExerciseProps {
   submitFeedback: (
@@ -58,14 +58,6 @@ export interface ProgrammingExerciseProps {
   outputHeight?: string
   solutionUrl?: string
 }
-
-const StyledOutput = styled(Grid)`
-  padding: 5px;
-  display: table-cell;
-  min-height: 100px;
-  overflow: auto;
-  white-space: pre-wrap;
-`
 
 const StyledButton = styled((props) => (
   <Button variant="contained" {...props} />
@@ -372,38 +364,11 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
     )
   }
 
-  const ieOrEdge =
-    window.StyleMedia && window.navigator.userAgent.indexOf("Edge") !== -1
-  const isSafari =
-    navigator.vendor &&
-    navigator.vendor.indexOf("Apple") > -1 &&
-    navigator.userAgent &&
-    navigator.userAgent.indexOf("CriOS") == -1 &&
-    navigator.userAgent.indexOf("FxiOS") == -1
-
   const pyEditorButtonsDisabled =
     (editorState & (EditorState.WorkerActive | EditorState.Submitting)) === 0
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "inherit",
-      }}
-    >
-      {(isSafari || ieOrEdge) && (
-        <OverlayBox>
-          <StyledOutput>
-            {t("browserNotSupported")}
-            <ul>
-              <li>Google Chrome</li>
-              <li>Mozilla Firefox</li>
-              <li>Microsoft Edge, version 79 or later</li>
-            </ul>
-          </StyledOutput>
-        </OverlayBox>
-      )}
-
+    <WithBrowserIncompatibilityOverlay>
       {editorState === EditorState.ShowPassedFeedbackForm && (
         <FeedbackForm
           awardedPoints={testResults?.points}
@@ -539,7 +504,7 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> = (
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         key="bottom-center"
       />
-    </div>
+    </WithBrowserIncompatibilityOverlay>
   )
 }
 
