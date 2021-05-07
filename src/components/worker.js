@@ -1,11 +1,11 @@
 /* eslint-env worker */
 
-self.importScripts("https://cdn.jsdelivr.net/pyodide/v0.17.0/full/pyodide.js")
+self.importScripts("https://download.mooc.fi/pyodide-cdn/v0.17.0/pyodide.js")
 /* global loadPyodide, pyodide */
 
 async function loadPyodideAndPackages() {
   await loadPyodide({
-    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.17.0/full/",
+    indexURL: "https://download.mooc.fi/pyodide-cdn/v0.17.0/",
   })
 }
 let pyodideReadyPromise = loadPyodideAndPackages()
@@ -77,7 +77,10 @@ self.print = function (...args) {
 }
 
 self.printError = function (...args) {
-  const kwargs = args.pop()
+  let kwargs = {}
+  if (typeof args[args.length - 1] === "object") {
+    kwargs = args.pop()
+  }
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   postMessage({
     type: "error",
@@ -225,7 +228,7 @@ function test({ code, debug }) {
         if (debug) console.log("running pyodide completed")
         postMessage({
           type: "test_results",
-          msg: JSON.parse(pyodide.globals.testOutput),
+          msg: JSON.parse(pyodide.globals.get("testOutput")),
         })
         postMessage({ type: "ready" })
       } catch (e) {
