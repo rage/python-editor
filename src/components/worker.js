@@ -1,4 +1,14 @@
-self.importScripts("https://download.mooc.fi/pyodide-cdn/v0.16.1/pyodide.js")
+/* eslint-env worker */
+
+self.importScripts("https://download.mooc.fi/pyodide-cdn/v0.17.0/pyodide.js")
+/* global loadPyodide, pyodide */
+
+async function loadPyodideAndPackages() {
+  await loadPyodide({
+    indexURL: "https://download.mooc.fi/pyodide-cdn/v0.17.0/",
+  })
+}
+let pyodideReadyPromise = loadPyodideAndPackages()
 
 let printBuffer = []
 let intervalId = null
@@ -47,7 +57,10 @@ let prevDate = null
  * `from js import print` and `__builtins__.print = print` to use.
  */
 self.print = function (...args) {
-  const kwargs = args.pop()
+  let kwargs = {}
+  if (typeof args[args.length - 1] === "object") {
+    kwargs = args.pop()
+  }
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   printBuffer.push(text)
 
@@ -64,7 +77,10 @@ self.print = function (...args) {
 }
 
 self.printError = function (...args) {
-  const kwargs = args.pop()
+  let kwargs = {}
+  if (typeof args[args.length - 1] === "object") {
+    kwargs = args.pop()
+  }
   const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
   postMessage({
     type: "error",
@@ -75,11 +91,15 @@ self.printError = function (...args) {
 self.inputPromise = () => {
   printBuffer.push({ type: "input_required" })
   return new Promise((resolve) => {
-    self.addEventListener("message", function (e) {
-      if (e.data.type === "input") {
-        resolve(e.data.msg)
-      }
-    })
+    self.addEventListener(
+      "message",
+      function (e) {
+        if (e.data.type === "input") {
+          resolve(e.data.msg)
+        }
+      },
+      { once: true },
+    )
   })
 }
 
@@ -93,8 +113,6 @@ self.exit = function () {
 }
 
 function run({ code, debug }) {
-  // Async function workaround for input by Andreas Klostermann
-  // https://github.com/akloster/aioweb-demo/blob/master/src/main.py
   code = `\
 async def execute():
     __name__ = "__main__"
@@ -106,57 +124,27 @@ ${code
   .join("\n")}
     pass # SyntaxError: EOF - Missing end parentheses at end of code?
 
-from functools import partial
+import asyncio
 from js import exit, inputPromise, print, printError, wait
 import traceback
 
-class WrappedPromise:
-    def __init__(self, promise):
-        self.promise = promise
-    def __await__(self):
-        x = yield self.promise
-        return x
-
-def input(prompt=None):
+async def input(prompt=None):
     if prompt:
         print(prompt, end="")
-    return WrappedPromise(inputPromise())
-
-class PromiseException(RuntimeError):
-    pass
-
-class WebLoop:
-    def __init__(self):
-        self.coros = []
-    def call_soon(self, coro):
-        self.step(coro)
-    def step(self, coro, arg=None):
-        try:
-            x = coro.send(arg)
-            x = x.then(partial(self.step, coro))
-            x.catch(partial(self.fail,coro))
-        except StopIteration as result:
-            pass
-
-    def fail(self, coro,arg=None):
-        try:
-            coro.throw(PromiseException(arg))
-        except StopIteration:
-            pass
+    return await inputPromise()
 
 async def wrap_execution():
-    try:
-        await execute()
-    except Exception as e:
-        tb = traceback.format_exc()
-        printError(tb)
-    exit()
+  try:
+      await execute()
+  except Exception as e:
+      tb = traceback.format_exc()
+      printError(tb)
+  exit()
 
-loop = WebLoop()
-loop.call_soon(wrap_execution())
+asyncio.create_task(wrap_execution())
 `
 
-  parsedCode = `
+  const parsedCode = `
 import ast
 import re
 
@@ -195,20 +183,20 @@ exec(code)
   if (debug) {
     console.log(parsedCode)
   }
-  languagePluginLoader
-    .then(() => {
-      pyodide
-        .loadPackage()
-        .then(() => postMessage({ type: "start_run" }))
-        .then(() => pyodide.runPythonAsync(parsedCode))
-        .catch((e) => {
-          printBuffer = []
-          printBuffer.push({
-            type: "error",
-            msg: fixLineNumberOffset(e.toString()),
-          })
-          exit()
+  pyodideReadyPromise
+    .then(async () => {
+      try {
+        postMessage({ type: "start_run" })
+        await pyodide.runPythonAsync(parsedCode)
+        if (debug) console.log("running pyodide completed")
+      } catch (e) {
+        printBuffer = []
+        printBuffer.push({
+          type: "error",
+          msg: fixLineNumberOffset(e.toString()),
         })
+        self.exit()
+      }
     })
     .catch((e) => {
       printBuffer = []
@@ -216,7 +204,7 @@ exec(code)
         type: "error",
         msg: fixLineNumberOffset(e.toString()),
       })
-      exit()
+      self.exit()
     })
 }
 
@@ -232,24 +220,21 @@ function test({ code, debug }) {
   if (debug) {
     console.log(code)
   }
-  languagePluginLoader
-    .then(() => {
-      pyodide
-        .loadPackage()
-        .then(() => postMessage({ type: "start_test" }))
-        .then(() => pyodide.runPythonAsync(code))
-        .then(() => {
-          console.log("running pyodide completed")
-          postMessage({
-            type: "test_results",
-            msg: JSON.parse(pyodide.globals.testOutput),
-          })
-          postMessage({ type: "ready" })
+  pyodideReadyPromise
+    .then(async () => {
+      try {
+        postMessage({ type: "start_test" })
+        await pyodide.runPythonAsync(code)
+        if (debug) console.log("running pyodide completed")
+        postMessage({
+          type: "test_results",
+          msg: JSON.parse(pyodide.globals.get("testOutput")),
         })
-        .catch((e) => {
-          printBuffer = []
-          printBuffer.push({ type: "error", msg: e.toString() })
-        })
+        postMessage({ type: "ready" })
+      } catch (e) {
+        printBuffer = []
+        printBuffer.push({ type: "error", msg: e.toString() })
+      }
     })
     .catch((e) => {
       printBuffer = []
