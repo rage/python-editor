@@ -35,153 +35,154 @@ interface ProgrammingExerciseLoaderProps {
     with the initial editor text set to the contents of the first
     file whose path contains "/src/__main__.py".
 */
-const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoaderProps> = ({
-  onExerciseDetailsChange,
-  organization,
-  course,
-  exercise,
-  token,
-  userId,
-  height,
-  outputHeight,
-  debug,
-  language = "en",
-}) => {
-  const time = useTime(10000)
-  const [t, i18n] = useTranslation()
-  const exerciseObject = useExercise(
+const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoaderProps> =
+  ({
+    onExerciseDetailsChange,
     organization,
     course,
     exercise,
-    userId,
     token,
-  )
+    userId,
+    height,
+    outputHeight,
+    debug,
+    language = "en",
+  }) => {
+    const time = useTime(10000)
+    const [t, i18n] = useTranslation()
+    const exerciseObject = useExercise(
+      organization,
+      course,
+      exercise,
+      userId,
+      token,
+    )
 
-  const apiConfig = { t, token }
-  const signedIn = userId && token
-  const exerciseDefined = organization && course && exercise
+    const apiConfig = { t, token }
+    const signedIn = userId && token
+    const exerciseDefined = organization && course && exercise
 
-  const cacheKey =
-    signedIn && exerciseDefined
-      ? `${userId}:${organization}-${course}-${exercise}`
-      : undefined
+    const cacheKey =
+      signedIn && exerciseDefined
+        ? `${userId}:${organization}-${course}-${exercise}`
+        : undefined
 
-  const submitAndWaitResult = useCallback(
-    async (files: ReadonlyArray<FileEntry>) => {
-      const wrapError = (message: string): TestResultObject => ({
-        points: [],
-        testCases: [
-          {
-            id: "0",
-            testName: "Exercise submission",
-            passed: false,
-            feedback: `Error ${message}`,
-          },
-        ],
-      })
-      if (!exerciseObject.details) {
-        return wrapError("418: Exercise details missing")
-      }
+    const submitAndWaitResult = useCallback(
+      async (files: ReadonlyArray<FileEntry>) => {
+        const wrapError = (message: string): TestResultObject => ({
+          points: [],
+          testCases: [
+            {
+              id: "0",
+              testName: "Exercise submission",
+              passed: false,
+              feedback: `Error ${message}`,
+            },
+          ],
+        })
+        if (!exerciseObject.details) {
+          return wrapError("418: Exercise details missing")
+        }
 
-      try {
-        const postResult = await postExerciseSubmission(
-          exerciseObject.details.id,
-          files,
-          apiConfig,
-        )
         try {
-          const submissionResult = await getSubmissionResults(
-            postResult,
+          const postResult = await postExerciseSubmission(
+            exerciseObject.details.id,
+            files,
             apiConfig,
           )
-          exerciseObject.updateDetails()
-          return submissionResult
+          try {
+            const submissionResult = await getSubmissionResults(
+              postResult,
+              apiConfig,
+            )
+            exerciseObject.updateDetails()
+            return submissionResult
+          } catch (e) {
+            return wrapError(e.message)
+          }
         } catch (e) {
           return wrapError(e.message)
         }
-      } catch (e) {
-        return wrapError(e.message)
+      },
+      [exerciseObject.details],
+    )
+
+    const submitToPaste = async (
+      files: ReadonlyArray<FileEntry>,
+    ): Promise<string> => {
+      if (!exerciseObject.details) {
+        return ""
       }
-    },
-    [exerciseObject.details],
-  )
-
-  const submitToPaste = async (
-    files: ReadonlyArray<FileEntry>,
-  ): Promise<string> => {
-    if (!exerciseObject.details) {
-      return ""
+      try {
+        const submitResult = await postExerciseSubmission(
+          exerciseObject.details.id,
+          files,
+          apiConfig,
+          { paste: true },
+        )
+        return submitResult.pasteUrl ?? ""
+      } catch (e) {
+        return Promise.reject(e.message)
+      }
     }
-    try {
-      const submitResult = await postExerciseSubmission(
-        exerciseObject.details.id,
-        files,
-        apiConfig,
-        { paste: true },
-      )
-      return submitResult.pasteUrl ?? ""
-    } catch (e) {
-      return Promise.reject(e.message)
-    }
-  }
 
-  useEffect(() => {
-    const exerciseDetails = exerciseObject.details
-    if (
-      exerciseDetails &&
-      exerciseDetails.deadline &&
-      !exerciseDetails.expired &&
-      time >= DateTime.fromISO(exerciseDetails.deadline)
-    ) {
-      exerciseObject.updateDetails()
-    }
-  }, [exerciseObject, time])
+    useEffect(() => {
+      const exerciseDetails = exerciseObject.details
+      if (
+        exerciseDetails &&
+        exerciseDetails.deadline &&
+        !exerciseDetails.expired &&
+        time >= DateTime.fromISO(exerciseDetails.deadline)
+      ) {
+        exerciseObject.updateDetails()
+      }
+    }, [exerciseObject, time])
 
-  useEffect(() => {
-    onExerciseDetailsChange?.(exerciseObject.details)
-  }, [exerciseObject.details, onExerciseDetailsChange])
+    useEffect(() => {
+      onExerciseDetailsChange?.(exerciseObject.details)
+    }, [exerciseObject.details, onExerciseDetailsChange])
 
-  useEffect(() => {
-    i18n.changeLanguage(language)
-  }, [language])
+    useEffect(() => {
+      i18n.changeLanguage(language)
+    }, [language])
 
-  const submitDisabled =
-    exerciseObject.details?.expired ||
-    !exerciseObject.details?.downloadable ||
-    !signedIn
+    const submitDisabled =
+      exerciseObject.details?.expired ||
+      !exerciseObject.details?.downloadable ||
+      !signedIn
 
-  return (
-    <div>
-      {!signedIn && (
-        <Notification style="warning">
-          {t("signInToSubmitExercise")}
-        </Notification>
-      )}
-      {exerciseObject.details?.expired && (
-        <Notification style="warning">{t("deadlineExpired")}</Notification>
-      )}
-      <ProgrammingExercise
-        cacheKey={cacheKey}
-        debug={debug}
-        exercise={exerciseObject}
-        submitFeedback={(testResults, feedback) => {
-          if (testResults.feedbackAnswerUrl && feedback.length > 0) {
-            postExerciseFeedback(testResults, feedback, apiConfig)
+    return (
+      <div>
+        {!signedIn && (
+          <Notification style="warning">
+            {t("signInToSubmitExercise")}
+          </Notification>
+        )}
+        {exerciseObject.details?.expired && (
+          <Notification style="warning">{t("deadlineExpired")}</Notification>
+        )}
+        <ProgrammingExercise
+          cacheKey={cacheKey}
+          debug={debug}
+          exercise={exerciseObject}
+          submitFeedback={(testResults, feedback) => {
+            if (testResults.feedbackAnswerUrl && feedback.length > 0) {
+              postExerciseFeedback(testResults, feedback, apiConfig)
+            }
+          }}
+          submitProgrammingExercise={submitAndWaitResult}
+          submitToPaste={submitToPaste}
+          submitDisabled={submitDisabled}
+          editorHeight={height}
+          outputHeight={outputHeight}
+          solutionUrl={
+            exerciseObject.details?.completed || exerciseObject.details?.expired
+              ? `https://tmc.mooc.fi/exercises/${exerciseObject.details.id}/solution`
+              : undefined
           }
-        }}
-        submitProgrammingExercise={submitAndWaitResult}
-        submitToPaste={submitToPaste}
-        submitDisabled={submitDisabled}
-        editorHeight={height}
-        outputHeight={outputHeight}
-        solutionUrl={
-          exerciseObject.details?.completed || exerciseObject.details?.expired
-            ? `https://tmc.mooc.fi/exercises/${exerciseObject.details.id}/solution`
-            : undefined
-        }
-      />
-    </div>
-  )
-}
+        />
+      </div>
+    )
+  }
 
 export { ProgrammingExerciseLoader, ProgrammingExerciseLoaderProps }

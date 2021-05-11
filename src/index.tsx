@@ -6,12 +6,11 @@ import {
   ProgrammingExerciseLoaderProps,
 } from "./components/ProgrammingExerciseLoader"
 
-const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseLoaderProps> = (
-  props: ProgrammingExerciseLoaderProps,
-) => (
-  <I18nextProvider i18n={i18n}>
-    <ProgrammingExerciseLoader {...props} />
-  </I18nextProvider>
-)
+const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseLoaderProps> =
+  (props: ProgrammingExerciseLoaderProps) => (
+    <I18nextProvider i18n={i18n}>
+      <ProgrammingExerciseLoader {...props} />
+    </I18nextProvider>
+  )
 
 export { ProgrammingExercise }

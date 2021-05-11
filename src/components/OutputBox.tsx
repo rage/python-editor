@@ -113,45 +113,44 @@ interface OutputFooterProps {
   color: OutputColor
 }
 
-const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercentageProps> = (
-  props,
-) => {
-  const {
-    children,
-    color,
-    percentage,
-    showAll,
-    setShowAll,
-    showAllDisabled,
-  } = props
-  const [t] = useTranslation()
+const OutputFooterWithPercentage: React.FunctionComponent<OutputFooterWithPercentageProps> =
+  (props) => {
+    const {
+      children,
+      color,
+      percentage,
+      showAll,
+      setShowAll,
+      showAllDisabled,
+    } = props
+    const [t] = useTranslation()
 
-  return (
-    <StyledOutputTitle backgroundColor={color}>
-      <Grid style={{ borderRight: "solid 1px lightgray" }} item xs={3}>
-        <FormControlLabel
-          label={t("showAll")}
-          style={{ paddingLeft: "5px" }}
-          control={
-            <Checkbox
-              checked={showAll}
-              disabled={showAllDisabled}
-              onChange={() => setShowAll?.(!showAll)}
-              color="primary"
-              data-cy="show-all-results-checkbox"
-            />
-          }
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <TestProgressBar percentage={percentage} />
-      </Grid>
-      <Grid container item xs={3} alignItems="center" justify="flex-end">
-        {children}
-      </Grid>
-    </StyledOutputTitle>
-  )
-}
+    return (
+      <StyledOutputTitle backgroundColor={color}>
+        <Grid style={{ borderRight: "solid 1px lightgray" }} item xs={3}>
+          <FormControlLabel
+            label={t("showAll")}
+            style={{ paddingLeft: "5px" }}
+            control={
+              <Checkbox
+                checked={showAll}
+                disabled={showAllDisabled}
+                onChange={() => setShowAll?.(!showAll)}
+                color="primary"
+                data-cy="show-all-results-checkbox"
+              />
+            }
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <TestProgressBar percentage={percentage} />
+        </Grid>
+        <Grid container item xs={3} alignItems="center" justify="flex-end">
+          {children}
+        </Grid>
+      </StyledOutputTitle>
+    )
+  }
 
 const OutputFooter: React.FunctionComponent<OutputFooterProps> = (props) => {
   const { children, color } = props

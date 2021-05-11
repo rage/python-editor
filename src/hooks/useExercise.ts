@@ -37,10 +37,8 @@ export default function useExercise(
   const [projectFiles, setProjectFiles] = useState<ReadonlyArray<FileEntry>>([
     emptyFile,
   ])
-  const [
-    submissionDetails,
-    setSubmissionDetails,
-  ] = useState<SubmissionDetails>()
+  const [submissionDetails, setSubmissionDetails] =
+    useState<SubmissionDetails>()
   const [templateIssues, setTemplateIssues] = useState<ReadonlyArray<string>>(
     [],
   )
