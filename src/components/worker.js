@@ -76,16 +76,8 @@ self.print = function (...args) {
   }
 }
 
-self.printError = function (...args) {
-  let kwargs = {}
-  if (typeof args[args.length - 1] === "object") {
-    kwargs = args.pop()
-  }
-  const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
-  postMessage({
-    type: "error",
-    msg: fixLineNumberOffset(text),
-  })
+self.printError = function (message) {
+  postMessage({ type: "error", msg: message })
 }
 
 self.inputPromise = () => {
@@ -124,9 +116,8 @@ ${code
   .join("\n")}
     pass # SyntaxError: EOF - Missing end parentheses at end of code?
 
-import asyncio
+import asyncio, sys, traceback
 from js import exit, inputPromise, print, printError, wait
-import traceback
 
 async def input(prompt=None):
     if prompt:
@@ -136,9 +127,13 @@ async def input(prompt=None):
 async def wrap_execution():
   try:
       await execute()
-  except Exception as e:
-      tb = traceback.format_exc()
-      printError(tb)
+  except Exception:
+      t, v, tb = sys.exc_info()
+      frames = traceback.extract_tb(tb)
+      for frame in frames:
+          frame.lineno -= 2
+      message = "{} on line {}: {}".format(type(v).__name__, frames[-1].lineno, v)
+      printError(message)
   exit()
 
 asyncio.create_task(wrap_execution())
