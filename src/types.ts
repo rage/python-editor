@@ -54,11 +54,18 @@ export type FeedBackAnswer = {
   answer: string | number
 }
 
-export type OutputObject = {
-  id: string
-  type: string
-  text: string
-}
+export type OutputObject =
+  | {
+      id: string
+      type: "output" | "input"
+      text: string
+    }
+  | {
+      id: string
+      type: "error"
+      text: string
+      traceback: Array<[number, string]>
+    }
 
 export type Language = "en" | "fi"
 

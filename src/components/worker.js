@@ -76,8 +76,11 @@ self.print = function (...args) {
   }
 }
 
-self.printError = function (message) {
-  postMessage({ type: "error", msg: message })
+self.printError = function (msg, tb) {
+  const traceback = tb.toJs()
+  postMessage({ type: "error", msg, traceback })
+  // TODO: see https://pyodide.org/en/stable/usage/type-conversions.html#best-practices-for-avoiding-memory-leaks
+  // destroyToJsResult(traceback)
 }
 
 self.inputPromise = () => {
@@ -133,7 +136,7 @@ async def wrap_execution():
       for frame in frames:
           frame.lineno -= 2
       message = "{} on line {}: {}".format(type(v).__name__, frames[-1].lineno, v)
-      printError(message)
+      printError(message, [(f.lineno, f.name) for f in frames])
   exit()
 
 asyncio.create_task(wrap_execution())
@@ -201,6 +204,21 @@ exec(code)
       })
       self.exit()
     })
+}
+
+function destroyToJsResult(x) {
+  if (!x) {
+    return
+  }
+  if (pyodide.isPyProxy(x)) {
+    x.destroy()
+    return
+  }
+  if (x[Symbol.iterator]) {
+    for (let k of x) {
+      destroyToJsResult(k)
+    }
+  }
 }
 
 function lineOffsetReplacer(m, number, o, s) {

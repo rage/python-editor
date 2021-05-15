@@ -162,7 +162,14 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> =
           break
         case "error":
           console.error(msg)
-          setOutput(output.concat({ id: uuid(), type: "error", text: msg }))
+          setOutput(
+            output.concat({
+              id: uuid(),
+              type: "error",
+              text: msg,
+              traceback: e.data.traceback,
+            }),
+          )
           setWorkerAvailable(true)
           worker.recycle()
           break
