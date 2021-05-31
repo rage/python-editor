@@ -76,7 +76,8 @@ self.print = function (...args) {
   }
 }
 
-self.printError = function (msg, tb) {
+self.printError = function (message, kind, line, tb) {
+  const msg = `${kind} on line ${line}: ${message}`
   const traceback = tb.toJs()
   postMessage({ type: "error", msg, traceback })
   // TODO: see https://pyodide.org/en/stable/usage/type-conversions.html#best-practices-for-avoiding-memory-leaks
@@ -135,8 +136,7 @@ async def wrap_execution():
       frames = traceback.extract_tb(tb)
       for frame in frames:
           frame.lineno -= 2
-      message = "{} on line {}: {}".format(type(v).__name__, frames[-1].lineno, v)
-      printError(message, [(f.lineno, f.name) for f in frames])
+      printError(str(v), type(v).__name__, frames[-1].lineno, [(f.lineno, f.name) for f in frames[2:]])
   exit()
 
 asyncio.create_task(wrap_execution())
@@ -180,11 +180,8 @@ try:
     exec(code)
 except Exception:
     t, v, tb = sys.exc_info()
-    frames = traceback.extract_tb(tb)
-    for frame in frames:
-        frame.lineno -= 2
-    message = "{} on line {}: {}".format(type(v).__name__, frames[-1].lineno, v)
-    printError(message, [(f.lineno, f.name) for f in frames])
+    error, line = re.compile(r'(.+) \\(.+, line (\\d+)').search(str(v)).groups()
+    printError(error, type(v).__name__, int(line) - 2, [])
     exit()
 `
   if (debug) {
