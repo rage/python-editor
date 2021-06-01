@@ -1,9 +1,10 @@
+import { Button } from "@material-ui/core"
 import React, { useState } from "react"
 import styled from "styled-components"
 
 interface ErrorProps {
   error: string
-  trace: Array<[number, string]>
+  trace: Array<string>
 }
 
 const StyledPythonError = styled.div`
@@ -15,19 +16,25 @@ const StyledPythonError = styled.div`
 `
 
 const PythonError: React.FunctionComponent<ErrorProps> = ({ error, trace }) => {
-  const [showTrace, setShowTrace] = useState(true)
+  const [showTrace, setShowTrace] = useState(false)
 
   return (
     <StyledPythonError>
       {error}
+      {trace.length > 0 ? (
+        <Button
+          onClick={() => setShowTrace(!showTrace)}
+          data-cy="show-trace-button"
+        >
+          Toggle calls
+        </Button>
+      ) : null}
       {showTrace && (
-        <ul>
-          {trace.map((x) => (
-            <li key={x[0]}>
-              {x[0]} {x[1]}
-            </li>
+        <ol>
+          {trace.map((x, i) => (
+            <li key={i}>{x}</li>
           ))}
-        </ul>
+        </ol>
       )}
     </StyledPythonError>
   )

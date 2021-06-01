@@ -136,7 +136,7 @@ async def wrap_execution():
       frames = traceback.extract_tb(tb)
       for frame in frames:
           frame.lineno -= 2
-      printError(str(v), type(v).__name__, frames[-1].lineno, [(f.lineno, f.name) for f in frames[2:]])
+      printError(str(v), type(v).__name__, frames[-1].lineno, [f"Line {f.lineno} in {f.name}()" for f in frames[2:]])
   exit()
 
 asyncio.create_task(wrap_execution())

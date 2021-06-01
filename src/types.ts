@@ -64,7 +64,7 @@ export type OutputObject =
       id: string
       type: "error"
       text: string
-      traceback: Array<[number, string]>
+      traceback: Array<string>
     }
 
 export type Language = "en" | "fi"
