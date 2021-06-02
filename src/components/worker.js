@@ -76,12 +76,9 @@ self.print = function (...args) {
   }
 }
 
-self.printError = function (message, kind, line, tb) {
+self.printError = function (message, kind, line, traceback) {
   const msg = `${kind} on line ${line}: ${message}`
-  const traceback = tb.toJs()
   postMessage({ type: "error", msg, traceback })
-  // TODO: see https://pyodide.org/en/stable/usage/type-conversions.html#best-practices-for-avoiding-memory-leaks
-  // destroyToJsResult(traceback)
 }
 
 self.inputPromise = () => {
@@ -120,7 +117,7 @@ ${code
   .join("\n")}
     pass # SyntaxError: EOF - Missing end parentheses at end of code?
 
-import asyncio, sys, traceback
+import asyncio, pyodide, sys, traceback
 from js import exit, inputPromise, print, printError, wait
 
 async def input(prompt=None):
@@ -136,7 +133,8 @@ async def wrap_execution():
       frames = traceback.extract_tb(tb)
       for frame in frames:
           frame.lineno -= 2
-      printError(str(v), type(v).__name__, frames[-1].lineno, [f"Line {f.lineno} in {f.name}()" for f in frames[2:]])
+      tb2 = [f"Line {f.lineno} in {f.name}()" for f in frames[2:]]
+      printError(str(v), type(v).__name__, frames[-1].lineno, pyodide.to_js(tb2))
   exit()
 
 asyncio.create_task(wrap_execution())
@@ -202,21 +200,6 @@ except Exception:
       })
       self.exit()
     })
-}
-
-function destroyToJsResult(x) {
-  if (!x) {
-    return
-  }
-  if (pyodide.isPyProxy(x)) {
-    x.destroy()
-    return
-  }
-  if (x[Symbol.iterator]) {
-    for (let k of x) {
-      destroyToJsResult(k)
-    }
-  }
 }
 
 function test({ code, debug }) {

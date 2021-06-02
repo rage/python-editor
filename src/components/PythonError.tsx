@@ -1,5 +1,6 @@
 import { Button } from "@material-ui/core"
 import React, { useState } from "react"
+import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 
 interface ErrorProps {
@@ -8,25 +9,28 @@ interface ErrorProps {
 }
 
 const StyledPythonError = styled.div`
-  border-color: f97777;
+  border-color: f23535;
   border-style: solid;
-  border-radius: 10px;
+  border-radius: 7px;
+  margin-top: 4px;
   padding: 10px;
   width: auto;
 `
 
 const PythonError: React.FunctionComponent<ErrorProps> = ({ error, trace }) => {
   const [showTrace, setShowTrace] = useState(false)
+  const [t] = useTranslation()
 
   return (
     <StyledPythonError>
-      {error}
+      <p>{error}</p>
       {trace.length > 0 ? (
         <Button
           onClick={() => setShowTrace(!showTrace)}
+          variant="contained"
           data-cy="show-trace-button"
         >
-          Toggle calls
+          {showTrace ? t("hideFunctionCalls") : t("showFunctionCalls")}
         </Button>
       ) : null}
       {showTrace && (
