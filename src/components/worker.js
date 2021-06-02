@@ -76,7 +76,9 @@ self.print = function (...args) {
   }
 }
 
-self.printError = function (message, kind, line, traceback) {
+self.printError = function (message, kind, line, tb) {
+  const traceback = tb.toJs()
+  tb.destroy()
   const msg = `${kind} on line ${line}: ${message}`
   postMessage({ type: "error", msg, traceback })
 }
@@ -117,7 +119,7 @@ ${code
   .join("\n")}
     pass # SyntaxError: EOF - Missing end parentheses at end of code?
 
-import asyncio, pyodide, sys, traceback
+import asyncio, sys, traceback
 from js import exit, inputPromise, print, printError, wait
 
 async def input(prompt=None):
@@ -134,7 +136,7 @@ async def wrap_execution():
       for frame in frames:
           frame.lineno -= 2
       tb2 = [f"Line {f.lineno} in {f.name}()" for f in frames[2:]]
-      printError(str(v), type(v).__name__, frames[-1].lineno, pyodide.to_js(tb2))
+      printError(str(v), type(v).__name__, frames[-1].lineno, tb2)
   exit()
 
 asyncio.create_task(wrap_execution())
