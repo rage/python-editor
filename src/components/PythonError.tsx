@@ -9,7 +9,7 @@ interface ErrorProps {
 }
 
 const StyledPythonError = styled.div`
-  border-color: f23535;
+  border-color: #f23535;
   border-style: solid;
   border-radius: 7px;
   margin-top: 4px;
@@ -23,7 +23,9 @@ const PythonError: React.FunctionComponent<ErrorProps> = ({ error, trace }) => {
 
   return (
     <StyledPythonError>
-      <p>{error}</p>
+      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {error}
+      </pre>
       {trace.length > 0 ? (
         <Button
           onClick={() => setShowTrace(!showTrace)}
