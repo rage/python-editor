@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import styled from "styled-components"
 import { TextField } from "@material-ui/core"
 import { OutputObject } from "../types"
+import PythonError from "./PythonError"
 
 const StyledConsole = styled.div`
   white-space: pre-wrap;
@@ -49,6 +50,14 @@ const Console: React.FunctionComponent<ConsoleProps> = (props) => {
     switch (output.type) {
       case "input":
         return <StyledUserInput key={output.id}>{output.text}</StyledUserInput>
+      case "error":
+        return (
+          <PythonError
+            key={output.id}
+            error={output.text}
+            trace={output.traceback}
+          />
+        )
       default:
         return <React.Fragment key={output.id}>{output.text}</React.Fragment>
     }

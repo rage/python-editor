@@ -76,16 +76,11 @@ self.print = function (...args) {
   }
 }
 
-self.printError = function (...args) {
-  let kwargs = {}
-  if (typeof args[args.length - 1] === "object") {
-    kwargs = args.pop()
-  }
-  const text = args.join(kwargs?.sep ?? " ") + (kwargs?.end ?? "\n")
-  postMessage({
-    type: "error",
-    msg: fixLineNumberOffset(text),
-  })
+self.printError = function (message, kind, line, tb) {
+  const traceback = tb.toJs()
+  tb.destroy()
+  const msg = `${kind} on line ${line}: ${message}`
+  postMessage({ type: "error", msg, traceback })
 }
 
 self.inputPromise = () => {
@@ -124,9 +119,8 @@ ${code
   .join("\n")}
     pass # SyntaxError: EOF - Missing end parentheses at end of code?
 
-import asyncio
+import asyncio, sys, traceback
 from js import exit, inputPromise, print, printError, wait
-import traceback
 
 async def input(prompt=None):
     if prompt:
@@ -136,17 +130,21 @@ async def input(prompt=None):
 async def wrap_execution():
   try:
       await execute()
-  except Exception as e:
-      tb = traceback.format_exc()
-      printError(tb)
+  except Exception:
+      t, v, tb = sys.exc_info()
+      frames = traceback.extract_tb(tb)
+      for frame in frames:
+          frame.lineno -= 2
+      tb2 = [f"Line {f.lineno} in {f.name}()" for f in frames[2:]]
+      printError(str(v), type(v).__name__, frames[-1].lineno, tb2)
   exit()
 
 asyncio.create_task(wrap_execution())
 `
 
   const parsedCode = `
-import ast
-import re
+import ast, re, sys, traceback
+from js import exit, printError
 
 class PatchCode(ast.NodeTransformer):
     def generic_visit(self, node):
@@ -174,46 +172,36 @@ class PatchCode(ast.NodeTransformer):
 
       return node
 
-tree = ast.parse("""${code}""")
-optimizer = PatchCode()
-tree = optimizer.visit(tree)
-code = compile(tree, "<string>", "exec")
-exec(code)
+try:
+    tree = ast.parse("""${code}""")
+    optimizer = PatchCode()
+    tree = optimizer.visit(tree)
+    code = compile(tree, "<string>", "exec")
+    exec(code)
+except Exception:
+    t, v, tb = sys.exc_info()
+    error, line = re.compile(r'(.+) \\(.+, line (\\d+)').search(str(v)).groups()
+    printError(error, type(v).__name__, int(line) - 2, [])
+    exit()
 `
   if (debug) {
     console.log(parsedCode)
   }
   pyodideReadyPromise
     .then(async () => {
-      try {
-        postMessage({ type: "start_run" })
-        await pyodide.runPythonAsync(parsedCode)
-        if (debug) console.log("running pyodide completed")
-      } catch (e) {
-        printBuffer = []
-        printBuffer.push({
-          type: "error",
-          msg: fixLineNumberOffset(e.toString()),
-        })
-        self.exit()
-      }
+      postMessage({ type: "start_run" })
+      await pyodide.runPythonAsync(parsedCode)
+      if (debug) console.log("running pyodide completed")
     })
     .catch((e) => {
       printBuffer = []
       printBuffer.push({
         type: "error",
-        msg: fixLineNumberOffset(e.toString()),
+        msg: "Failed to initialize Pyodide: " + e.toString(),
+        traceback: [],
       })
       self.exit()
     })
-}
-
-function lineOffsetReplacer(m, number, o, s) {
-  return "line " + (parseInt(number) - 2).toString()
-}
-
-function fixLineNumberOffset(msg) {
-  return msg.replace(/line\s(\d+)/g, lineOffsetReplacer)
 }
 
 function test({ code, debug }) {
@@ -233,12 +221,12 @@ function test({ code, debug }) {
         postMessage({ type: "ready" })
       } catch (e) {
         printBuffer = []
-        printBuffer.push({ type: "error", msg: e.toString() })
+        printBuffer.push({ type: "error", msg: e.toString(), traceback: [] })
       }
     })
     .catch((e) => {
       printBuffer = []
-      printBuffer.push({ type: "error", msg: e.toString() })
+      printBuffer.push({ type: "error", msg: e.toString(), traceback: [] })
     })
     .finally(() => (running = false))
 }
