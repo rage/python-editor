@@ -82,8 +82,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> =
   }) => {
     const [t] = useTranslation()
     const [output, setOutput] = useState<OutputObject[]>([])
-    const [testResults, setTestResults] =
-      useState<TestResultObject | undefined>()
+    const [testResults, setTestResults] = useState<
+      TestResultObject | undefined
+    >()
     const [workerAvailable, setWorkerAvailable] = useState(true)
     const [files, setFiles, setFilesIfNewer] = useCachedFileEntries(
       cacheKey,
@@ -91,8 +92,9 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> =
     )
     const [activeFile, setActiveFile] = useState(0)
     const [openNotification, setOpenNotification] = useState(false)
-    const [executionTimeoutTimer, setExecutionTimeoutTimer] =
-      useState<NodeJS.Timeout | undefined>()
+    const [executionTimeoutTimer, setExecutionTimeoutTimer] = useState<
+      NodeJS.Timeout | undefined
+    >()
     const [worker] = useWorker({ debug })
     const outputBoxRef = React.createRef<AnimatedOutputBoxRef>()
     const [editorState, setEditorState] = useState(EditorState.Initializing)
