@@ -39,7 +39,7 @@ const getZipFromUrl = async (
       responseType: "arraybuffer",
     })
     return await zip.loadAsync(response.data)
-  } catch (error) {
+  } catch (error: any) {
     throw error?.response?.status
       ? new Error(`${error.response.status}: ${t("failedToDownloadExercise")}`)
       : new Error(`418: ${t("failedToEstablishConnectionToServer")}`)
@@ -68,7 +68,7 @@ const getExerciseDetails = async (
       softDeadline: data.soft_deadline,
       unlocked: data.unlocked,
     }
-  } catch (error) {
+  } catch (error: any) {
     throw error?.response?.status
       ? new Error(
           `${error.response.status}: ${t("couldNotFindExerciseDetails")}`,
@@ -100,7 +100,7 @@ export const getOldSubmissions = async (
   try {
     const response = await axios.get(url, { headers, responseType: "json" })
     submissions = response.data as any[]
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(
       `${error.response.status}: ${t("failedToDownloadExercise")}`,
     )
@@ -148,7 +148,7 @@ const getSubmissionResults = async (
           responseType: "json",
         })
       ).data
-    } catch (error) {
+    } catch (error: any) {
       console.error(error.response)
       submissionStatus = { status: "error", statusCode: error.response.status }
     }
@@ -209,7 +209,7 @@ const postExerciseSubmission = async (
       showSubmissionUrl: response.data.show_submission_url,
       submissionUrl: response.data.submission_url,
     }
-  } catch (error) {
+  } catch (error: any) {
     const status = error.response.status
     const message =
       status === 403
@@ -240,7 +240,7 @@ const postExerciseFeedback = async (
       headers,
     })
     return
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(`${error.response.status}: ${JSON.parse(error.response)}`)
   }
 }

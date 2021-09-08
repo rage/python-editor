@@ -1,8 +1,8 @@
 import { FileEntry } from "../types"
 
 export const emptyFile: FileEntry = {
-  fullName: "",
-  shortName: "",
+  fullName: "empty.py",
+  shortName: "empty.py",
   originalContent: "",
   content: "",
 }
