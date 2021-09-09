@@ -109,7 +109,11 @@ export default function useExercise(
         setTestCode(template.testSource)
       } catch (e) {
         setDetails(undefined)
-        setProjectFiles([{ ...emptyFile, content: `# ${e.message}` }])
+        if (e instanceof Error) {
+          setProjectFiles([{ ...emptyFile, content: `# ${e.message}` }])
+        } else {
+          setProjectFiles([{ ...emptyFile, content: `# Unknown error.` }])
+        }
         setSubmissionDetails(undefined)
         setTemplateIssues([])
         setTestCode(undefined)
