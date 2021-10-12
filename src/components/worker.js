@@ -1,11 +1,11 @@
 /* eslint-env worker */
 
-self.importScripts("https://download.mooc.fi/pyodide-cdn/v0.17.0/pyodide.js")
+self.importScripts("https://download.mooc.fi/pyodide-cdn/v0.18.1/pyodide.js")
 /* global loadPyodide, pyodide */
 
 async function loadPyodideAndPackages() {
   await loadPyodide({
-    indexURL: "https://download.mooc.fi/pyodide-cdn/v0.17.0/",
+    indexURL: "https://download.mooc.fi/pyodide-cdn/v0.18.1/",
   })
 }
 let pyodideReadyPromise = loadPyodideAndPackages()
