@@ -8,7 +8,7 @@ type CachedFileEntries = CachedData<FileEntries>
 export type CachedFileEntriesHook = [
   files: ReadonlyArray<FileEntry>,
   setFiles: React.Dispatch<React.SetStateAction<ReadonlyArray<FileEntry>>>,
-  setFilesIfNewer: React.Dispatch<React.SetStateAction<CachedFileEntries>>,
+  setFilesIfNewer: (newFiles: CachedFileEntries) => void,
 ]
 
 export default function useCachedFileEntries(
@@ -32,7 +32,19 @@ export default function useCachedFileEntries(
     [value, setValue],
   )
 
-  return [value, setFiles, setValueIfNewer]
+  const setFilesIfNewer = useCallback(
+    (newFiles: CachedFileEntries) => {
+      // Dirty solution of getting rid of sometimes cached empty.py
+      if (value.every((x) => x.fullName === "empty.py")) {
+        setValue(newFiles)
+      } else {
+        setValueIfNewer(newFiles)
+      }
+    },
+    [setValue, setValueIfNewer, value],
+  )
+
+  return [value, setFiles, setFilesIfNewer]
 }
 
 const areFileEntries = (data: unknown): data is Array<FileEntry> => {
