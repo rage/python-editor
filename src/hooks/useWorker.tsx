@@ -7,20 +7,6 @@ const blobObject = URL.createObjectURL(
   }),
 )
 
-// interface WorkerEventKind<T1, T2> {
-//   type: T1
-//   msg: T2
-// }
-
-// type WorkerEvent =
-//   | WorkerEventKind<"error", string>
-//   | WorkerEventKind<"print_batch", string[]>
-//   | WorkerEventKind<"print_done", void>
-//   | WorkerEventKind<"ready", void>
-//   | WorkerEventKind<"start_run", void>
-//   | WorkerEventKind<"start_tests", void>
-//   | WorkerEventKind<string, unknown>
-
 interface Message {
   type: string
   msg?: any
@@ -87,6 +73,8 @@ const useWorker = ({ debug }: WorkerProps) => {
       messageBuffer.forEach((message) => worker.postMessage(message))
       setMessageBuffer([])
     }
+    // FIXME
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [worker])
 
   return [{ setMessageListener, postMessage, recycle, terminate }]

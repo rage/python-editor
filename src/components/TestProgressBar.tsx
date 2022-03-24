@@ -6,6 +6,7 @@ type TestProgressBarProps = {
   percentage: number
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const BorderLinearProgress = withStyles((theme) => ({
   root: {
     height: 25,

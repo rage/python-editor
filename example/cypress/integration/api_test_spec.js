@@ -39,6 +39,7 @@ describe("API Endpoint tests #1", () => {
 
     // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExercise")
@@ -108,6 +109,7 @@ describe("API Endpoint tests #1", () => {
       .type(workingProgram)
     cy.get("[data-cy=test-btn]").click()
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(250)
     cy.contains("Points awarded: 1.1")
     cy.contains("Question A")
@@ -163,6 +165,7 @@ describe("API Endpoint tests #2", () => {
 
     // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExpiredExercise")

@@ -13,7 +13,8 @@
     "prettier-check": "prettier --check './**/*.{js,json,md,ts,tsx}'",
     "prettier": "prettier --write './**/*.{js,json,md,ts,tsx}'",
     "test": "jest",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -49,8 +50,11 @@
     "axios": "^0.21.0",
     "babel-jest": "^27.4.6",
     "eslint": "^7.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "husky": "^4.3.8",
+    "husky": "^7.0.4",
     "i18next": "^20.3.1",
     "jest": "^27.4.7",
     "js-base64": "^3.6.1",
@@ -81,23 +85,16 @@
     "axios": "^0.21.0",
     "i18next": ">=20.2.0",
     "js-base64": "^3.6.0",
-    "luxon": "^1.26.0",
     "jszip": "^3.6.0",
     "jszip-utils": "^0.1.0",
+    "luxon": "^1.26.0",
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0",
     "react-i18next": ">=11.8.0",
     "styled-components": "^5.2.1",
     "uuid": "^8.3.2"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{js,css,json,md,ts,tsx}": [
-      "prettier --check"
-    ]
+  "dependencies": {
+    "eslint-plugin-cypress": "^2.12.1"
   }
 }

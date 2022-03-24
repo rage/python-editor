@@ -283,6 +283,8 @@ const ProgrammingExercise: React.FunctionComponent<ProgrammingExerciseProps> =
           }
           break
       }
+      // FIXME
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editorState])
 
     const stopWorker = () => {

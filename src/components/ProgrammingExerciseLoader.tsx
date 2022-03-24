@@ -98,12 +98,14 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
             exerciseObject.updateDetails()
             return submissionResult
           } catch (e) {
-            return wrapError(e.message)
+            return wrapError((e as any).message)
           }
         } catch (e) {
-          return wrapError(e.message)
+          return wrapError((e as any).message)
         }
       },
+      // FIXME
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [exerciseObject.details],
     )
 
@@ -122,7 +124,7 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
         )
         return submitResult.pasteUrl ?? ""
       } catch (e) {
-        return Promise.reject(e.message)
+        return Promise.reject((e as any).message)
       }
     }
 
@@ -144,6 +146,8 @@ const ProgrammingExerciseLoader: React.FunctionComponent<ProgrammingExerciseLoad
 
     useEffect(() => {
       i18n.changeLanguage(language)
+      // FIXME
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [language])
 
     const submitDisabled =

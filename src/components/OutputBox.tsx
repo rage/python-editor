@@ -15,6 +15,7 @@ enum OutputColor {
   Gray = "#E8E8E8",
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StyledOutputTitle = styled(({ backgroundColor, ...props }) => (
   <Grid
     container

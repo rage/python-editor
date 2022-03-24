@@ -38,6 +38,8 @@ const Console: React.FunctionComponent<ConsoleProps> = (props) => {
     if (inputRequested) {
       focusOnInputField()
     }
+    // FIXME
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputRequested, outputContent])
 
   const keyPressOnInput = (e: any) => {

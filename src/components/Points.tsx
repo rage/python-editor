@@ -9,9 +9,7 @@ const StyledChip = styled(Chip)`
   }
 `
 
-const StyledPointsPaper = styled(({ points, ...props }) => (
-  <Paper {...props} />
-))`
+const StyledPointsPaper = styled(({ ...props }) => <Paper {...props} />)`
   border-left: 10px solid #4caf50;
   margin: 5px;
   padding: 10px;

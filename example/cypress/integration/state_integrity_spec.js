@@ -38,6 +38,7 @@ describe("State integrity tests", () => {
 
     // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(10000)
     cy.get("[data-cy=load-btn]").click()
     cy.wait("@getExercise")
@@ -52,10 +53,12 @@ describe("State integrity tests", () => {
       .type("{ctrl}{end}")
       .type("{shift}{ctrl}{home}{backspace}")
       .type("input()\ninput()\ninput()\nprint('made it to the end')")
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(5000)
     cy.get("[data-cy=run-btn]").click()
     cy.get("[data-cy=user-input-field]")
     cy.get("[data-cy=stop-btn]").click()
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(5000)
     cy.get("[data-cy=run-btn]").click()
     cy.get("[data-cy=user-input-field]").find("input").type("one{enter}")
@@ -77,6 +80,7 @@ describe("State integrity tests", () => {
     cy.contains("Reset exercise template")
     cy.get("[data-cy=reset-btn-ok]").click()
     cy.contains(program).should("not.exist")
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(100)
     cy.contains("Kirjoita ratkaisu tähän")
   })

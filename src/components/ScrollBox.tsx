@@ -47,6 +47,7 @@ const ScrollBox = React.forwardRef<ScrollBoxRef, ScrollBoxProps>(
     )
   },
 )
+ScrollBox.displayName = "ScrollBox"
 
 export default ScrollBox
 export { ScrollBoxRef }

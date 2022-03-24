@@ -38,6 +38,7 @@ describe("The Playground", () => {
 
     // require("../helpers/pyodide_helper").interceptPyodide(cy)
     cy.visit("/")
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(10000)
   })
 

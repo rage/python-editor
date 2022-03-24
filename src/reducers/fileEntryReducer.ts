@@ -83,7 +83,9 @@ const getCachedFileEntry = (key: string): CacheEntry | undefined => {
     if (isCacheEntry(parsed)) {
       return parsed
     }
-  } catch (e) {}
+  } catch (e) {
+    // No-op
+  }
 
   return undefined
 }

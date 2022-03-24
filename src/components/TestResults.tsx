@@ -14,12 +14,14 @@ type TestResultProps = {
   feedback: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StyledPaper = styled(({ passed, ...props }) => <Paper {...props} />)`
   border-left: 10px solid ${({ passed }) => (passed ? "#4caf50" : "#f44336")};
   margin: 5px;
   padding: 10px;
 `
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TestResultHeader = styled(({ passed, ...props }) => (
   <Typography {...props} />
 ))`

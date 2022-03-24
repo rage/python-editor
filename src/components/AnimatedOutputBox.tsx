@@ -79,7 +79,7 @@ const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
         setRender(true)
         if (!open) setOpen(true)
       }
-    }, [isRunning])
+    }, [isRunning, open, render])
 
     useImperativeHandle(ref, () => {
       return { close, open: openFn }
@@ -106,6 +106,7 @@ const Output = React.forwardRef<AnimatedOutputBoxRef, AnimatedOutputBoxProps>(
     )
   },
 )
+Output.displayName = "Output"
 
 export default Output
 export { AnimatedOutputBoxRef }
