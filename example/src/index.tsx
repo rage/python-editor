@@ -169,7 +169,7 @@ const App = () => {
         </I18nextProvider>
       )}
       <h2>Debug</h2>
-      {fetch && details && JSON.stringify(details)}
+      {fetch && details && <pre>{JSON.stringify(details, undefined, 2)}</pre>}
     </>
   )
 }
