@@ -155,6 +155,9 @@ describe("API Endpoint tests #2", () => {
       `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}`,
       { fixture: "get_expired_exercise.json" },
     ).as("getExpiredExercise")
+    cy.intercept("GET", "**/api/v8/exercises/90703/users/current/submissions", {
+      fixture: "old_submissions.json",
+    })
     cy.intercept(
       "GET",
       `**/api/v8/org/${inputOrganization}/courses/${inputCourse}/exercises/${inputExercise}/download`,

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useQuery } from "react-query"
 import { emptyFile } from "../constants"
 import {
   createWebEditorModuleSource,
@@ -14,15 +14,38 @@ import {
 } from "../services/programming_exercise"
 import { ExerciseDetails, FileEntry, SubmissionDetails } from "../types"
 
-export interface WebEditorExercise {
+export interface WebEditorExerciseReady {
+  ready: true
   details: ExerciseDetails | undefined
   getTestProgram(code: string): string
   projectFiles: ReadonlyArray<FileEntry>
-  ready: boolean
   reset(): void
-  submissionDetails?: SubmissionDetails
+  submissionDetails: SubmissionDetails | undefined
   templateIssues: ReadonlyArray<string>
   updateDetails(): Promise<void>
+}
+
+export interface WebEditorExerciseLoading {
+  ready: false
+  details: undefined
+  getTestProgram(code: string): string
+  projectFiles: ReadonlyArray<FileEntry>
+  reset(): void
+  submissionDetails: undefined
+  templateIssues: ReadonlyArray<never>
+  updateDetails(): Promise<void>
+}
+
+export type WebEditorExercise =
+  | WebEditorExerciseLoading
+  | WebEditorExerciseReady
+
+interface InternalExercise {
+  details: ExerciseDetails | undefined
+  projectFiles: ReadonlyArray<FileEntry>
+  templateIssues: ReadonlyArray<string>
+  testCode: string | undefined
+  submissionDetails: SubmissionDetails | undefined
 }
 
 export default function useExercise(
@@ -32,21 +55,10 @@ export default function useExercise(
   userId: string,
   token: string,
 ): WebEditorExercise {
-  const [ready, setReady] = useState(false)
-  const [details, setDetails] = useState<ExerciseDetails>()
-  const [projectFiles, setProjectFiles] = useState<ReadonlyArray<FileEntry>>([
-    emptyFile,
-  ])
-  const [submissionDetails, setSubmissionDetails] =
-    useState<SubmissionDetails>()
-  const [templateIssues, setTemplateIssues] = useState<ReadonlyArray<string>>(
-    [],
-  )
-  const [testCode, setTestCode] = useState<string>()
   const [t] = useTranslation()
-
-  useEffect(() => {
-    const effect = async () => {
+  const getExerciseInfo = useQuery(
+    ["exercise", organization, course, exercise, userId],
+    async (): Promise<InternalExercise> => {
       try {
         const apiConfig = { token, t }
         const details = await getExerciseDetails(
@@ -55,14 +67,16 @@ export default function useExercise(
           exercise,
           apiConfig,
         )
-        setDetails(details)
         if (!details.downloadable) {
-          setProjectFiles([
-            { ...emptyFile, content: `# ${t("exerciseNotYetUnlocked")}` },
-          ])
-          setTemplateIssues([])
-          setTestCode(undefined)
-          return
+          return {
+            details,
+            projectFiles: [
+              { ...emptyFile, content: `# ${t("exerciseNotYetUnlocked")}` },
+            ],
+            templateIssues: [],
+            testCode: undefined,
+            submissionDetails: undefined,
+          }
         }
 
         const template = await getExercise(
@@ -72,10 +86,13 @@ export default function useExercise(
           apiConfig,
         )
         if (!userId || !token) {
-          setProjectFiles(template.srcFiles)
-          setTemplateIssues(template.problems ?? [])
-          setTestCode(template.testSource)
-          return
+          return {
+            details,
+            projectFiles: guaranteeAtLeastOneFile(template.srcFiles),
+            templateIssues: template.problems ?? [],
+            testCode: template.testSource,
+            submissionDetails: undefined,
+          }
         }
 
         const latestSubmissionDetails = await getLatestSubmissionDetails(
@@ -88,81 +105,118 @@ export default function useExercise(
             apiConfig,
           )
           if (submission) {
-            setProjectFiles(
-              template.srcFiles.map<FileEntry>((templateFile) => {
-                const submittedFile = submission.srcFiles.find(
-                  (y) => y.fullName === templateFile.fullName,
-                )
-                return submittedFile
-                  ? { ...templateFile, content: submittedFile.content }
-                  : templateFile
-              }),
-            )
+            const mapped = template.srcFiles.map<FileEntry>((templateFile) => {
+              const submittedFile = submission.srcFiles.find(
+                (y) => y.fullName === templateFile.fullName,
+              )
+              return submittedFile
+                ? { ...templateFile, content: submittedFile.content }
+                : templateFile
+            })
+            return {
+              details,
+              projectFiles: guaranteeAtLeastOneFile(mapped),
+              templateIssues: template.problems ?? [],
+              testCode: template.testSource,
+              submissionDetails: latestSubmissionDetails,
+            }
           } else {
-            setProjectFiles(template.srcFiles)
+            return {
+              details,
+              projectFiles: guaranteeAtLeastOneFile(template.srcFiles),
+              templateIssues: template.problems ?? [],
+              testCode: template.testSource,
+              submissionDetails: latestSubmissionDetails,
+            }
           }
         } else {
-          setProjectFiles(template.srcFiles)
+          return {
+            details,
+            projectFiles: guaranteeAtLeastOneFile(template.srcFiles),
+            templateIssues: template.problems ?? [],
+            testCode: template.testSource,
+            submissionDetails: undefined,
+          }
         }
-        setSubmissionDetails(latestSubmissionDetails)
-        setTemplateIssues(template.problems ?? [])
-        setTestCode(template.testSource)
       } catch (e) {
-        setDetails(undefined)
         if (e instanceof Error) {
-          setProjectFiles([{ ...emptyFile, content: `# ${e.message}` }])
+          return {
+            details: undefined,
+            projectFiles: [{ ...emptyFile, content: `# ${e.message}` }],
+            templateIssues: [],
+            testCode: undefined,
+            submissionDetails: undefined,
+          }
         } else {
-          setProjectFiles([{ ...emptyFile, content: `# Unknown error.` }])
+          return {
+            details: undefined,
+            projectFiles: [{ ...emptyFile, content: `# Unknown error.` }],
+            templateIssues: [],
+            testCode: undefined,
+            submissionDetails: undefined,
+          }
         }
-        setSubmissionDetails(undefined)
-        setTemplateIssues([])
-        setTestCode(undefined)
       }
-    }
-
-    if (organization && course && exercise) {
-      setReady(false)
-      effect().then(() => setReady(true))
-    } else {
-      setReady(true)
-    }
-  }, [organization, course, exercise, userId, token, t])
-
-  const getTestProgram = useCallback(
-    (code: string) => `
-__webeditor_module_source = ${createWebEditorModuleSource(code)}
-${testCode}
-`,
-    [testCode],
+    },
   )
 
-  const reset = useCallback(() => {
-    setProjectFiles((prev) =>
-      prev.map((x) => ({ ...x, content: x.originalContent })),
-    )
-  }, [])
+  const getTestProgram = (code: string) => `
+__webeditor_module_source = ${createWebEditorModuleSource(code)}
+${getExerciseInfo.data?.testCode}
+`
 
-  const updateDetails = useCallback(async () => {
+  const reset = () => {
+    // This is a bit dirty but useQuery doesn't provide a way to mutate the result.
+    // TODO: Needs refactoring to decouple stuff from useQuery.
+    getExerciseInfo.data?.projectFiles.forEach((x) => ({
+      ...x,
+      content: x.originalContent,
+    }))
+  }
+
+  const updateDetails = async () => {
+    // This is a bit dirty but useQuery doesn't provide a way to mutate the result.
+    // TODO: Needs refactoring to decouple stuff from useQuery.
     try {
-      const details = await getExerciseDetails(organization, course, exercise, {
-        token,
-        t,
-      })
-      setDetails(details)
+      if (getExerciseInfo.isSuccess) {
+        const details = await getExerciseDetails(
+          organization,
+          course,
+          exercise,
+          {
+            token,
+            t,
+          },
+        )
+        getExerciseInfo.data.details = details
+      }
     } catch (e) {
       // no op
     }
-  }, [organization, course, exercise, token, t])
+  }
 
-  return {
-    details,
-    getTestProgram,
-    templateIssues,
-    projectFiles,
-    ready,
-    reset,
-    submissionDetails,
-    updateDetails,
+  if (getExerciseInfo.isSuccess) {
+    return {
+      ready: true,
+      details: getExerciseInfo.data.details,
+      getTestProgram,
+      templateIssues: getExerciseInfo.data.templateIssues,
+      projectFiles: getExerciseInfo.data.projectFiles,
+      reset,
+      submissionDetails: getExerciseInfo.data.submissionDetails,
+      updateDetails,
+    }
+  } else {
+    return {
+      ready: false,
+      details: undefined,
+      getTestProgram,
+      templateIssues: [],
+      projectFiles: [emptyFile],
+      reset,
+      submissionDetails: undefined,
+      updateDetails,
+    }
   }
 }
 
@@ -202,5 +256,13 @@ const getSubmission = async (
   } catch (e) {
     // Stop caring, show template
     return undefined
+  }
+}
+
+function guaranteeAtLeastOneFile(files: FileEntry[]): FileEntry[] {
+  if (files.length > 0) {
+    return files
+  } else {
+    return [emptyFile]
   }
 }

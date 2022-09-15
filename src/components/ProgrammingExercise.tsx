@@ -539,6 +539,7 @@ ProgrammingExercise.defaultProps = {
     updateDetails: async () =>
       console.log("Called for exercise details update."),
     getTestProgram: () => 'print("Default test called.")',
+    submissionDetails: undefined,
   },
 }
 
