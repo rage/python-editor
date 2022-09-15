@@ -57,7 +57,7 @@ export default function useExercise(
 ): WebEditorExercise {
   const [t] = useTranslation()
   const getExerciseInfo = useQuery(
-    ["exercise", organization, course, exercise],
+    ["exercise", organization, course, exercise, userId],
     async (): Promise<InternalExercise> => {
       try {
         const apiConfig = { token, t }
