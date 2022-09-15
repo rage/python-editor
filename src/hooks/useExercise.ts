@@ -88,7 +88,7 @@ export default function useExercise(
         if (!userId || !token) {
           return {
             details,
-            projectFiles: template.srcFiles,
+            projectFiles: guaranteeAtLeastOneFile(template.srcFiles),
             templateIssues: template.problems ?? [],
             testCode: template.testSource,
             submissionDetails: undefined,
@@ -105,7 +105,7 @@ export default function useExercise(
             apiConfig,
           )
           if (submission) {
-            const mapd = template.srcFiles.map<FileEntry>((templateFile) => {
+            const mapped = template.srcFiles.map<FileEntry>((templateFile) => {
               const submittedFile = submission.srcFiles.find(
                 (y) => y.fullName === templateFile.fullName,
               )
@@ -115,7 +115,7 @@ export default function useExercise(
             })
             return {
               details,
-              projectFiles: mapd,
+              projectFiles: guaranteeAtLeastOneFile(mapped),
               templateIssues: template.problems ?? [],
               testCode: template.testSource,
               submissionDetails: latestSubmissionDetails,
@@ -123,7 +123,7 @@ export default function useExercise(
           } else {
             return {
               details,
-              projectFiles: template.srcFiles,
+              projectFiles: guaranteeAtLeastOneFile(template.srcFiles),
               templateIssues: template.problems ?? [],
               testCode: template.testSource,
               submissionDetails: latestSubmissionDetails,
@@ -132,7 +132,7 @@ export default function useExercise(
         } else {
           return {
             details,
-            projectFiles: template.srcFiles,
+            projectFiles: guaranteeAtLeastOneFile(template.srcFiles),
             templateIssues: template.problems ?? [],
             testCode: template.testSource,
             submissionDetails: undefined,
@@ -256,5 +256,13 @@ const getSubmission = async (
   } catch (e) {
     // Stop caring, show template
     return undefined
+  }
+}
+
+function guaranteeAtLeastOneFile(files: FileEntry[]): FileEntry[] {
+  if (files.length > 0) {
+    return files
+  } else {
+    return [emptyFile]
   }
 }
