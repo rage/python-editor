@@ -10,7 +10,7 @@
     "now-build": "parcel build index.html --out-dir ../public"
   },
   "dependencies": {
-    "parcel": "^1.12.4",
+    "parcel": "^2.8.2",
     "react": "^17.0.2",
     "react-app-polyfill": "^2.0.0"
   },
