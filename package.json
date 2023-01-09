@@ -57,7 +57,7 @@
     "jszip": "^3.6.0",
     "jszip-utils": "^0.1.0",
     "lint-staged": "^11.0.0",
-    "luxon": "^1.27.0",
+    "luxon": "^2.5.2",
     "monaco-editor": "^0.34.0",
     "node-fetch": "^2.6.7",
     "prettier": "^2.3.1",
